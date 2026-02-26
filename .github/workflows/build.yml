@@ -85,14 +85,14 @@ jobs:
           "Double-click VoxelForge.exe to play!" | Out-File -FilePath package/VoxelForge/README.txt -Append
 
       - name: Upload Windows ZIP
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: VoxelForge-Windows-x64
           path: package/
           retention-days: 30
 
       - name: Upload NSIS Installer
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: VoxelForge-Windows-Installer
           path: build/*.exe
@@ -168,7 +168,7 @@ jobs:
           zip -r VoxelForge-macOS-Intel.zip VoxelForge.app
 
       - name: Upload macOS Intel DMG
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: VoxelForge-macOS-Intel-DMG
           path: VoxelForge-macOS-Intel.dmg
@@ -176,7 +176,7 @@ jobs:
         continue-on-error: true
 
       - name: Upload macOS Intel ZIP
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: VoxelForge-macOS-Intel-ZIP
           path: VoxelForge-macOS-Intel.zip
@@ -248,7 +248,7 @@ jobs:
           zip -r VoxelForge-macOS-AppleSilicon.zip VoxelForge.app
 
       - name: Upload macOS Apple Silicon DMG
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: VoxelForge-macOS-AppleSilicon-DMG
           path: VoxelForge-macOS-AppleSilicon.dmg
@@ -256,7 +256,7 @@ jobs:
         continue-on-error: true
 
       - name: Upload macOS Apple Silicon ZIP
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: VoxelForge-macOS-AppleSilicon-ZIP
           path: VoxelForge-macOS-AppleSilicon.zip
@@ -341,7 +341,7 @@ jobs:
           tar -czvf VoxelForge-Linux-Portable.tar.gz -C portable VoxelForge
 
       - name: Upload AppImage
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: VoxelForge-Linux-AppImage
           path: VoxelForge-Linux-x86_64.AppImage
@@ -349,7 +349,7 @@ jobs:
         continue-on-error: true
 
       - name: Upload Portable Tarball
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: VoxelForge-Linux-Portable
           path: VoxelForge-Linux-Portable.tar.gz
@@ -456,7 +456,7 @@ jobs:
           dpkg-deb --build pkg VoxelForge-Debian-Ubuntu.deb
 
       - name: Upload Debian Package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: VoxelForge-Debian-Ubuntu
           path: VoxelForge-Debian-Ubuntu.deb
@@ -560,7 +560,7 @@ jobs:
           tar -czvf VoxelForge-Fedora-Portable.tar.gz -C portable VoxelForge
 
       - name: Upload RPM Package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: VoxelForge-Fedora-RHEL-RPM
           path: /tmp/VoxelForge-Fedora-RHEL.rpm
@@ -568,7 +568,7 @@ jobs:
         continue-on-error: true
 
       - name: Upload Fedora Portable
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: VoxelForge-Fedora-Portable
           path: VoxelForge-Fedora-Portable.tar.gz
@@ -657,7 +657,7 @@ jobs:
           tar -czvf VoxelForge-Arch-Portable.tar.gz -C portable VoxelForge
 
       - name: Upload Arch Package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: VoxelForge-Arch-Linux
           path: /tmp/VoxelForge-Arch.pkg.tar.zst
@@ -665,7 +665,7 @@ jobs:
         continue-on-error: true
 
       - name: Upload Arch Portable
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: VoxelForge-Arch-Portable
           path: VoxelForge-Arch-Portable.tar.gz
