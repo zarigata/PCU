@@ -192,6 +192,7 @@ add_library(VoxelForge_Engine STATIC
     
     # Entity
     src/entity/EntityManager.cpp
+    src/entity/Entity.cpp
     src/entity/EntityBase.cpp
     src/entity/LivingEntity.cpp
     src/entity/Player.cpp

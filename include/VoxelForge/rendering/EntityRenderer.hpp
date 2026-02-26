@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <string>
+
 #include <vulkan/vulkan.hpp>
 #include <VoxelForge/rendering/VulkanBuffer.hpp>
 #include <VoxelForge/rendering/Camera.hpp>

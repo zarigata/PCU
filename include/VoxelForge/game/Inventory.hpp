@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <string>
+
 #include <VoxelForge/game/Item.hpp>
 #include <array>
 #include <functional>

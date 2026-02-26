@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <string>
+
 #include <VoxelForge/rendering/VulkanContext.hpp>
 #include <VoxelForge/rendering/Camera.hpp>
 #include <memory>

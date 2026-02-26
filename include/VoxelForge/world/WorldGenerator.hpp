@@ -12,6 +12,8 @@
 
 #pragma once
 
+#include <string>
+
 #include <VoxelForge/world/Block.hpp>
 #include <VoxelForge/world/Chunk.hpp>
 #include <VoxelForge/utils/Noise.hpp>
