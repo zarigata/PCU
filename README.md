@@ -18,6 +18,25 @@ VoxelForge is a **complete, open-source Minecraft clone** built in modern C++20/
 - High-performance Vulkan rendering
 - Multiplayer support
 
+## Current Status: 🚧 In Development
+
+| Component | Status | Progress |
+|-----------|--------|----------|
+| Core Systems | ✅ | 90% |
+| Window/Input | ✅ | 100% |
+| Event System | ✅ | 100% |
+| Memory Management | ✅ | 100% |
+| Camera System | ✅ | 100% |
+| Block Registry | 🔄 | 30% |
+| Chunk System | 🔄 | 40% |
+| World Generation | ⏳ | 0% |
+| Vulkan Renderer | ⏳ | 0% |
+| Entity System | ⏳ | 10% |
+| Physics | ⏳ | 0% |
+| Audio | ⏳ | 0% |
+| Networking | ⏳ | 0% |
+| Modding API | ⏳ | 0% |
+
 ## Quick Links
 
 | Document | Description |
@@ -38,6 +57,35 @@ VoxelForge is a **complete, open-source Minecraft clone** built in modern C++20/
 | Scripting | Lua 5.4 / LuaJIT |
 | Build | CMake 3.26+ |
 
+## Building
+
+### Prerequisites
+
+- CMake 3.26+
+- C++20 compatible compiler (GCC 12+, Clang 15+, MSVC 2022+)
+- Vulkan SDK 1.3+
+- Git
+
+### Build Commands
+
+```bash
+# Clone repository
+git clone https://github.com/zarigata/PCU.git
+cd PCU
+
+# Create build directory
+mkdir build && cd build
+
+# Configure
+cmake .. -DCMAKE_BUILD_TYPE=Release
+
+# Build
+cmake --build . -j$(nproc)
+
+# Run
+./bin/VoxelForge
+```
+
 ## Project Structure
 
 ```
@@ -56,105 +104,48 @@ VoxelForge/
 │   ├── game/               # Game logic
 │   └── utils/              # Utilities
 ├── include/                # Header files
-│   ├── VoxelForge/         # Public headers
-│   └── thirdparty/         # Third-party headers
 ├── assets/                 # Game assets
-│   ├── textures/
-│   ├── models/
-│   ├── audio/
-│   └── shaders/
 ├── mods/                   # Mod directory
-│   ├── core/               # Core mod
-│   └── example_mod/        # Example mod
-├── tools/                  # Development tools
 ├── tests/                  # Test suites
-├── docs/                   # Documentation
-├── scripts/                # Build/utility scripts
-├── cmake/                  # CMake modules
-└── thirdparty/             # Third-party libraries
+└── docs/                   # Documentation
 ```
 
-## Building
+## Implemented Features
 
-### Prerequisites
+### Core Systems ✅
+- **Logger** - spdlog-based logging with file rotation
+- **Timer** - High-resolution timing and FPS counter
+- **Memory** - Arena allocators for performance
+- **ECS** - Custom Entity Component System
 
-- CMake 3.26+
-- C++20 compatible compiler (GCC 12+, Clang 15+, MSVC 2022+)
-- Vulkan SDK 1.3+
-- Git
+### Platform ✅
+- **Window** - GLFW window management
+- **Input** - Full keyboard/mouse input handling
+- **Events** - Type-safe event bus
 
-### Build Commands
+### Utilities ✅
+- **Noise** - Perlin, Simplex, Voronoi noise
+- **Random** - XorShift128+ PRNG
+- **NBT** - Named Binary Tag serialization
+- **Compression** - Zstandard streaming compression
 
-```bash
-# Clone repository
-git clone https://github.com/voxelforge/voxelforge.git
-cd voxelforge
+### World 🔄
+- **BlockRegistry** - 20+ vanilla blocks
+- **Block States** - Property system for variants
+- **Chunk System** - Paletted storage, light data
 
-# Create build directory
-mkdir build && cd build
-
-# Configure
-cmake .. -DCMAKE_BUILD_TYPE=Release
-
-# Build
-cmake --build . -j$(nproc)
-
-# Run
-./bin/VoxelForge
-```
-
-### Build Options
-
-| Option | Default | Description |
-|--------|---------|-------------|
-| `VOXELFORGE_BUILD_TESTS` | ON | Build unit tests |
-| `VOXELFORGE_BUILD_BENCHMARKS` | OFF | Build benchmarks |
-| `VOXELFORGE_BUILD_TOOLS` | ON | Build dev tools |
-| `VOXELFORGE_ENABLE_SANITIZERS` | OFF | Enable sanitizers |
-| `VOXELFORGE_USE_LUAJIT` | ON | Use LuaJIT |
-
-## Development Roadmap
-
-### Phase 1: Foundation (Months 1-3)
-- Core engine setup
-- Vulkan rendering foundation
-- Basic world generation
-
-### Phase 2: Gameplay Core (Months 4-6)
-- Player physics
-- Inventory system
-- Lighting system
-
-### Phase 3: Entities & AI (Months 7-9)
-- ECS implementation
-- Mob AI system
-- Combat system
-
-### Phase 4: Advanced Features (Months 10-15)
-- Networking/multiplayer
-- Redstone system
-- Dimensions & bosses
-
-### Phase 5: Polish & Modding (Months 16-21)
-- Modding system
-- Audio system
-- Final content
-
-### Phase 6: Release & Support (Ongoing)
-- 1.0.0 Release
-- Community updates
+### Rendering 🔄
+- **Camera** - Perspective/orthographic with frustum culling
 
 ## Statistics
 
-| Metric | Value |
-|--------|-------|
-| Estimated Duration | 18-24 months |
-| Block Types | 800+ |
-| Item Types | 600+ |
-| Entity Types | 70+ |
-| Biome Types | 60+ |
-| Commands | 50+ |
-| Total Features | 1,600+ |
+| Metric | Current | Target |
+|--------|---------|--------|
+| Lines of Code | 7,382 | 200,000+ |
+| Commits | 9 | - |
+| Block Types | 20+ | 800+ |
+| Item Types | 0 | 600+ |
+| Entity Types | 0 | 70+ |
 
 ## Contributing
 
