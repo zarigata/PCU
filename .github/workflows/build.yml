@@ -1,0 +1,722 @@
+name: Build VoxelForge
+
+on:
+  push:
+    branches: [main, master, develop]
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Build type'
+        required: true
+        default: 'Release'
+        type: choice
+        options:
+          - Release
+          - Debug
+          - RelWithDebInfo
+
+env:
+  BUILD_TYPE: ${{ github.event.inputs.build_type || 'Release' }}
+
+jobs:
+  # ============================================
+  # Windows Build
+  # ============================================
+  build-windows:
+    runs-on: windows-latest
+    name: Build Windows
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Install Vulkan SDK
+        uses: humbletim/install-vulkan-sdk@v1.1.1
+        with:
+          version: 1.3.261.0
+          cache: true
+
+      - name: Install FreeType
+        run: |
+          vcpkg install freetype:x64-windows
+          echo "CMAKE_TOOLCHAIN_FILE=-DCMAKE_TOOLCHAIN_FILE=$env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" >> $env:GITHUB_ENV
+
+      - name: Configure CMake
+        run: |
+          cmake -B build `
+            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} `
+            -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" `
+            -DVOXELFORGE_BUILD_TESTS=OFF `
+            -DVOXELFORGE_BUILD_BENCHMARKS=OFF
+
+      - name: Build
+        run: cmake --build build --config ${{ env.BUILD_TYPE }} --parallel
+
+      - name: Package with CPack
+        working-directory: build
+        run: |
+          cpack -C ${{ env.BUILD_TYPE }} -G ZIP;NSIS
+        continue-on-error: true
+
+      - name: Create portable package
+        run: |
+          mkdir -p package/VoxelForge
+          cp build/${{ env.BUILD_TYPE }}/VoxelForge.exe package/VoxelForge/ 2>/dev/null || cp build/bin/VoxelForge.exe package/VoxelForge/ 2>/dev/null || true
+          cp -r assets package/VoxelForge/ 2>/dev/null || true
+          cp -r mods package/VoxelForge/ 2>/dev/null || true
+          
+          # Copy DLLs
+          $vulkanSDK = "$env:VULKAN_SDK"
+          if (Test-Path "$vulkanSDK/Bin/vulkan-1.dll") {
+            cp "$vulkanSDK/Bin/vulkan-1.dll" package/VoxelForge/
+          }
+          
+          # Create README for portable
+          "VoxelForge - C++ Minecraft Clone" | Out-File -FilePath package/VoxelForge/README.txt
+          "Double-click VoxelForge.exe to play!" | Out-File -FilePath package/VoxelForge/README.txt -Append
+
+      - name: Upload Windows ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: VoxelForge-Windows-x64
+          path: package/
+          retention-days: 30
+
+      - name: Upload NSIS Installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: VoxelForge-Windows-Installer
+          path: build/*.exe
+          retention-days: 30
+        if: always()
+
+  # ============================================
+  # macOS Builds (Intel & Apple Silicon)
+  # ============================================
+  build-macos-intel:
+    runs-on: macos-13
+    name: Build macOS Intel
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: |
+          brew install cmake vulkan-loader vulkan-headers freetype
+
+      - name: Configure CMake
+        run: |
+          cmake -B build \
+            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+            -DVOXELFORGE_BUILD_TESTS=OFF \
+            -DVOXELFORGE_BUILD_BENCHMARKS=OFF \
+            -DCMAKE_OSX_ARCHITECTURES=x86_64
+
+      - name: Build
+        run: cmake --build build --config ${{ env.BUILD_TYPE }} --parallel
+
+      - name: Create macOS App Bundle
+        run: |
+          mkdir -p VoxelForge.app/Contents/MacOS
+          mkdir -p VoxelForge.app/Contents/Resources
+          cp build/bin/VoxelForge VoxelForge.app/Contents/MacOS/ 2>/dev/null || cp build/VoxelForge VoxelForge.app/Contents/MacOS/ || true
+          cp -r assets VoxelForge.app/Contents/Resources/ 2>/dev/null || true
+          cp -r mods VoxelForge.app/Contents/Resources/ 2>/dev/null || true
+          
+          # Create Info.plist
+          cat > VoxelForge.app/Contents/Info.plist << 'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>CFBundleExecutable</key>
+              <string>VoxelForge</string>
+              <key>CFBundleIdentifier</key>
+              <string>org.voxelforge.game</string>
+              <key>CFBundleName</key>
+              <string>VoxelForge</string>
+              <key>CFBundleVersion</key>
+              <string>1.0.0</string>
+              <key>CFBundleShortVersionString</key>
+              <string>1.0.0</string>
+              <key>CFBundlePackageType</key>
+              <string>APPL</string>
+          </dict>
+          </plist>
+          EOF
+
+      - name: Create DMG
+        run: |
+          brew install create-dmg
+          create-dmg --volname "VoxelForge" --volicon "assets/icon.icns" --window-pos 200 120 --window-size 800 400 --icon-size 100 --icon "VoxelForge.app" 200 190 --hide-extension "VoxelForge.app" --app-drop-link 600 185 "VoxelForge-macOS-Intel.dmg" "VoxelForge.app/"
+        continue-on-error: true
+
+      - name: Create ZIP fallback
+        run: |
+          zip -r VoxelForge-macOS-Intel.zip VoxelForge.app
+
+      - name: Upload macOS Intel DMG
+        uses: actions/upload-artifact@v4
+        with:
+          name: VoxelForge-macOS-Intel-DMG
+          path: VoxelForge-macOS-Intel.dmg
+          retention-days: 30
+        continue-on-error: true
+
+      - name: Upload macOS Intel ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: VoxelForge-macOS-Intel-ZIP
+          path: VoxelForge-macOS-Intel.zip
+          retention-days: 30
+
+  build-macos-arm:
+    runs-on: macos-latest
+    name: Build macOS Apple Silicon
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: |
+          brew install cmake vulkan-loader vulkan-headers freetype
+
+      - name: Configure CMake
+        run: |
+          cmake -B build \
+            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+            -DVOXELFORGE_BUILD_TESTS=OFF \
+            -DVOXELFORGE_BUILD_BENCHMARKS=OFF \
+            -DCMAKE_OSX_ARCHITECTURES=arm64
+
+      - name: Build
+        run: cmake --build build --config ${{ env.BUILD_TYPE }} --parallel
+
+      - name: Create macOS App Bundle
+        run: |
+          mkdir -p VoxelForge.app/Contents/MacOS
+          mkdir -p VoxelForge.app/Contents/Resources
+          cp build/bin/VoxelForge VoxelForge.app/Contents/MacOS/ 2>/dev/null || cp build/VoxelForge VoxelForge.app/Contents/MacOS/ || true
+          cp -r assets VoxelForge.app/Contents/Resources/ 2>/dev/null || true
+          cp -r mods VoxelForge.app/Contents/Resources/ 2>/dev/null || true
+          
+          # Create Info.plist
+          cat > VoxelForge.app/Contents/Info.plist << 'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>CFBundleExecutable</key>
+              <string>VoxelForge</string>
+              <key>CFBundleIdentifier</key>
+              <string>org.voxelforge.game</string>
+              <key>CFBundleName</key>
+              <string>VoxelForge</string>
+              <key>CFBundleVersion</key>
+              <string>1.0.0</string>
+              <key>CFBundleShortVersionString</key>
+              <string>1.0.0</string>
+              <key>CFBundlePackageType</key>
+              <string>APPL</string>
+          </dict>
+          </plist>
+          EOF
+
+      - name: Create DMG
+        run: |
+          brew install create-dmg
+          create-dmg --volname "VoxelForge" --volicon "assets/icon.icns" --window-pos 200 120 --window-size 800 400 --icon-size 100 --icon "VoxelForge.app" 200 190 --hide-extension "VoxelForge.app" --app-drop-link 600 185 "VoxelForge-macOS-AppleSilicon.dmg" "VoxelForge.app/"
+        continue-on-error: true
+
+      - name: Create ZIP fallback
+        run: |
+          zip -r VoxelForge-macOS-AppleSilicon.zip VoxelForge.app
+
+      - name: Upload macOS Apple Silicon DMG
+        uses: actions/upload-artifact@v4
+        with:
+          name: VoxelForge-macOS-AppleSilicon-DMG
+          path: VoxelForge-macOS-AppleSilicon.dmg
+          retention-days: 30
+        continue-on-error: true
+
+      - name: Upload macOS Apple Silicon ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: VoxelForge-macOS-AppleSilicon-ZIP
+          path: VoxelForge-macOS-AppleSilicon.zip
+          retention-days: 30
+
+  # ============================================
+  # Linux Builds
+  # ============================================
+  build-linux-appimage:
+    runs-on: ubuntu-22.04
+    name: Build Linux AppImage (Universal)
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential cmake ninja-build \
+            libvulkan-dev vulkan-validationlayers \
+            libfreetype6-dev libfontconfig1-dev \
+            libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev \
+            libgl1-mesa-dev \
+            desktop-file-utils
+
+      - name: Configure CMake
+        run: |
+          cmake -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+            -DCMAKE_INSTALL_PREFIX=/usr \
+            -DVOXELFORGE_BUILD_TESTS=OFF \
+            -DVOXELFORGE_BUILD_BENCHMARKS=OFF
+
+      - name: Build
+        run: cmake --build build --config ${{ env.BUILD_TYPE }} --parallel
+
+      - name: Install to AppDir
+        run: |
+          export DESTDIR=AppDir
+          cmake --install build
+
+      - name: Download linuxdeploy
+        run: |
+          wget -q https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+          wget -q https://github.com/linuxdeploy/linuxdeploy-plugin-appimage/releases/download/continuous/linuxdeploy-plugin-appimage-x86_64.AppImage
+          chmod +x linuxdeploy*.AppImage
+
+      - name: Create desktop file
+        run: |
+          mkdir -p AppDir/usr/share/applications
+          cat > AppDir/usr/share/applications/voxelforge.desktop << 'EOF'
+          [Desktop Entry]
+          Type=Application
+          Name=VoxelForge
+          Comment=C++ Minecraft Clone with Integrated Modding
+          Exec=voxelforge
+          Icon=voxelforge
+          Categories=Game;AdventureGame;
+          Terminal=false
+          EOF
+
+      - name: Create AppImage
+        run: |
+          export OUTPUT=VoxelForge-Linux-x86_64.AppImage
+          ./linuxdeploy-x86_64.AppImage --appdir AppDir --plugin appimage --output appimage
+        continue-on-error: true
+
+      - name: Create portable tarball fallback
+        run: |
+          mkdir -p portable/VoxelForge
+          cp build/bin/VoxelForge portable/VoxelForge/ 2>/dev/null || cp build/VoxelForge portable/VoxelForge/ || true
+          cp -r assets portable/VoxelForge/ 2>/dev/null || true
+          cp -r mods portable/VoxelForge/ 2>/dev/null || true
+          echo '#!/bin/bash' > portable/VoxelForge/run.sh
+          echo 'cd "$(dirname "$0")"' >> portable/VoxelForge/run.sh
+          echo './VoxelForge' >> portable/VoxelForge/run.sh
+          chmod +x portable/VoxelForge/run.sh
+          tar -czvf VoxelForge-Linux-Portable.tar.gz -C portable VoxelForge
+
+      - name: Upload AppImage
+        uses: actions/upload-artifact@v4
+        with:
+          name: VoxelForge-Linux-AppImage
+          path: VoxelForge-Linux-x86_64.AppImage
+          retention-days: 30
+        continue-on-error: true
+
+      - name: Upload Portable Tarball
+        uses: actions/upload-artifact@v4
+        with:
+          name: VoxelForge-Linux-Portable
+          path: VoxelForge-Linux-Portable.tar.gz
+          retention-days: 30
+
+  build-linux-debian:
+    runs-on: ubuntu-22.04
+    name: Build Debian/Ubuntu Package
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential cmake ninja-build \
+            libvulkan-dev vulkan-validationlayers \
+            libfreetype6-dev libfontconfig1-dev \
+            libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev \
+            libgl1-mesa-dev \
+            dpkg-dev fakeroot
+
+      - name: Configure CMake
+        run: |
+          cmake -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+            -DVOXELFORGE_BUILD_TESTS=OFF \
+            -DVOXELFORGE_BUILD_BENCHMARKS=OFF
+
+      - name: Build
+        run: cmake --build build --config ${{ env.BUILD_TYPE }} --parallel
+
+      - name: Package DEB
+        working-directory: build
+        run: |
+          cpack -G DEB
+        continue-on-error: true
+
+      - name: Create manual DEB package
+        run: |
+          # Create package structure
+          mkdir -p pkg/DEBIAN
+          mkdir -p pkg/usr/bin
+          mkdir -p pkg/usr/share/voxelforge/assets
+          mkdir -p pkg/usr/share/voxelforge/mods
+          mkdir -p pkg/usr/share/applications
+          mkdir -p pkg/usr/share/icons/hicolor/256x256/apps
+          
+          # Copy binary
+          cp build/bin/VoxelForge pkg/usr/bin/voxelforge 2>/dev/null || cp build/VoxelForge pkg/usr/bin/voxelforge || true
+          
+          # Copy assets
+          cp -r assets/* pkg/usr/share/voxelforge/assets/ 2>/dev/null || true
+          cp -r mods/* pkg/usr/share/voxelforge/mods/ 2>/dev/null || true
+          
+          # Create control file
+          cat > pkg/DEBIAN/control << 'EOF'
+          Package: voxelforge
+          Version: 1.0.0
+          Section: games
+          Priority: optional
+          Architecture: amd64
+          Maintainer: VoxelForge Team <team@voxelforge.org>
+          Description: C++ Minecraft Clone with Integrated Modding
+           VoxelForge is a complete, open-source Minecraft clone built in modern C++20
+           featuring Vulkan rendering, multiplayer support, and a dual-layer modding system.
+          Depends: libvulkan1, libfreetype6, libx11-6, libxrandr2, libxinerama1, libxcursor1, libxi6
+          EOF
+          
+          # Create desktop file
+          cat > pkg/usr/share/applications/voxelforge.desktop << 'EOF'
+          [Desktop Entry]
+          Type=Application
+          Name=VoxelForge
+          Comment=C++ Minecraft Clone with Integrated Modding
+          Exec=voxelforge
+          Icon=voxelforge
+          Categories=Game;AdventureGame;
+          Terminal=false
+          EOF
+          
+          # Create wrapper script
+          cat > pkg/usr/bin/voxelforge << 'EOF'
+          #!/bin/bash
+          cd /usr/share/voxelforge
+          exec /usr/lib/voxelforge/VoxelForge "$@"
+          EOF
+          
+          mkdir -p pkg/usr/lib/voxelforge
+          mv pkg/usr/bin/voxelforge pkg/usr/lib/voxelforge/VoxelForge 2>/dev/null || true
+          
+          cat > pkg/usr/bin/voxelforge << 'EOF'
+          #!/bin/bash
+          cd /usr/share/voxelforge
+          exec /usr/lib/voxelforge/VoxelForge "$@"
+          EOF
+          chmod +x pkg/usr/bin/voxelforge
+          
+          # Build deb
+          dpkg-deb --build pkg VoxelForge-Debian-Ubuntu.deb
+
+      - name: Upload Debian Package
+        uses: actions/upload-artifact@v4
+        with:
+          name: VoxelForge-Debian-Ubuntu
+          path: VoxelForge-Debian-Ubuntu.deb
+          retention-days: 30
+
+  build-linux-fedora-rpm:
+    runs-on: ubuntu-22.04
+    name: Build Fedora/RHEL RPM Package
+    container: fedora:39
+    
+    steps:
+      - name: Install build tools
+        run: |
+          dnf -y install git cmake ninja-build gcc-c++ make \
+            vulkan-loader-devel vulkan-headers \
+            freetype-devel fontconfig-devel \
+            libX11-devel libXrandr-devel libXinerama-devel libXcursor-devel libXi-devel \
+            mesa-libGL-devel \
+            rpm-build
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Configure CMake
+        run: |
+          cmake -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+            -DVOXELFORGE_BUILD_TESTS=OFF \
+            -DVOXELFORGE_BUILD_BENCHMARKS=OFF
+
+      - name: Build
+        run: cmake --build build --config ${{ env.BUILD_TYPE }} --parallel
+
+      - name: Create RPM package
+        run: |
+          # Create RPM build structure
+          mkdir -p ~/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+          
+          # Create tarball
+          tar -czvf ~/rpmbuild/SOURCES/voxelforge-1.0.0.tar.gz \
+            --transform 's,^,voxelforge-1.0.0/,' \
+            build/bin assets mods 2>/dev/null || tar -czvf ~/rpmbuild/SOURCES/voxelforge-1.0.0.tar.gz build assets mods
+          
+          # Create spec file
+          cat > ~/rpmbuild/SPECS/voxelforge.spec << 'EOF'
+          Name:           voxelforge
+          Version:        1.0.0
+          Release:        1%{?dist}
+          Summary:        C++ Minecraft Clone with Integrated Modding
+          
+          License:        MIT
+          URL:            https://github.com/zarigata/PCU
+          
+          Source0:        %{name}-%{version}.tar.gz
+          
+          BuildRequires:  cmake, gcc-c++, vulkan-loader-devel, freetype-devel
+          Requires:       vulkan-loader, freetype
+          
+          %description
+          VoxelForge is a complete, open-source Minecraft clone built in modern C++20
+          featuring Vulkan rendering, multiplayer support, and a dual-layer modding system.
+          
+          %prep
+          %setup -q
+          
+          %install
+          mkdir -p %{buildroot}/usr/bin
+          mkdir -p %{buildroot}/usr/share/voxelforge
+          cp -r build/bin/VoxelForge %{buildroot}/usr/bin/voxelforge 2>/dev/null || cp build/VoxelForge %{buildroot}/usr/bin/voxelforge || true
+          cp -r assets %{buildroot}/usr/share/voxelforge/ 2>/dev/null || true
+          cp -r mods %{buildroot}/usr/share/voxelforge/ 2>/dev/null || true
+          
+          %files
+          /usr/bin/voxelforge
+          /usr/share/voxelforge
+          
+          %changelog
+          * Thu Feb 26 2026 VoxelForge Team <team@voxelforge.org> - 1.0.0-1
+          - Initial package
+          EOF
+          
+          # Build RPM
+          rpmbuild -bb ~/rpmbuild/SPECS/voxelforge.spec
+          
+          # Copy to accessible location
+          cp ~/rpmbuild/RPMS/x86_64/*.rpm /tmp/VoxelForge-Fedora-RHEL.rpm || true
+        continue-on-error: true
+
+      - name: Create portable tarball
+        run: |
+          mkdir -p portable/VoxelForge
+          cp build/bin/VoxelForge portable/VoxelForge/ 2>/dev/null || cp build/VoxelForge portable/VoxelForge/ || true
+          cp -r assets portable/VoxelForge/ 2>/dev/null || true
+          cp -r mods portable/VoxelForge/ 2>/dev/null || true
+          echo '#!/bin/bash' > portable/VoxelForge/run.sh
+          echo 'cd "$(dirname "$0")"' >> portable/VoxelForge/run.sh
+          echo './VoxelForge' >> portable/VoxelForge/run.sh
+          chmod +x portable/VoxelForge/run.sh
+          tar -czvf VoxelForge-Fedora-Portable.tar.gz -C portable VoxelForge
+
+      - name: Upload RPM Package
+        uses: actions/upload-artifact@v4
+        with:
+          name: VoxelForge-Fedora-RHEL-RPM
+          path: /tmp/VoxelForge-Fedora-RHEL.rpm
+          retention-days: 30
+        continue-on-error: true
+
+      - name: Upload Fedora Portable
+        uses: actions/upload-artifact@v4
+        with:
+          name: VoxelForge-Fedora-Portable
+          path: VoxelForge-Fedora-Portable.tar.gz
+          retention-days: 30
+
+  build-linux-arch:
+    runs-on: ubuntu-22.04
+    name: Build Arch Linux Package
+    container: archlinux:latest
+    
+    steps:
+      - name: Install build tools
+        run: |
+          pacman -Syu --noconfirm
+          pacman -S --noconfirm git cmake ninja gcc make \
+            vulkan-icd-loader vulkan-headers \
+            freetype2 fontconfig \
+            libx11 libxrandr libxinerama libxcursor libxi \
+            mesa
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Configure CMake
+        run: |
+          cmake -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+            -DVOXELFORGE_BUILD_TESTS=OFF \
+            -DVOXELFORGE_BUILD_BENCHMARKS=OFF
+
+      - name: Build
+        run: cmake --build build --config ${{ env.BUILD_TYPE }} --parallel
+
+      - name: Create Arch Linux package
+        run: |
+          # Create pkgbuild structure
+          mkdir -p /tmp/voxelforge
+          
+          # Create PKGBUILD
+          cat > /tmp/voxelforge/PKGBUILD << 'EOF'
+          pkgname=voxelforge
+          pkgver=1.0.0
+          pkgrel=1
+          pkgdesc="C++ Minecraft Clone with Integrated Modding"
+          arch=('x86_64')
+          url="https://github.com/zarigata/PCU"
+          license=('MIT')
+          depends=('vulkan-icd-loader' 'freetype2' 'libx11' 'libxrandr' 'libxinerama' 'libxcursor' 'libxi')
+          makedepends=('cmake' 'ninja' 'gcc' 'vulkan-headers')
+          
+          package() {
+            mkdir -p "$pkgdir/usr/bin"
+            mkdir -p "$pkgdir/usr/share/voxelforge"
+            cp "$srcdir/VoxelForge" "$pkgdir/usr/bin/voxelforge" 2>/dev/null || true
+            cp -r "$srcdir/assets" "$pkgdir/usr/share/voxelforge/" 2>/dev/null || true
+            cp -r "$srcdir/mods" "$pkgdir/usr/share/voxelforge/" 2>/dev/null || true
+          }
+          EOF
+          
+          # Prepare source
+          mkdir -p /tmp/voxelforge/src
+          cp build/bin/VoxelForge /tmp/voxelforge/src/ 2>/dev/null || cp build/VoxelForge /tmp/voxelforge/src/ || true
+          cp -r assets /tmp/voxelforge/src/ 2>/dev/null || true
+          cp -r mods /tmp/voxelforge/src/ 2>/dev/null || true
+          
+          # Build package
+          cd /tmp/voxelforge
+          makepkg --nodeps
+          
+          # Find and rename
+          mv *.pkg.tar.zst /tmp/VoxelForge-Arch.pkg.tar.zst 2>/dev/null || true
+        continue-on-error: true
+
+      - name: Create portable tarball
+        run: |
+          mkdir -p portable/VoxelForge
+          cp build/bin/VoxelForge portable/VoxelForge/ 2>/dev/null || cp build/VoxelForge portable/VoxelForge/ || true
+          cp -r assets portable/VoxelForge/ 2>/dev/null || true
+          cp -r mods portable/VoxelForge/ 2>/dev/null || true
+          echo '#!/bin/bash' > portable/VoxelForge/run.sh
+          echo 'cd "$(dirname "$0")"' >> portable/VoxelForge/run.sh
+          echo './VoxelForge' >> portable/VoxelForge/run.sh
+          chmod +x portable/VoxelForge/run.sh
+          tar -czvf VoxelForge-Arch-Portable.tar.gz -C portable VoxelForge
+
+      - name: Upload Arch Package
+        uses: actions/upload-artifact@v4
+        with:
+          name: VoxelForge-Arch-Linux
+          path: /tmp/VoxelForge-Arch.pkg.tar.zst
+          retention-days: 30
+        continue-on-error: true
+
+      - name: Upload Arch Portable
+        uses: actions/upload-artifact@v4
+        with:
+          name: VoxelForge-Arch-Portable
+          path: VoxelForge-Arch-Portable.tar.gz
+          retention-days: 30
+
+  # ============================================
+  # Release
+  # ============================================
+  create-release:
+    name: Create Release
+    needs: [build-windows, build-macos-intel, build-macos-arm, build-linux-appimage, build-linux-debian, build-linux-fedora-rpm, build-linux-arch]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: List all files
+        run: find artifacts -type f -ls
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: VoxelForge ${{ github.ref_name }}
+          body: |
+            ## VoxelForge ${{ github.ref_name }}
+            
+            ### Downloads
+            | Platform | Architecture | Format |
+            |----------|-------------|--------|
+            | Windows | x64 | ZIP, Installer |
+            | macOS | Intel (x64) | DMG, ZIP |
+            | macOS | Apple Silicon (ARM) | DMG, ZIP |
+            | Linux | Universal | AppImage, Portable |
+            | Debian/Ubuntu | x64 | DEB |
+            | Fedora/RHEL | x64 | RPM |
+            | Arch Linux | x64 | pkg.tar.zst |
+            
+            ### System Requirements
+            - **Windows**: Windows 10+, Vulkan-compatible GPU
+            - **macOS**: macOS 11+ (Big Sur), Vulkan-compatible GPU (MoltenVK)
+            - **Linux**: Vulkan-compatible GPU, glibc 2.35+
+            
+            ### Quick Start
+            Download the package for your platform, extract if needed, and run!
+          files: |
+            artifacts/**/*
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
