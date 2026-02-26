@@ -4,24 +4,15 @@
  */
 
 #include <VoxelForge/Engine.hpp>
-#include <VoxelForge/core/Logger.hpp>
-#include <VoxelForge/core/Memory.hpp>
-#include <VoxelForge/core/Timer.hpp>
+#include <VoxelForge/game/Game.hpp>
 #include <iostream>
-#include <cstdlib>
 
 #ifdef _WIN32
 #include <windows.h>
 #endif
 
-using namespace VoxelForge;
-
-/**
- * @brief Main entry point
- */
 int main(int argc, char* argv[]) {
 #ifdef _WIN32
-    // Enable ANSI colors on Windows
     SetConsoleOutputCP(CP_UTF8);
     HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
     DWORD dwMode = 0;
@@ -44,28 +35,10 @@ int main(int argc, char* argv[]) {
     std::cout << "========================================" << std::endl;
     
     try {
-        // Initialize systems
-        VF_CORE_INFO("Starting VoxelForge...");
-        
-        // Initialize memory
-        Memory::init();
-        
-        // Initialize timer
-        Timer startupTimer;
-        
-        // TODO: Initialize window, Vulkan, etc.
-        
-        float initTime = startupTimer.elapsedMillis();
-        VF_CORE_INFO("Initialization complete in {:.2f}ms", initTime);
-        
-        // Main game loop would go here
-        VF_CORE_INFO("Game loop not yet implemented - exiting");
-        
-        // Shutdown
-        VF_CORE_INFO("Shutting down...");
-        Memory::shutdown();
-        Logger::shutdown();
-        
+        // Create and run game
+        auto app = VoxelForge::createApplication();
+        app->run();
+        delete app;
         return 0;
     }
     catch (const std::exception& e) {
