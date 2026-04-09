@@ -1,0 +1,44 @@
+# Auto-detect text files and normalize to LF
+* text=auto eol=lf
+
+# C/C++ source files
+*.cpp text diff=cpp
+*.h text diff=cpp
+*.hpp text diff=cpp
+*.c text diff=cpp
+
+# Shader files
+*.glsl text
+*.vert text
+*.frag text
+*.comp text
+
+# Lua scripts
+*.lua text diff=lua
+
+# Configuration files
+*.json text
+*.yaml text
+*.yml text
+*.toml text
+
+# Build files
+CMakeLists.txt text
+Makefile text
+*.cmake text
+
+# Documentation
+*.md text diff=markdown
+*.txt text
+
+# Binary files (don't touch)
+*.png binary
+*.jpg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.ttf binary
+*.otf binary
+*.wav binary
+*.ogg binary
+*.mp3 binary
