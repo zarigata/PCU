@@ -5,7 +5,8 @@
 
 #pragma once
 
-#include <VoxelForge/world/Chunk.hpp>
+#include <VoxelForge/world/ChunkPos.hpp>
+#include <VoxelForge/world/Block.hpp>
 #include <VoxelForge/utils/Noise.hpp>
 #include <unordered_map>
 #include <memory>
@@ -15,13 +16,6 @@
 namespace VoxelForge {
 
 class Player;
-
-// Hash functor for ChunkPos in unordered_map
-struct ChunkPosHash {
-    size_t operator()(const ChunkPos& pos) const {
-        return std::hash<int64_t>()(pos.toHash());
-    }
-};
 
 struct WorldSettings {
     int64_t seed = 0;
@@ -135,13 +129,6 @@ private:
     // Generation helpers
     int calculateTerrainHeight(int x, int z) const;
     int getBiomeAt(int x, int z) const;
-    
-    // Chunk hash
-    struct ChunkPosHash {
-        size_t operator()(const ChunkPos& pos) const {
-            return std::hash<int64_t>()(pos.toHash());
-        }
-    };
 };
 
 } // namespace VoxelForge

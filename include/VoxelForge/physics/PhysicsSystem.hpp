@@ -29,6 +29,13 @@ namespace physx {
     struct PxFilterData;
 }
 
+// Hash functor for glm::ivec3
+struct IVec3Hash {
+    size_t operator()(const glm::ivec3& v) const {
+        return std::hash<int>()(v.x) ^ (std::hash<int>()(v.y) << 1) ^ (std::hash<int>()(v.z) << 2);
+    }
+};
+
 namespace VoxelForge {
 
 class World;
@@ -317,7 +324,7 @@ private:
         physx::PxRigidStatic* actor = nullptr;
         std::vector<physx::PxShape*> shapes;
     };
-    std::unordered_map<glm::ivec3, ChunkCollider, glm::ivec3Hash> chunkColliders;
+    std::unordered_map<glm::ivec3, ChunkCollider, IVec3Hash> chunkColliders;
     
     // Collision callback
     std::function<void(uint32_t, uint32_t, const CollisionInfo&)> collisionCallback;

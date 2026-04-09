@@ -19,11 +19,11 @@ World::World(int64_t seed) {
     caveNoise = std::make_unique<PerlinNoise>(static_cast<uint32_t>(seed + 1));
     biomeNoise = std::make_unique<SimplexNoise>(static_cast<uint32_t>(seed + 2));
     
-    VF_CORE_INFO("World created with seed: {}", seed);
+    spdlog::info("World created with seed: {}", seed);
 }
 
 World::~World() {
-    VF_CORE_INFO("World destroyed with {} chunks", chunks.size());
+    spdlog::info("World destroyed with {} chunks", chunks.size());
 }
 
 // ============================================
@@ -128,7 +128,7 @@ void World::unloadChunk(const ChunkPos& pos) {
         // Save chunk before unloading
         // TODO: Implement chunk saving
         chunks.erase(it);
-        VF_CORE_DEBUG("Unloaded chunk at ({}, {})", pos.x, pos.z);
+        spdlog::debug("Unloaded chunk at ({}, {})", pos.x, pos.z);
     }
 }
 

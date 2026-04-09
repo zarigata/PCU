@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include "ChunkPos.hpp"
 #include "Block.hpp"
 #include <array>
 #include <memory>
@@ -30,43 +31,6 @@ constexpr int SECTION_HEIGHT = 16;
 constexpr int SECTIONS_PER_CHUNK = CHUNK_HEIGHT / SECTION_HEIGHT;
 constexpr int BLOCKS_PER_SECTION = CHUNK_WIDTH * SECTION_HEIGHT * CHUNK_WIDTH;
 constexpr int BLOCKS_PER_CHUNK = CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_WIDTH;
-
-// ============================================
-// Chunk Position
-// ============================================
-
-struct ChunkPos {
-    int x, z;
-    
-    ChunkPos() : x(0), z(0) {}
-    ChunkPos(int x, int z) : x(x), z(z) {}
-    
-    bool operator==(const ChunkPos& other) const { return x == other.x && z == other.z; }
-    bool operator!=(const ChunkPos& other) const { return !(*this == other); }
-    
-    BlockPos toBlockPos(int localX, int y, int localZ) const {
-        return BlockPos(x * CHUNK_WIDTH + localX, y, z * CHUNK_WIDTH + localZ);
-    }
-    
-    static ChunkPos fromBlockPos(const BlockPos& pos) {
-        return ChunkPos(
-            pos.x < 0 ? (pos.x - CHUNK_WIDTH + 1) / CHUNK_WIDTH : pos.x / CHUNK_WIDTH,
-            pos.z < 0 ? (pos.z - CHUNK_WIDTH + 1) / CHUNK_WIDTH : pos.z / CHUNK_WIDTH
-        );
-    }
-    
-    i64 toHash() const {
-        return (static_cast<i64>(x) & 0xFFFFFFFFLL) | (static_cast<i64>(z) << 32);
-    }
-    
-    static ChunkPos fromHash(i64 hash) {
-        return ChunkPos(static_cast<int>(hash & 0xFFFFFFFFLL), 
-                        static_cast<int>((hash >> 32) & 0xFFFFFFFFLL));
-    }
-    
-    int getLocalX(int blockX) const { return ((blockX % CHUNK_WIDTH) + CHUNK_WIDTH) % CHUNK_WIDTH; }
-    int getLocalZ(int blockZ) const { return ((blockZ % CHUNK_WIDTH) + CHUNK_WIDTH) % CHUNK_WIDTH; }
-};
 
 // ============================================
 // Section Position
@@ -432,15 +396,8 @@ struct ChunkMeshData {
 
 } // namespace VoxelForge
 
-// Hash function for ChunkPos
+// Hash function for SectionPos
 namespace std {
-    template<>
-    struct hash<VoxelForge::ChunkPos> {
-        size_t operator()(const VoxelForge::ChunkPos& pos) const {
-            return hash<int64_t>()(pos.toHash());
-        }
-    };
-    
     template<>
     struct hash<VoxelForge::SectionPos> {
         size_t operator()(const VoxelForge::SectionPos& pos) const {

@@ -4,7 +4,7 @@
  */
 
 #include <VoxelForge/engine/ResourceManager.hpp>
-#include <VoxelForge/core/Logger.hpp>
+#include <spdlog/spdlog.h>
 
 namespace VoxelForge {
 
@@ -15,21 +15,21 @@ ResourceManager& ResourceManager::get() {
 
 void ResourceManager::setAssetPath(const std::string& path) {
     assetPath_ = path;
-    LOG_INFO("Asset path set to: {}", path);
+    spdlog::info("Asset path set to: {}", path);
 }
 
 void ResourceManager::loadTexture(const std::string& id, const std::string& path) {
-    LOG_DEBUG("Loading texture: {} from {}", id, path);
+    spdlog::debug("Loading texture: {} from {}", id, path);
     // TODO: Implement texture loading
 }
 
 void ResourceManager::loadShader(const std::string& id, const std::string& vertexPath, const std::string& fragmentPath) {
-    LOG_DEBUG("Loading shader: {} from {}, {}", id, vertexPath, fragmentPath);
+    spdlog::debug("Loading shader: {} from {}, {}", id, vertexPath, fragmentPath);
     // TODO: Implement shader loading
 }
 
 void ResourceManager::loadModel(const std::string& id, const std::string& path) {
-    LOG_DEBUG("Loading model: {} from {}", id, path);
+    spdlog::debug("Loading model: {} from {}", id, path);
     // TODO: Implement model loading
 }
 
@@ -39,7 +39,7 @@ void ResourceManager::unload(const std::string& id) {
 
 void ResourceManager::unloadAll() {
     resources_.clear();
-    LOG_INFO("All resources unloaded");
+    spdlog::info("All resources unloaded");
 }
 
 } // namespace VoxelForge

@@ -75,6 +75,7 @@ enum class Material : uint8_t {
     Dirt,
     Wood,
     Plant,
+    Vegetable,
     Water,
     Lava,
     Sand,
@@ -122,6 +123,16 @@ struct BlockSoundGroup {
     String fallSound;
     float pitch = 1.0f;
     float volume = 1.0f;
+    
+    // Predefined sound groups
+    static BlockSoundGroup STONE;
+    static BlockSoundGroup AMETHYST;
+    static BlockSoundGroup SCULK;
+    static BlockSoundGroup GLASS;
+    static BlockSoundGroup GRASS;
+    static BlockSoundGroup METAL;
+    static BlockSoundGroup SAND;
+    static BlockSoundGroup WOOD;
 };
 
 // ============================================
@@ -338,6 +349,12 @@ public:
     VoxelShape getCollisionShape() const;
     RenderType getRenderType() const;
     Material getMaterial() const;
+    
+    // Serialization
+    static BlockState decode(uint64_t encoded);
+    uint64_t encode() const;
+    uint64_t serialize() const { return encode(); }
+    static BlockState deserialize(uint64_t encoded) { return decode(encoded); }
 
 private:
     BlockID blockId;

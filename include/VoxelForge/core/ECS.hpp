@@ -1,6 +1,6 @@
 /**
  * @file ECS.hpp
- * @brief Custom Entity Component System for VoxelForge
+ * @brief Custom EntityID Component System for VoxelForge
  * 
  * Designed specifically for voxel game needs with:
  * - Cache-friendly component storage
@@ -20,12 +20,15 @@
 
 namespace VoxelForge {
 
+// Forward declaration
+class Entity;
+
 // ============================================
 // Type Definitions
 // ============================================
 
-using Entity = uint64_t;
-constexpr Entity INVALID_ENTITY = 0;
+using EntityID = uint64_t;
+constexpr EntityID INVALID_ENTITY = 0;
 
 using ComponentID = uint32_t;
 constexpr ComponentID MAX_COMPONENTS = 256;
@@ -53,8 +56,8 @@ namespace detail {
 class IComponentPool {
 public:
     virtual ~IComponentPool() = default;
-    virtual void remove(Entity entity) = 0;
-    virtual bool has(Entity entity) const = 0;
+    virtual void remove(EntityID entity) = 0;
+    virtual bool has(EntityID entity) const = 0;
     virtual size_t size() const = 0;
 };
 
@@ -68,9 +71,9 @@ public:
     static_assert(std::is_trivially_copyable_v<T> || std::is_default_constructible_v<T>,
                   "Component must be trivially copyable or default constructible");
     
-    void add(Entity entity, T component) {
+    void add(EntityID entity, T component) {
         if (entityToIndex.find(entity) != entityToIndex.end()) {
-            // Entity already has this component, update it
+            // EntityID already has this component, update it
             components[entityToIndex[entity]] = component;
             return;
         }
@@ -81,7 +84,7 @@ public:
         entityToIndex[entity] = index;
     }
     
-    void remove(Entity entity) override {
+    void remove(EntityID entity) override {
         auto it = entityToIndex.find(entity);
         if (it == entityToIndex.end()) return;
         
@@ -100,19 +103,19 @@ public:
         entityToIndex.erase(entity);
     }
     
-    T* get(Entity entity) {
+    T* get(EntityID entity) {
         auto it = entityToIndex.find(entity);
         if (it == entityToIndex.end()) return nullptr;
         return &components[it->second];
     }
     
-    const T* get(Entity entity) const {
+    const T* get(EntityID entity) const {
         auto it = entityToIndex.find(entity);
         if (it == entityToIndex.end()) return nullptr;
         return &components[it->second];
     }
     
-    bool has(Entity entity) const override {
+    bool has(EntityID entity) const override {
         return entityToIndex.find(entity) != entityToIndex.end();
     }
     
@@ -126,13 +129,13 @@ public:
     auto begin() const { return components.begin(); }
     auto end() const { return components.end(); }
     
-    const std::vector<Entity>& getEntities() const { return entities; }
+    const std::vector<EntityID>& getEntities() const { return entities; }
     const std::vector<T>& getComponents() const { return components; }
 
 private:
     std::vector<T> components;
-    std::vector<Entity> entities;
-    std::unordered_map<Entity, size_t> entityToIndex;
+    std::vector<EntityID> entities;
+    std::unordered_map<EntityID, size_t> entityToIndex;
 };
 
 // ============================================
@@ -172,16 +175,16 @@ public:
     }
     
     // ============================================
-    // Entity Management
+    // EntityID Management
     // ============================================
     
-    Entity createEntity() {
-        Entity entity = nextEntity++;
+    EntityID createEntity() {
+        EntityID entity = nextEntity++;
         entityMasks[entity] = ComponentMask();
         return entity;
     }
     
-    void destroyEntity(Entity entity) {
+    void destroyEntity(EntityID entity) {
         // Remove all components
         for (auto pool : componentPools) {
             if (pool && pool->has(entity)) {
@@ -191,7 +194,7 @@ public:
         entityMasks.erase(entity);
     }
     
-    bool isAlive(Entity entity) const {
+    bool isAlive(EntityID entity) const {
         return entityMasks.find(entity) != entityMasks.end();
     }
     
@@ -200,7 +203,7 @@ public:
     // ============================================
     
     template<typename T, typename... Args>
-    T& addComponent(Entity entity, Args&&... args) {
+    T& addComponent(EntityID entity, Args&&... args) {
         ComponentID id = detail::getComponentID<T>();
         
         if (!componentPools[id]) {
@@ -215,7 +218,7 @@ public:
     }
     
     template<typename T>
-    void removeComponent(Entity entity) {
+    void removeComponent(EntityID entity) {
         ComponentID id = detail::getComponentID<T>();
         
         if (componentPools[id]) {
@@ -225,7 +228,7 @@ public:
     }
     
     template<typename T>
-    T* getComponent(Entity entity) {
+    T* getComponent(EntityID entity) {
         ComponentID id = detail::getComponentID<T>();
         
         if (!componentPools[id]) return nullptr;
@@ -235,7 +238,7 @@ public:
     }
     
     template<typename T>
-    const T* getComponent(Entity entity) const {
+    const T* getComponent(EntityID entity) const {
         ComponentID id = detail::getComponentID<T>();
         
         if (!componentPools[id]) return nullptr;
@@ -245,13 +248,13 @@ public:
     }
     
     template<typename T>
-    bool hasComponent(Entity entity) const {
+    bool hasComponent(EntityID entity) const {
         ComponentID id = detail::getComponentID<T>();
         return entityMasks.at(entity).test(id);
     }
     
     template<typename... Components>
-    bool hasAllComponents(Entity entity) const {
+    bool hasAllComponents(EntityID entity) const {
         return (hasComponent<Components>(entity) && ...);
     }
     
@@ -274,7 +277,7 @@ public:
     }
     
     // ============================================
-    // Entity Views (Iterators)
+    // EntityID Views (Iterators)
     // ============================================
     
     template<typename... Components>
@@ -288,8 +291,8 @@ public:
         class Iterator {
         public:
             Iterator(ECSWorld* world, ComponentMask mask, 
-                     std::unordered_map<Entity, ComponentMask>::iterator it,
-                     std::unordered_map<Entity, ComponentMask>::iterator end)
+                     std::unordered_map<EntityID, ComponentMask>::iterator it,
+                     std::unordered_map<EntityID, ComponentMask>::iterator end)
                 : world(world), mask(mask), it(it), end(end) {
                 // Find first matching entity
                 while (this->it != this->end && (this->it->second & mask) != mask) {
@@ -309,15 +312,15 @@ public:
                 return it != other.it;
             }
             
-            Entity operator*() const {
+            EntityID operator*() const {
                 return it->first;
             }
             
         private:
             ECSWorld* world;
             ComponentMask mask;
-            std::unordered_map<Entity, ComponentMask>::iterator it;
-            std::unordered_map<Entity, ComponentMask>::iterator end;
+            std::unordered_map<EntityID, ComponentMask>::iterator it;
+            std::unordered_map<EntityID, ComponentMask>::iterator end;
         };
         
         Iterator begin() {
@@ -331,7 +334,7 @@ public:
         // For each helper
         template<typename Func>
         void each(Func&& func) {
-            for (Entity entity : *this) {
+            for (EntityID entity : *this) {
                 func(entity, *world->getComponent<Components>(entity)...);
             }
         }
@@ -355,12 +358,12 @@ public:
     }
     
     // ============================================
-    // Single Entity Query
+    // Single EntityID Query
     // ============================================
     
     template<typename... Components>
-    std::vector<Entity> getEntitiesWith() {
-        std::vector<Entity> result;
+    std::vector<EntityID> getEntitiesWith() {
+        std::vector<EntityID> result;
         for (auto [entity, mask] : entityMasks) {
             ComponentMask required;
             (required.set(detail::getComponentID<Components>()), ...);
@@ -372,9 +375,9 @@ public:
     }
 
 private:
-    Entity nextEntity = 1;
+    EntityID nextEntity = 1;
     std::vector<IComponentPool*> componentPools;
-    std::unordered_map<Entity, ComponentMask> entityMasks;
+    std::unordered_map<EntityID, ComponentMask> entityMasks;
     std::vector<std::unique_ptr<System>> systems;
 };
 
@@ -446,16 +449,16 @@ public:
     }
 };
 
-class PhysicsSystem : public System {
+class PhysicsSystemBase : public System {
 public:
-    PhysicsSystem() {
+    PhysicsSystemBase() {
         requireComponent<TransformComponent>();
         requireComponent<PhysicsComponent>();
         requireComponent<VelocityComponent>();
     }
     
     void update(float deltaTime) override {
-        // Physics simulation would be handled by the main PhysicsSystem class
+        // Physics simulation handled by PhysicsSystem class
         // This is just for ECS integration
     }
 };

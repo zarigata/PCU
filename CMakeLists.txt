@@ -197,6 +197,7 @@ add_library(VoxelForge_Engine STATIC
     src/world/Chunk.cpp
     src/world/ChunkSection.cpp
     src/world/BlockRegistry.cpp
+    src/world/BlockSounds.cpp
     src/world/BlockState.cpp
     src/world/WorldGenerator.cpp
     src/world/BiomeRegistry.cpp

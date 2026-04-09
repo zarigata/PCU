@@ -1,11 +1,12 @@
 /**
  * @file LuaEngine.hpp
- * @brief LuaJIT-based scripting engine
+ * @brief Lua scripting engine
+ * 
+ * NOTE: sol2 integration temporarily stubbed pending Lua library fixes.
  */
 
 #pragma once
 
-#include <sol/sol.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <string>
@@ -13,6 +14,7 @@
 #include <unordered_map>
 #include <memory>
 #include <functional>
+#include <any>
 
 namespace VoxelForge {
 
@@ -35,7 +37,7 @@ struct ScriptInfo {
 struct ScriptResult {
     bool success = false;
     std::string error;
-    sol::object returnValue;
+    std::any returnValue;
 };
 
 // Script event types
@@ -60,7 +62,7 @@ enum class ScriptEvent {
 
 // Script callback info
 struct ScriptCallback {
-    sol::protected_function function;
+    std::function<void()> function;  // Stubbed
     ScriptEvent event;
     std::string scriptName;
     int priority = 0;
@@ -79,13 +81,11 @@ struct LuaEngineSettings {
 // Lua script state
 struct ScriptState {
     std::string name;
-    sol::environment environment;
     bool loaded = false;
     bool enabled = true;
-    std::unordered_map<ScriptEvent, std::vector<sol::protected_function>> callbacks;
 };
 
-// Main Lua scripting engine
+// Main Lua scripting engine (stubbed for compilation)
 class LuaEngine {
 public:
     LuaEngine();
@@ -112,15 +112,14 @@ public:
     
     // Script execution
     ScriptResult execute(const std::string& code);
-    ScriptResult execute(const std::string& code, sol::environment& env);
     ScriptResult executeInScript(const std::string& scriptName, const std::string& code);
     
     // Event handling
     void registerEventCallback(const std::string& scriptName, ScriptEvent event,
-                               sol::protected_function callback, int priority = 0);
-    void triggerEvent(ScriptEvent event, const std::vector<sol::object>& args = {});
+                               std::function<void()> callback, int priority = 0);
+    void triggerEvent(ScriptEvent event);
     
-    // Global API registration
+    // Global API registration (stubbed)
     void registerGlobalAPI();
     void registerMathAPI();
     void registerWorldAPI();
@@ -131,30 +130,11 @@ public:
     void registerGUIAPI();
     void registerNetworkAPI();
     
-    // Custom API registration
-    void registerFunction(const std::string& name, sol::function func);
-    void registerTable(const std::string& name, sol::table table);
-    void registerClass(const std::string& name, sol::usertype<void> type);
-    
-    // Sandbox
-    void setupSandbox(sol::environment& env);
-    void setGlobal(const std::string& name, sol::object value);
-    sol::object getGlobal(const std::string& name);
+    // Custom API registration (stubbed)
+    void registerFunction(const std::string& name, std::function<void()> func);
     
     // Utility
-    sol::state& getState() { return lua; }
-    const sol::state& getState() const { return lua; }
-    
-    sol::environment createEnvironment();
-    sol::environment getScriptEnvironment(const std::string& name);
-    
-    // Type conversion helpers
-    static sol::table vec3ToTable(const glm::vec3& v, sol::state& lua);
-    static glm::vec3 tableToVec3(const sol::table& t);
-    static sol::table ivec3ToTable(const glm::ivec3& v, sol::state& lua);
-    static glm::ivec3 tableToIVec3(const sol::table& t);
-    static sol::table quatToTable(const glm::quat& q, sol::state& lua);
-    static glm::quat tableToQuat(const sol::table& t);
+    bool isInitialized() const { return initialized; }
     
     // Error handling
     void setErrorHandler(std::function<void(const std::string&)> handler);
@@ -163,26 +143,19 @@ public:
     // Debug
     void setDebugEnabled(bool enabled) { debugEnabled = enabled; }
     bool isDebugEnabled() const { return debugEnabled; }
-    void dumpGlobals();
     
 private:
     void setupPackagePaths();
-    void setupJIT();
-    void setupMemoryLimit();
-    static void luaPanic(sol::optional<std::string> msg);
     
-    sol::state lua;
     LuaEngineSettings settings;
-    
     std::unordered_map<std::string, std::unique_ptr<ScriptState>> scripts;
     std::unordered_map<ScriptEvent, std::vector<ScriptCallback>> eventCallbacks;
-    
     std::function<void(const std::string&)> errorHandler;
     bool initialized = false;
     bool debugEnabled = false;
 };
 
-// Scripted behavior component for entities
+// Scripted behavior component for entities (stubbed)
 class ScriptedBehavior {
 public:
     ScriptedBehavior();
@@ -192,7 +165,7 @@ public:
     void clear();
     
     void onUpdate(float deltaTime);
-    void onEvent(ScriptEvent event, const std::vector<sol::object>& args);
+    void onEvent(ScriptEvent event);
     
     bool hasScript() const { return !scriptName.empty(); }
     const std::string& getScriptName() const { return scriptName; }
@@ -200,41 +173,17 @@ public:
 private:
     LuaEngine* engine = nullptr;
     std::string scriptName;
-    sol::table selfTable;
 };
 
-// Inline helper functions for Lua integration
+// Helper functions (stubbed)
 namespace LuaHelpers {
 
-// Safe table access
-template<typename T>
-T getTableValue(const sol::table& t, const std::string& key, T defaultValue = T{}) {
-    auto val = t[key];
-    if (val.valid()) {
-        return val.get<T>();
-    }
-    return defaultValue;
-}
+glm::vec3 makeVec3(float x, float y, float z);
+glm::ivec3 makeIVec3(int x, int y, int z);
 
-// Safe function call
-template<typename... Args>
-sol::protected_function_result callFunction(sol::protected_function& func, Args&&... args) {
-    auto result = func(std::forward<Args>(args)...);
-    if (!result.valid()) {
-        sol::error err = result;
-        // Log error
-    }
-    return result;
-}
-
-// Create a vector from Lua args
-glm::vec3 makeVec3(sol::variadic_args args);
-glm::ivec3 makeIVec3(sol::variadic_args args);
-
-// Convert array to vector
-std::vector<float> tableToFloatVector(const sol::table& t);
-std::vector<int> tableToIntVector(const sol::table& t);
-std::vector<std::string> tableToStringVector(const sol::table& t);
+std::vector<float> toFloatVector(const std::string& s);
+std::vector<int> toIntVector(const std::string& s);
+std::vector<std::string> toStringVector(const std::string& s);
 
 } // namespace LuaHelpers
 

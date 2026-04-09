@@ -12,7 +12,10 @@
 
 namespace VoxelForge {
 
-// Entity types
+// Forward declarations
+struct ItemStack;
+
+// EntityID types
 enum class EntityType : uint8_t {
     Generic,
     Player,
@@ -25,7 +28,7 @@ enum class EntityType : uint8_t {
     BlockEntity
 };
 
-// Entity tags for behavior
+// EntityID tags for behavior
 enum class EntityTag : uint32_t {
     None = 0,
     CanSwim = 1 << 0,
@@ -96,12 +99,12 @@ struct AgeComponent {
 };
 
 struct OwnerComponent {
-    Entity owner = INVALID_ENTITY;
+    EntityID owner = INVALID_ENTITY;
     UUID ownerUUID;
 };
 
 struct TargetComponent {
-    Entity target = INVALID_ENTITY;
+    EntityID target = INVALID_ENTITY;
     BlockPos targetPos;
     float targetDistance = 0.0f;
 };
@@ -149,7 +152,7 @@ struct CollisionComponent {
 };
 
 struct ProjectileComponent {
-    Entity owner = INVALID_ENTITY;
+    EntityID owner = INVALID_ENTITY;
     bool inGround = false;
     int inGroundTime = 0;
     float damage = 0.0f;
@@ -158,25 +161,25 @@ struct ProjectileComponent {
 };
 
 struct ItemEntityComponent {
-    ItemStack stack;
+    std::shared_ptr<ItemStack> stack;
     int pickupDelay = 0;
     int lifespan = 6000;  // 5 minutes in ticks
     float hoverStart = 0.0f;
 };
 
-// Entity creation helpers
+// EntityID creation helpers
 namespace EntityFactory {
-    Entity createPlayer(ECSWorld& world, const Vec3& position);
-    Entity createItem(ECSWorld& world, const Vec3& position, const ItemStack& stack);
-    Entity createZombie(ECSWorld& world, const Vec3& position);
-    Entity createSkeleton(ECSWorld& world, const Vec3& position);
-    Entity createCreeper(ECSWorld& world, const Vec3& position);
-    Entity createCow(ECSWorld& world, const Vec3& position);
-    Entity createPig(ECSWorld& world, const Vec3& position);
-    Entity createSheep(ECSWorld& world, const Vec3& position);
-    Entity createChicken(ECSWorld& world, const Vec3& position);
-    Entity createArrow(ECSWorld& world, const Vec3& position, const Vec3& velocity, Entity owner);
-    Entity createSnowball(ECSWorld& world, const Vec3& position, const Vec3& velocity, Entity owner);
+    EntityID createPlayer(ECSWorld& world, const Vec3& position);
+    EntityID createItem(ECSWorld& world, const Vec3& position, const ItemStack& stack);
+    EntityID createZombie(ECSWorld& world, const Vec3& position);
+    EntityID createSkeleton(ECSWorld& world, const Vec3& position);
+    EntityID createCreeper(ECSWorld& world, const Vec3& position);
+    EntityID createCow(ECSWorld& world, const Vec3& position);
+    EntityID createPig(ECSWorld& world, const Vec3& position);
+    EntityID createSheep(ECSWorld& world, const Vec3& position);
+    EntityID createChicken(ECSWorld& world, const Vec3& position);
+    EntityID createArrow(ECSWorld& world, const Vec3& position, const Vec3& velocity, EntityID owner);
+    EntityID createSnowball(ECSWorld& world, const Vec3& position, const Vec3& velocity, EntityID owner);
 }
 
 } // namespace VoxelForge

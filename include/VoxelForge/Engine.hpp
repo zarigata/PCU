@@ -263,7 +263,6 @@ private:
 #include "world/Block.hpp"
 #include "world/BlockRegistry.hpp"
 #include "world/Chunk.hpp"
-#include "world/World.hpp"
 
 // Entity systems
 #include "entity/Entity.hpp"
