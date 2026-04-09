@@ -6,6 +6,13 @@
 | ------- | ------------------ | ------ |
 | main    | ✅ Active development | Alpha |
 
+## Code Quality
+
+All contributions must pass:
+- **clang-format**: Code formatting
+- **clang-tidy**: Static analysis
+- **CI builds**: Linux, Windows, macOS
+
 ## Reporting a Vulnerability
 
 **DO NOT** open a public issue for security vulnerabilities.

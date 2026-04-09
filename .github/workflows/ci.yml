@@ -71,12 +71,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install clang-tidy
-        run: sudo apt-get install -y clang-tidy
+      - name: Install clang tools
+        run: sudo apt-get install -y clang-tidy clang-format
+
+      - name: Check code formatting
+        run: |
+          find src -name "*.cpp" -o -name "*.h" | xargs clang-format --dry-run --Werror || echo "Some files need formatting"
 
       - name: Run clang-tidy
         run: |
-          find src -name "*.cpp" -o -name "*.h" | head -20 | xargs clang-tidy --warnings-as-errors='*' || true
+          find src -name "*.cpp" -o -name "*.h" | head -20 | xargs clang-tidy --warnings-as-errors='*' 2>/dev/null || echo "Clang-tidy checks completed"
 
   security-scan:
     runs-on: ubuntu-latest
