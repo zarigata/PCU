@@ -1,0 +1,29 @@
+# GitHub Pages Configuration
+title: VoxelForge
+description: Open source C++ voxel game engine with modding API and multiplayer support
+url: https://zarigata.github.io
+baseurl: /PCU
+
+# Build settings
+markdown: kramdown
+highlighter: rouge
+
+# Plugins (GitHub Pages supported)
+plugins:
+  - jekyll-sitemap
+  - jekyll-seo-tag
+
+# SEO
+author: zarigata
+twitter:
+  username: zarigata
+social:
+  name: VoxelForge
+  links:
+    - https://github.com/zarigata/PCU
+
+# Exclude from build
+exclude:
+  - README.md
+  - PLAN.md
+  - CMakeLists.txt

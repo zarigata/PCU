@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2563eb"/>
+      <stop offset="100%" style="stop-color:#7c3aed"/>
+    </linearGradient>
+  </defs>
+  <!-- Voxel cube logo -->
+  <rect x="10" y="40" width="20" height="20" fill="url(#grad)" opacity="0.7"/>
+  <rect x="30" y="40" width="20" height="20" fill="url(#grad)" opacity="0.8"/>
+  <rect x="50" y="40" width="20" height="20" fill="url(#grad)" opacity="0.9"/>
+  <rect x="70" y="40" width="20" height="20" fill="url(#grad)"/>
+  <rect x="20" y="20" width="20" height="20" fill="url(#grad)" opacity="0.6"/>
+  <rect x="40" y="20" width="20" height="20" fill="url(#grad)" opacity="0.7"/>
+  <rect x="60" y="20" width="20" height="20" fill="url(#grad)" opacity="0.8"/>
+  <rect x="30" y="60" width="20" height="20" fill="url(#grad)" opacity="0.5"/>
+  <rect x="50" y="60" width="20" height="20" fill="url(#grad)" opacity="0.6"/>
+</svg>

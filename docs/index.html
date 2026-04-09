@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoxelForge - Open Source C++ Voxel Game Engine</title>
+    <meta name="description" content="VoxelForge is a high-performance C++ voxel game engine with modding API, multiplayer support, and Vulkan rendering. Free and open source.">
+    <meta name="keywords" content="voxel game, minecraft clone, c++ game engine, open source game, vulkan, multiplayer, modding api">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="VoxelForge - Open Source Voxel Game Engine">
+    <meta property="og:description" content="High-performance C++ voxel game engine with modding API and multiplayer support.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://zarigata.github.io/PCU/">
+    <meta property="og:image" content="https://zarigata.github.io/PCU/assets/images/og-image.png">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="VoxelForge - Open Source Voxel Game Engine">
+    <meta name="twitter:description" content="High-performance C++ voxel game engine with modding API and multiplayer support.">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    
+    <!-- Service Worker Registration -->
+    <script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js')
+                .then(reg => console.log('Service Worker registered'))
+                .catch(err => console.log('Service Worker failed:', err));
+        });
+    }
+    </script>
+    
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "VoxelForge",
+        "applicationCategory": "Game",
+        "operatingSystem": "Windows, macOS, Linux",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "description": "Open source C++ voxel game engine with modding API and multiplayer support"
+    }
+    </script>
+</head>
+<body>
+    <header class="hero">
+        <nav class="navbar">
+            <div class="logo">
+                <img src="assets/images/logo.svg" alt="VoxelForge Logo" class="logo-img">
+                <span class="logo-text">VoxelForge</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#features">Features</a></li>
+                <li><a href="#download">Download</a></li>
+                <li><a href="#docs">Documentation</a></li>
+                <li><a href="https://github.com/zarigata/PCU" target="_blank">GitHub</a></li>
+            </ul>
+        </nav>
+        
+        <div class="hero-content">
+            <h1>Build Your Voxel World</h1>
+            <p class="tagline">High-performance C++ voxel game engine with modding API &amp; multiplayer</p>
+            <div class="cta-buttons">
+                <a href="#download" class="btn btn-primary">Download Free</a>
+                <a href="https://github.com/zarigata/PCU" class="btn btn-secondary" target="_blank">View Source</a>
+            </div>
+            <div class="hero-stats">
+                <div class="stat">
+                    <span class="stat-number">C++17</span>
+                    <span class="stat-label">Modern Code</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number">Vulkan</span>
+                    <span class="stat-label">Rendering</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number">Open</span>
+                    <span class="stat-label">Source</span>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <section id="features" class="features">
+        <h2>Powerful Features</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🎮</div>
+                <h3>Voxel Engine</h3>
+                <p>High-performance voxel rendering with chunked world generation and efficient memory management.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔧</div>
+                <h3>Modding API</h3>
+                <p>Built-in modding system with Lua scripting. Create custom blocks, items, and game mechanics.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🌐</div>
+                <h3>Multiplayer</h3>
+                <p>Dedicated server support with client-server architecture. Play with friends on your own server.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3>Vulkan Rendering</h3>
+                <p>Modern graphics API for maximum performance. Cross-platform rendering pipeline.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🎨</div>
+                <h3>Custom Assets</h3>
+                <p>Import custom textures, models, and sounds. Full asset pipeline support.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📜</div>
+                <h3>Open Source</h3>
+                <p>MIT licensed. Free to use, modify, and distribute. Community-driven development.</p>
+            </div>
+        </div>
+    </section>
+    
+    <section id="download" class="download">
+        <h2>Download VoxelForge</h2>
+        <p class="download-intro">Free and open source. Available for Windows, macOS, and Linux.</p>
+        
+        <div class="download-grid">
+            <div class="download-card">
+                <div class="os-icon">🪟</div>
+                <h3>Windows</h3>
+                <p>Windows 10/11 (64-bit)</p>
+                <a href="https://github.com/zarigata/PCU/releases/latest" class="btn btn-download" target="_blank">
+                    Download .exe
+                </a>
+            </div>
+            <div class="download-card">
+                <div class="os-icon">🍎</div>
+                <h3>macOS</h3>
+                <p>macOS 11+ (Intel &amp; Apple Silicon)</p>
+                <a href="https://github.com/zarigata/PCU/releases/latest" class="btn btn-download" target="_blank">
+                    Download .dmg
+                </a>
+            </div>
+            <div class="download-card">
+                <div class="os-icon">🐧</div>
+                <h3>Linux</h3>
+                <p>Ubuntu, Fedora, Arch</p>
+                <a href="https://github.com/zarigata/PCU/releases/latest" class="btn btn-download" target="_blank">
+                    Download AppImage
+                </a>
+            </div>
+        </div>
+        
+        <div class="download-note">
+            <p>Binary releases coming soon. <a href="https://github.com/zarigata/PCU#build-from-source" target="_blank">Build from source</a> in the meantime.</p>
+        </div>
+    </section>
+    
+    <section id="docs" class="documentation">
+        <h2>Quick Start</h2>
+        <div class="code-block">
+            <pre><code># Clone the repository
+git clone https://github.com/zarigata/PCU.git
+cd PCU
+
+# Build with CMake
+cmake -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --parallel
+
+# Run the game
+./build/bin/VoxelForge</code></pre>
+        </div>
+        
+        <div class="doc-links">
+            <a href="https://github.com/zarigata/PCU/blob/main/README.md" class="doc-link" target="_blank">
+                📖 README
+            </a>
+            <a href="https://github.com/zarigata/PCU/blob/main/CONTRIBUTING.md" class="doc-link" target="_blank">
+                🤝 Contributing
+            </a>
+            <a href="https://github.com/zarigata/PCU/issues" class="doc-link" target="_blank">
+                🐛 Report Issue
+            </a>
+        </div>
+    </section>
+    
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <span class="footer-logo">VoxelForge</span>
+                <p>Open source voxel game engine</p>
+            </div>
+            <div class="footer-links">
+                <a href="https://github.com/zarigata/PCU" target="_blank">GitHub</a>
+                <a href="https://github.com/zarigata/PCU/issues" target="_blank">Issues</a>
+                <a href="https://github.com/zarigata/PCU/blob/main/SECURITY.md" target="_blank">Security</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 VoxelForge. MIT License.</p>
+        </div>
+    </footer>
+</body>
+</html>

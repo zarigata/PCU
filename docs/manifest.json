@@ -1,0 +1,25 @@
+{
+    "name": "VoxelForge",
+    "short_name": "VoxelForge",
+    "description": "Open source C++ voxel game engine",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#0f172a",
+    "theme_color": "#2563eb",
+    "icons": [
+        {
+            "src": "assets/images/favicon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml"
+        },
+        {
+            "src": "assets/images/logo.svg",
+            "sizes": "512x512",
+            "type": "image/svg+xml"
+        }
+    ],
+    "categories": ["games", "development"],
+    "screenshots": [],
+    "related_applications": [],
+    "prefer_related_applications": false
+}
