@@ -3,6 +3,7 @@
  * @brief Application implementation
  */
 
+#include <VoxelForge/Engine.hpp>
 #include <VoxelForge/core/Application.hpp>
 #include <VoxelForge/core/Logger.hpp>
 #include <VoxelForge/core/Memory.hpp>

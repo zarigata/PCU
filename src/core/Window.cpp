@@ -3,6 +3,7 @@
  * @brief Window implementation using GLFW
  */
 
+#include <VoxelForge/Engine.hpp>
 #include <VoxelForge/core/Window.hpp>
 #include <VoxelForge/core/Logger.hpp>
 #include <GLFW/glfw3.h>

@@ -5,11 +5,14 @@
 
 #pragma once
 
+#include <cstdint>
 #include <chrono>
 #include <string>
 #include <functional>
 
 namespace VoxelForge {
+
+using i64 = int64_t;
 
 class Timer {
 public:

@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include "../Engine.hpp"
+
 #include <cstdint>
 #include <string>
 #include <vector>

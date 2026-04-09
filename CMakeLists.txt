@@ -39,6 +39,9 @@ include(FetchContent)
 # Vulkan
 find_package(Vulkan REQUIRED)
 
+# OpenGL
+find_package(OpenGL REQUIRED)
+
 # GLFW
 FetchContent_Declare(
     glfw
@@ -103,6 +106,14 @@ FetchContent_Declare(
     GIT_TAG        v1.3.17
 )
 FetchContent_MakeAvailable(enet)
+
+# sol2 (Lua bindings)
+FetchContent_Declare(
+    sol2
+    GIT_REPOSITORY https://github.com/ThePhD/sol2.git
+    GIT_TAG        v3.3.1
+)
+FetchContent_MakeAvailable(sol2)
 
 # Lua
 if(VOXELFORGE_USE_LUAJIT)
@@ -283,6 +294,7 @@ target_include_directories(VoxelForge_Engine
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/include
         ${CMAKE_CURRENT_SOURCE_DIR}/include/VoxelForge
+        ${sol2_SOURCE_DIR}/include
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
@@ -294,9 +306,10 @@ target_link_libraries(VoxelForge_Engine
         glm::glm
         nlohmann_json::nlohmann_json
         spdlog::spdlog
-        zstd::zstd_static
-        enet::enet
+        libzstd_static
+        enet
         Freetype::Freetype
+        GL
 )
 
 target_compile_definitions(VoxelForge_Engine
