@@ -281,6 +281,7 @@ jobs:
           sudo apt-get install -y \
             build-essential cmake ninja-build \
             libvulkan-dev vulkan-validationlayers \
+            glslang-tools spirv-tools \
             libfreetype6-dev libfontconfig1-dev \
             libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev \
             libgl1-mesa-dev \
