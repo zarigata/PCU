@@ -8,19 +8,7 @@
 
 namespace VoxelForge {
 
-void Engine::initialize() {
-    spdlog::info("VoxelForge Engine initializing...");
-    initialized_ = true;
-}
-
-void Engine::shutdown() {
-    spdlog::info("VoxelForge Engine shutting down...");
-    initialized_ = false;
-}
-
-Engine& Engine::get() {
-    static Engine instance;
-    return instance;
-}
+// Engine class is defined inline in Engine.hpp
+// This file is kept for potential future non-inline implementations
 
 } // namespace VoxelForge

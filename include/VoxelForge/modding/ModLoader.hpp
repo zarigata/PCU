@@ -11,6 +11,7 @@
 #include <memory>
 #include <functional>
 #include <filesystem>
+#include <sol/sol.hpp>
 
 // Platform-specific dynamic library handling
 #ifdef _WIN32

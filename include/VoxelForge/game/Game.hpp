@@ -75,7 +75,7 @@ private:
 
 // Game instance access
 inline Game& getGame() {
-    return *static_cast<Game*>(Application::get());
+    return static_cast<Game&>(Application::get());
 }
 
 } // namespace VoxelForge

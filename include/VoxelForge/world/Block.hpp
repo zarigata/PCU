@@ -21,6 +21,37 @@
 namespace VoxelForge {
 
 // Forward declarations
+class BlockState;
+class World;
+class Player;
+class Entity;
+struct ItemStack;
+
+// Tool type enum (needed for BlockDefinition)
+enum class ToolType : uint8_t {
+    None,
+    Pickaxe,
+    Axe,
+    Shovel,
+    Hoe,
+    Sword,
+    Shears
+};
+
+enum class ToolTier : uint8_t {
+    None,
+    Wood,
+    Stone,
+    Iron,
+    Diamond,
+    Netherite
+};
+
+} // namespace VoxelForge
+
+namespace VoxelForge {
+
+// Forward declarations
 class World;
 class Player;
 class Entity;
@@ -66,32 +97,6 @@ enum class Material : uint8_t {
 
 // ============================================
 // Tool Types
-// ============================================
-
-enum class ToolType : uint8_t {
-    None,
-    Pickaxe,
-    Axe,
-    Shovel,
-    Hoe,
-    Sword,
-    Shears
-};
-
-// ============================================
-// Tool Tiers
-// ============================================
-
-enum class ToolTier : uint8_t {
-    None,
-    Wood,
-    Stone,
-    Iron,
-    Diamond,
-    Netherite,
-    Gold
-};
-
 // ============================================
 // Render Types
 // ============================================
@@ -170,13 +175,14 @@ class VoxelShape {
 public:
     VoxelShape() = default;
     VoxelShape(const std::vector<AABB>& boxes) : boxes(boxes) {}
+    VoxelShape(std::initializer_list<AABB> init) : boxes(init) {}
     
     static VoxelShape fullCube() {
-        return VoxelShape({ AABB(0, 0, 0, 1, 1, 1) });
+        return VoxelShape(std::vector<AABB>{ AABB(0, 0, 0, 1, 1, 1) });
     }
     
     static VoxelShape empty() {
-        return VoxelShape({});
+        return VoxelShape(std::vector<AABB>{});
     }
     
     static VoxelShape cube(float x1, float y1, float z1, float x2, float y2, float z2) {
@@ -202,48 +208,48 @@ public:
     virtual ~IBlockBehavior() = default;
     
     // Placement and removal
-    virtual void onPlace(World& world, const BlockPos& pos, BlockState state) {}
-    virtual void onRemove(World& world, const BlockPos& pos, BlockState state) {}
-    virtual bool canPlaceAt(World& world, const BlockPos& pos, BlockState state) { return true; }
-    virtual bool canSurvive(World& world, const BlockPos& pos, BlockState state) { return true; }
+    virtual void onPlace(World& world, const BlockPos& pos, const BlockState& state) {}
+    virtual void onRemove(World& world, const BlockPos& pos, const BlockState& state) {}
+    virtual bool canPlaceAt(World& world, const BlockPos& pos, const BlockState& state) { return true; }
+    virtual bool canSurvive(World& world, const BlockPos& pos, const BlockState& state) { return true; }
     
     // Player interaction
-    virtual void onUse(World& world, Player& player, const BlockPos& pos, BlockState state) {}
-    virtual void onAttack(Player& player, const BlockPos& pos, BlockState state) {}
-    virtual void onProjectileHit(World& world, const BlockPos& pos, Entity& projectile, BlockState state) {}
+    virtual void onUse(World& world, Player& player, const BlockPos& pos, const BlockState& state) {}
+    virtual void onAttack(Player& player, const BlockPos& pos, const BlockState& state) {}
+    virtual void onProjectileHit(World& world, const BlockPos& pos, Entity& projectile, const BlockState& state) {}
     
     // Block updates
-    virtual void onNeighborUpdate(World& world, const BlockPos& pos, const BlockPos& neighborPos, BlockState state) {}
-    virtual void onRandomTick(World& world, const BlockPos& pos, BlockState state) {}
-    virtual void onScheduledTick(World& world, const BlockPos& pos, BlockState state) {}
+    virtual void onNeighborUpdate(World& world, const BlockPos& pos, const BlockPos& neighborPos, const BlockState& state) {}
+    virtual void onRandomTick(World& world, const BlockPos& pos, const BlockState& state) {}
+    virtual void onScheduledTick(World& world, const BlockPos& pos, const BlockState& state) {}
     
     // Collision and shapes
-    virtual VoxelShape getCollisionShape(BlockState state) const;
-    virtual VoxelShape getOutlineShape(BlockState state) const;
-    virtual VoxelShape getRaycastShape(BlockState state) const;
+    virtual VoxelShape getCollisionShape(const BlockState& state) const;
+    virtual VoxelShape getOutlineShape(const BlockState& state) const;
+    virtual VoxelShape getRaycastShape(const BlockState& state) const;
     
     // Lighting
-    virtual int getLightEmission(BlockState state) const { return 0; }
-    virtual int getLightOpacity(BlockState state) const { return 15; }
-    virtual bool propagatesSkylightDown(BlockState state) const { return false; }
+    virtual int getLightEmission(const BlockState& state) const { return 0; }
+    virtual int getLightOpacity(const BlockState& state) const { return 15; }
+    virtual bool propagatesSkylightDown(const BlockState& state) const { return false; }
     
     // Redstone (will be expanded in redstone system)
-    virtual int getWeakPower(BlockState state) const { return 0; }
-    virtual int getStrongPower(BlockState state) const { return 0; }
-    virtual bool canProvidePower(BlockState state) const { return false; }
+    virtual int getWeakPower(const BlockState& state) const { return 0; }
+    virtual int getStrongPower(const BlockState& state) const { return 0; }
+    virtual bool canProvidePower(const BlockState& state) const { return false; }
     
     // Movement
-    virtual float getSlipperiness(BlockState state) const { return 0.6f; }
-    virtual float getVelocityMultiplier(BlockState state) const { return 1.0f; }
-    virtual float getJumpVelocityMultiplier(BlockState state) const { return 1.0f; }
+    virtual float getSlipperiness(const BlockState& state) const { return 0.6f; }
+    virtual float getVelocityMultiplier(const BlockState& state) const { return 1.0f; }
+    virtual float getJumpVelocityMultiplier(const BlockState& state) const { return 1.0f; }
     
     // Fluids
-    virtual bool isLiquid(BlockState state) const { return false; }
-    virtual int getFluidLevel(BlockState state) const { return 0; }
+    virtual bool isLiquid(const BlockState& state) const { return false; }
+    virtual int getFluidLevel(const BlockState& state) const { return 0; }
     
     // Drops
-    virtual std::vector<ItemStack> getDrops(World& world, const BlockPos& pos, BlockState state, 
-                                            const Player* breaker, ToolType tool) const;
+    virtual std::vector<ItemStack> getDrops(World& world, const BlockPos& pos, const BlockState& state, 
+                                            const Player* breaker, const ToolType& tool) const;
 };
 
 // ============================================
@@ -294,9 +300,9 @@ struct BlockDefinition {
 
 class BlockState {
 public:
-    BlockState() : blockId(AIR_BLOCK), data(0) {}
-    BlockState(BlockID id, uint64_t propertyHash = 0) 
-        : blockId(id), propertyHash(propertyHash) {}
+    BlockState() : blockId(AIR_BLOCK), propertyHash(0) {}
+    BlockState(BlockID id, uint64_t hash = 0) 
+        : blockId(id), propertyHash(hash) {}
     
     BlockID getBlockId() const { return blockId; }
     uint64_t getPropertyHash() const { return propertyHash; }

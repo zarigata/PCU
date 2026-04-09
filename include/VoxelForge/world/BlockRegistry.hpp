@@ -1,11 +1,6 @@
 #pragma once
 
-namespace VoxelForge {
+#include "Block.hpp"
 
-class BlockRegistry {
-public:
-    BlockRegistry() = default;
-    ~BlockRegistry() = default;
-};
-
-} // namespace VoxelForge
+// BlockRegistry is defined in Block.hpp
+// This header exists for backward compatibility

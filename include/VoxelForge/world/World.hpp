@@ -16,6 +16,13 @@ namespace VoxelForge {
 
 class Player;
 
+// Hash functor for ChunkPos in unordered_map
+struct ChunkPosHash {
+    size_t operator()(const ChunkPos& pos) const {
+        return std::hash<int64_t>()(pos.toHash());
+    }
+};
+
 struct WorldSettings {
     int64_t seed = 0;
     int chunkLoadRadius = 8;

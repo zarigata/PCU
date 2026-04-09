@@ -138,7 +138,7 @@ using Quat = glm::quat;
 
 // Block position type (integer coordinates)
 using BlockPos = Vec3i;
-using ChunkPos = Vec3i;
+// Note: ChunkPos is defined in Chunk.hpp as a struct with x,z coordinates
 
 // Color type
 struct Color {
@@ -216,6 +216,35 @@ public:
 
 #define VF_DEFER_IMPL(x, y) x##y
 #define VF_DEFER(x) auto VF_DEFER_IMPL(defer_, __LINE__) = VoxelForge::Defer([&]() { x; })
+
+// Engine class
+class Engine {
+public:
+    static Engine& get() {
+        static Engine instance;
+        return instance;
+    }
+    
+    void initialize() {
+        if (!initialized_) {
+            initialized_ = true;
+        }
+    }
+    
+    void shutdown() {
+        initialized_ = false;
+    }
+    
+    bool isInitialized() const { return initialized_; }
+    
+private:
+    Engine() = default;
+    ~Engine() = default;
+    Engine(const Engine&) = delete;
+    Engine& operator=(const Engine&) = delete;
+    
+    bool initialized_ = false;
+};
 
 } // namespace VoxelForge
 
