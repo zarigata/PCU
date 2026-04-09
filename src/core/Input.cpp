@@ -73,10 +73,6 @@ bool Input::isKeyJustReleased(int key) const {
     return !isKeyPressed(key) && (previous.keys.count(key) && previous.keys.at(key));
 }
 
-bool Input::isKeyDown(int key) const {
-    return isKeyPressed(key);
-}
-
 bool Input::isMouseButtonPressed(int button) const {
     return current.mouseButtons.count(button) && current.mouseButtons.at(button);
 }
@@ -89,10 +85,6 @@ bool Input::isMouseButtonJustPressed(int button) const {
 bool Input::isMouseButtonJustReleased(int button) const {
     return !isMouseButtonPressed(button) && 
            (previous.mouseButtons.count(button) && previous.mouseButtons.at(button));
-}
-
-bool Input::isMouseButtonDown(int button) const {
-    return isMouseButtonPressed(button);
 }
 
 void Input::setCursorMode(int mode) {
@@ -126,9 +118,9 @@ void Input::keyCallback(GLFWwindow* win, int key, int scancode, int action, int 
     if (!input) return;
     
     if (key >= 0 && key < 512) {
-        if (action == Action::Press || action == Action::Repeat) {
+        if (action == GLFW_PRESS || action == GLFW_REPEAT) {
             input->current.keys[key] = true;
-        } else if (action == Action::Release) {
+        } else if (action == GLFW_RELEASE) {
             input->current.keys[key] = false;
         }
     }
@@ -146,9 +138,9 @@ void Input::mouseButtonCallback(GLFWwindow* win, int button, int action, int mod
     if (!input) return;
     
     if (button >= 0 && button < 8) {
-        if (action == Action::Press) {
+        if (action == GLFW_PRESS) {
             input->current.mouseButtons[button] = true;
-        } else if (action == Action::Release) {
+        } else if (action == GLFW_RELEASE) {
             input->current.mouseButtons[button] = false;
         }
     }

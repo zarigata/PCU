@@ -1,24 +1,20 @@
 /**
  * @file Input.hpp
- * @brief Input handling system
+ * @brief Input system for VoxelForge
  */
 
 #pragma once
 
-#include <string>
-
-#include <cstdint>
+#include <GLFW/glfw3.h>
 #include <unordered_map>
 #include <vector>
-#include <functional>
+#include <string>
+#include <cstdint>
 #include <glm/glm.hpp>
-
-// Forward declarations
-struct GLFWwindow;
 
 namespace VoxelForge {
 
-// Key codes (GLFW compatible)
+// Key codes (GLFW keys)
 namespace Key {
     enum : int {
         Unknown = -1,
@@ -28,11 +24,44 @@ namespace Key {
         Minus = 45,
         Period = 46,
         Slash = 47,
-        D0 = 48, D1, D2, D3, D4, D5, D6, D7, D8, D9,
+        Num0 = 48,
+        Num1 = 49,
+        Num2 = 50,
+        Num3 = 51,
+        Num4 = 52,
+        Num5 = 53,
+        Num6 = 54,
+        Num7 = 55,
+        Num8 = 56,
+        Num9 = 57,
         Semicolon = 59,
         Equal = 61,
-        A = 65, B, C, D, E, F, G, H, I, J, K, L, M,
-        N, O, P, Q, R, S, T, U, V, W, X, Y, Z,
+        A = 65,
+        B = 66,
+        C = 67,
+        D = 68,
+        E = 69,
+        F = 70,
+        G = 71,
+        H = 72,
+        I = 73,
+        J = 74,
+        K = 75,
+        L = 76,
+        M = 77,
+        N = 78,
+        O = 79,
+        P = 80,
+        Q = 81,
+        R = 82,
+        S = 83,
+        T = 84,
+        U = 85,
+        V = 86,
+        W = 87,
+        X = 88,
+        Y = 89,
+        Z = 90,
         LeftBracket = 91,
         Backslash = 92,
         RightBracket = 93,
@@ -47,25 +76,6 @@ namespace Key {
         Left = 263,
         Down = 264,
         Up = 265,
-        PageUp = 266,
-        PageDown = 267,
-        Home = 268,
-        End = 269,
-        CapsLock = 280,
-        ScrollLock = 281,
-        NumLock = 282,
-        PrintScreen = 283,
-        Pause = 284,
-        F1 = 290, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
-        F13, F14, F15, F16, F17, F18, F19, F20, F21, F22, F23, F24, F25,
-        KP0 = 320, KP1, KP2, KP3, KP4, KP5, KP6, KP7, KP8, KP9,
-        KPDecimal = 330,
-        KPDivide = 331,
-        KPMultiply = 332,
-        KPSubtract = 333,
-        KPAdd = 334,
-        KPEnter = 335,
-        KPEqual = 336,
         LeftShift = 340,
         LeftControl = 341,
         LeftAlt = 342,
@@ -73,8 +83,7 @@ namespace Key {
         RightShift = 344,
         RightControl = 345,
         RightAlt = 346,
-        RightSuper = 347,
-        Menu = 348
+        RightSuper = 347
     };
 }
 
@@ -92,28 +101,6 @@ namespace Mouse {
         Left = Button0,
         Right = Button1,
         Middle = Button2
-    };
-}
-
-// Action types
-namespace Action {
-    enum : int {
-        Release = 0,
-        Press = 1,
-        Repeat = 2
-    };
-}
-
-// Modifier keys
-namespace Mod {
-    enum : int {
-        None = 0,
-        Shift = 1,
-        Control = 2,
-        Alt = 4,
-        Super = 8,
-        CapsLock = 16,
-        NumLock = 32
     };
 }
 
@@ -152,19 +139,17 @@ public:
     bool isKeyPressed(int key) const;
     bool isKeyJustPressed(int key) const;
     bool isKeyJustReleased(int key) const;
-    bool isKeyDown(int key) const;
     
     // Mouse state
     bool isMouseButtonPressed(int button) const;
     bool isMouseButtonJustPressed(int button) const;
     bool isMouseButtonJustReleased(int button) const;
-    bool isMouseButtonDown(int button) const;
     
     // Mouse position
-    glm::vec2 getMousePosition() const { return current.mousePosition; }
-    glm::vec2 getMouseDelta() const { return current.mouseDelta; }
     float getMouseX() const { return current.mousePosition.x; }
     float getMouseY() const { return current.mousePosition.y; }
+    glm::vec2 getMousePosition() const { return current.mousePosition; }
+    glm::vec2 getMouseDelta() const { return current.mouseDelta; }
     
     // Scroll
     glm::vec2 getScrollDelta() const { return current.scrollDelta; }

@@ -113,24 +113,18 @@ FetchContent_Declare(
     GIT_REPOSITORY https://github.com/ThePhD/sol2.git
     GIT_TAG        v3.3.1
 )
+set(SOL2_ENABLE_TESTS OFF CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(sol2)
 
 # Lua
-if(VOXELFORGE_USE_LUAJIT)
-    FetchContent_Declare(
-        luajit
-        GIT_REPOSITORY https://github.com/LuaJIT/LuaJIT.git
-        GIT_TAG        v2.1
-    )
-    # LuaJIT has custom build, handle separately
-else()
-    FetchContent_Declare(
-        lua
-        GIT_REPOSITORY https://github.com/lua/lua.git
-        GIT_TAG        v5.4.6
-    )
-    # Lua has custom build, handle separately
-endif()
+FetchContent_Declare(
+    lua
+    GIT_REPOSITORY https://github.com/walterschell/Lua.git
+    GIT_TAG        v5.4.6
+    SOURCE_SUBDIR  lua-5.4.6
+)
+set(LUA_BUILD_EXE OFF CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(lua)
 
 # FreeType
 find_package(Freetype REQUIRED)
@@ -295,6 +289,7 @@ target_include_directories(VoxelForge_Engine
         ${CMAKE_CURRENT_SOURCE_DIR}/include
         ${CMAKE_CURRENT_SOURCE_DIR}/include/VoxelForge
         ${sol2_SOURCE_DIR}/include
+        ${CMAKE_CURRENT_BINARY_DIR}/_deps/lua-src/lua-5.4.6/include
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
@@ -310,6 +305,8 @@ target_link_libraries(VoxelForge_Engine
         enet
         Freetype::Freetype
         GL
+        sol2::sol2
+        ${LUA_LIBRARIES}
 )
 
 target_compile_definitions(VoxelForge_Engine

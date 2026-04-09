@@ -3,8 +3,8 @@
  * @brief Event system implementation
  */
 
+#include <VoxelForge/Engine.hpp>
 #include <VoxelForge/engine/EventSystem.hpp>
-#include <VoxelForge/core/Logger.hpp>
 
 namespace VoxelForge {
 
@@ -14,19 +14,19 @@ EventBus& EventBus::get() {
 }
 
 void EventBus::processEvents() {
-    // Process queued events
     processing_ = true;
-    for (auto& handler : handlers_) {
-        if (handler.callback) {
-            // Process events
-        }
+    while (!eventQueue_.empty()) {
+        auto event = std::move(eventQueue_.front());
+        eventQueue_.pop();
+        event();
     }
     processing_ = false;
 }
 
 void EventBus::clear() {
-    handlers_.clear();
-    eventQueue_ = std::queue<std::function<void()>>();
+    while (!eventQueue_.empty()) {
+        eventQueue_.pop();
+    }
 }
 
 } // namespace VoxelForge

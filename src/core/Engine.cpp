@@ -4,17 +4,17 @@
  */
 
 #include <VoxelForge/Engine.hpp>
-#include <VoxelForge/core/Logger.hpp>
+#include <spdlog/spdlog.h>
 
 namespace VoxelForge {
 
 void Engine::initialize() {
-    LOG_INFO("VoxelForge Engine initializing...");
+    spdlog::info("VoxelForge Engine initializing...");
     initialized_ = true;
 }
 
 void Engine::shutdown() {
-    LOG_INFO("VoxelForge Engine shutting down...");
+    spdlog::info("VoxelForge Engine shutting down...");
     initialized_ = false;
 }
 
