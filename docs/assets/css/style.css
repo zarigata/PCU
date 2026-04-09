@@ -409,3 +409,185 @@ body {
         flex-direction: column;
     }
 }
+
+/* Download Page */
+.download-section {
+    padding: 3rem 2rem;
+    background: var(--background);
+}
+
+.download-grid-large {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.download-card-large {
+    background: var(--surface);
+    padding: 2rem;
+    border-radius: 1rem;
+}
+
+.os-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.os-icon-large {
+    font-size: 3rem;
+}
+
+.os-header h2 {
+    margin: 0;
+}
+
+.version {
+    color: var(--text-muted);
+    margin: 0;
+}
+
+.download-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.btn-large {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+}
+
+.btn-icon {
+    margin-right: 0.5rem;
+}
+
+.requirements {
+    border-top: 1px solid var(--background);
+    padding-top: 1.5rem;
+}
+
+.requirements h4,
+.package-managers h4 {
+    color: var(--text);
+    margin-bottom: 0.75rem;
+}
+
+.requirements ul {
+    list-style: none;
+    padding: 0;
+}
+
+.requirements li {
+    color: var(--text-muted);
+    padding: 0.25rem 0;
+    padding-left: 1rem;
+    position: relative;
+}
+
+.requirements li::before {
+    content: "•";
+    color: var(--accent);
+    position: absolute;
+    left: 0;
+}
+
+.package-managers {
+    margin-top: 1rem;
+}
+
+.code-block-small {
+    background: var(--background);
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    margin: 0.5rem 0;
+    overflow-x: auto;
+}
+
+.code-block-small code {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+/* Build from Source */
+.build-source {
+    padding: 5rem 2rem;
+    background: var(--surface);
+}
+
+.build-source h2 {
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
+
+.build-source > p {
+    text-align: center;
+    color: var(--text-muted);
+    margin-bottom: 2rem;
+}
+
+.build-deps {
+    max-width: 1200px;
+    margin: 3rem auto 0;
+}
+
+.build-deps h3 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.deps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.dep-card {
+    background: var(--background);
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+}
+
+.dep-card h4 {
+    margin-bottom: 0.75rem;
+    color: var(--text);
+}
+
+.dep-card code {
+    display: block;
+    white-space: pre-wrap;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+/* Release Notes */
+.release-notes {
+    padding: 3rem 2rem;
+    text-align: center;
+    background: var(--background);
+}
+
+.release-notes h2 {
+    margin-bottom: 1rem;
+}
+
+.release-info {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.release-info p {
+    color: var(--text-muted);
+    margin-bottom: 1.5rem;
+}
+
+/* Nav Active State */
+.nav-links a.active {
+    color: var(--text);
+    border-bottom: 2px solid var(--primary);
+}

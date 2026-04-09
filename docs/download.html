@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download VoxelForge - Windows, macOS, Linux</title>
+    <meta name="description" content="Download VoxelForge for free. Available for Windows, macOS, and Linux. Open source C++ voxel game engine.">
+    <meta name="keywords" content="download voxelforge, voxel game download, minecraft clone download, c++ game engine">
+    
+    <meta property="og:title" content="Download VoxelForge">
+    <meta property="og:description" content="Free download for Windows, macOS, and Linux.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://zarigata.github.io/PCU/download.html">
+    
+    <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="manifest" href="manifest.json">
+</head>
+<body>
+    <header class="hero">
+        <nav class="navbar">
+            <div class="logo">
+                <img src="assets/images/logo.svg" alt="VoxelForge Logo" class="logo-img">
+                <span class="logo-text">VoxelForge</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="#download" class="active">Download</a></li>
+                <li><a href="features.html">Features</a></li>
+                <li><a href="https://github.com/zarigata/PCU" target="_blank">GitHub</a></li>
+            </ul>
+        </nav>
+        
+        <div class="hero-content">
+            <h1>Download VoxelForge</h1>
+            <p class="tagline">Free and open source. Available for all major platforms.</p>
+        </div>
+    </header>
+    
+    <section class="download-section">
+        <div class="download-grid-large">
+            <!-- Windows -->
+            <div class="download-card-large">
+                <div class="os-header">
+                    <span class="os-icon-large">🪟</span>
+                    <div>
+                        <h2>Windows</h2>
+                        <p class="version">Windows 10/11 (64-bit)</p>
+                    </div>
+                </div>
+                <div class="download-options">
+                    <a href="https://github.com/zarigata/PCU/releases/latest" class="btn btn-primary btn-large" target="_blank">
+                        <span class="btn-icon">⬇️</span>
+                        Download Installer (.exe)
+                    </a>
+                    <a href="https://github.com/zarigata/PCU/releases/latest" class="btn btn-secondary" target="_blank">
+                        Download Portable (.zip)
+                    </a>
+                </div>
+                <div class="requirements">
+                    <h4>System Requirements</h4>
+                    <ul>
+                        <li>Windows 10 or later (64-bit)</li>
+                        <li>4 GB RAM minimum</li>
+                        <li>Vulkan-compatible GPU</li>
+                        <li>500 MB disk space</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- macOS -->
+            <div class="download-card-large">
+                <div class="os-header">
+                    <span class="os-icon-large">🍎</span>
+                    <div>
+                        <h2>macOS</h2>
+                        <p class="version">macOS 11+ (Intel & Apple Silicon)</p>
+                    </div>
+                </div>
+                <div class="download-options">
+                    <a href="https://github.com/zarigata/PCU/releases/latest" class="btn btn-primary btn-large" target="_blank">
+                        <span class="btn-icon">⬇️</span>
+                        Download DMG
+                    </a>
+                    <a href="https://github.com/zarigata/PCU/releases/latest" class="btn btn-secondary" target="_blank">
+                        Download ZIP
+                    </a>
+                </div>
+                <div class="requirements">
+                    <h4>System Requirements</h4>
+                    <ul>
+                        <li>macOS 11 Big Sur or later</li>
+                        <li>4 GB RAM minimum</li>
+                        <li>Apple Silicon or Intel Mac</li>
+                        <li>Vulkan-compatible GPU (MoltenVK)</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Linux -->
+            <div class="download-card-large">
+                <div class="os-header">
+                    <span class="os-icon-large">🐧</span>
+                    <div>
+                        <h2>Linux</h2>
+                        <p class="version">Ubuntu, Fedora, Arch, Debian</p>
+                    </div>
+                </div>
+                <div class="download-options">
+                    <a href="https://github.com/zarigata/PCU/releases/latest" class="btn btn-primary btn-large" target="_blank">
+                        <span class="btn-icon">⬇️</span>
+                        Download AppImage
+                    </a>
+                    <a href="https://github.com/zarigata/PCU/releases/latest" class="btn btn-secondary" target="_blank">
+                        Download .tar.gz
+                    </a>
+                </div>
+                <div class="requirements">
+                    <h4>System Requirements</h4>
+                    <ul>
+                        <li>Modern Linux distribution</li>
+                        <li>4 GB RAM minimum</li>
+                        <li>Vulkan-compatible GPU</li>
+                        <li>glibc 2.31 or newer</li>
+                    </ul>
+                </div>
+                <div class="package-managers">
+                    <h4>Package Managers</h4>
+                    <div class="code-block-small">
+                        <code># Ubuntu/Debian
+sudo apt install ./voxelforge.deb</code>
+                    </div>
+                    <div class="code-block-small">
+                        <code># Arch Linux (AUR)
+yay -S voxelforge-git</code>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="build-source">
+        <h2>Build from Source</h2>
+        <p>Prefer to build yourself? Here's how:</p>
+        
+        <div class="code-block">
+            <pre><code># Prerequisites: CMake 3.26+, C++17 compiler, Vulkan SDK
+
+# Clone the repository
+git clone --recursive https://github.com/zarigata/PCU.git
+cd PCU
+
+# Create build directory
+cmake -B build -DCMAKE_BUILD_TYPE=Release
+
+# Build (use all available cores)
+cmake --build build --parallel
+
+# Run the game
+./build/bin/VoxelForge</code></pre>
+        </div>
+        
+        <div class="build-deps">
+            <h3>Dependencies</h3>
+            <div class="deps-grid">
+                <div class="dep-card">
+                    <h4>Ubuntu/Debian</h4>
+                    <code>sudo apt install build-essential cmake ninja-build \
+  libvulkan-dev vulkan-validationlayers \
+  glslang-tools spirv-tools \
+  libfreetype6-dev libfontconfig1-dev</code>
+                </div>
+                <div class="dep-card">
+                    <h4>macOS</h4>
+                    <code>brew install cmake vulkan-loader vulkan-headers freetype</code>
+                </div>
+                <div class="dep-card">
+                    <h4>Windows</h4>
+                    <code># Install Vulkan SDK from:
+# https://vulkan.lunarg.com/sdk/home</code>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="release-notes">
+        <h2>Latest Release</h2>
+        <div class="release-info">
+            <p>Binary releases coming soon. The project is in active development.</p>
+            <p>Current status: <strong>Alpha</strong> - Core engine development in progress.</p>
+            <a href="https://github.com/zarigata/PCU/releases" class="btn btn-secondary" target="_blank">
+                View All Releases
+            </a>
+        </div>
+    </section>
+    
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <span class="footer-logo">VoxelForge</span>
+                <p>Open source voxel game engine</p>
+            </div>
+            <div class="footer-links">
+                <a href="index.html">Home</a>
+                <a href="download.html">Download</a>
+                <a href="features.html">Features</a>
+                <a href="https://github.com/zarigata/PCU" target="_blank">GitHub</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 VoxelForge. MIT License.</p>
+        </div>
+    </footer>
+</body>
+</html>

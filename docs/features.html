@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Features - VoxelForge Voxel Game Engine</title>
+    <meta name="description" content="VoxelForge features: High-performance voxel rendering, Vulkan graphics, modding API, multiplayer support, cross-platform.">
+    <meta name="keywords" content="voxel engine features, game engine features, vulkan rendering, modding api, multiplayer game">
+    
+    <meta property="og:title" content="VoxelForge Features">
+    <meta property="og:description" content="High-performance C++ voxel engine with Vulkan rendering and modding API.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://zarigata.github.io/PCU/features.html">
+    
+    <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="manifest" href="manifest.json">
+    
+    <style>
+        .feature-detail {
+            padding: 5rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .feature-detail:nth-child(even) {
+            background: var(--surface);
+        }
+        .feature-detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+        .feature-detail-grid.reverse {
+            direction: rtl;
+        }
+        .feature-detail-grid.reverse > * {
+            direction: ltr;
+        }
+        .feature-screenshot {
+            background: var(--background);
+            border-radius: 1rem;
+            aspect-ratio: 16/9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            border: 1px solid var(--secondary);
+        }
+        .tech-stack {
+            padding: 5rem 2rem;
+            background: var(--surface);
+        }
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 2rem auto 0;
+        }
+        .tech-item {
+            text-align: center;
+            padding: 2rem;
+            background: var(--background);
+            border-radius: 1rem;
+        }
+        .tech-item h4 {
+            margin-top: 1rem;
+            color: var(--text);
+        }
+        .tech-item p {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+        .tech-icon {
+            font-size: 2.5rem;
+        }
+        .comparison {
+            padding: 5rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 2rem;
+        }
+        .comparison-table th, .comparison-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--surface);
+        }
+        .comparison-table th {
+            background: var(--surface);
+            color: var(--text);
+        }
+        .comparison-table td {
+            color: var(--text-muted);
+        }
+        .comparison-table .check {
+            color: var(--accent);
+        }
+        @media (max-width: 768px) {
+            .feature-detail-grid {
+                grid-template-columns: 1fr;
+            }
+            .feature-detail-grid.reverse {
+                direction: ltr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="hero" style="min-height: auto; padding-bottom: 2rem;">
+        <nav class="navbar">
+            <div class="logo">
+                <img src="assets/images/logo.svg" alt="VoxelForge Logo" class="logo-img">
+                <span class="logo-text">VoxelForge</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="download.html">Download</a></li>
+                <li><a href="#features" class="active">Features</a></li>
+                <li><a href="https://github.com/zarigata/PCU" target="_blank">GitHub</a></li>
+            </ul>
+        </nav>
+        
+        <div class="hero-content" style="padding: 3rem 2rem;">
+            <h1>Features</h1>
+            <p class="tagline">Everything you need to build your voxel world</p>
+        </div>
+    </header>
+    
+    <section id="features" class="feature-detail">
+        <div class="feature-detail-grid">
+            <div>
+                <h2>🎮 High-Performance Voxel Engine</h2>
+                <p>Efficient chunked world generation with level-of-detail rendering. Our engine handles massive worlds with smooth framerates.</p>
+                <ul>
+                    <li>Chunk-based world storage</li>
+                    <li>Frustum culling and occlusion</li>
+                    <li>Greedy meshing for performance</li>
+                    <li>Procedural terrain generation</li>
+                    <li>Real-time lighting and shadows</li>
+                </ul>
+            </div>
+            <div class="feature-screenshot">
+                🗺️
+            </div>
+        </div>
+    </section>
+    
+    <section class="feature-detail">
+        <div class="feature-detail-grid reverse">
+            <div>
+                <h2>⚡ Vulkan Rendering</h2>
+                <p>Modern graphics API for maximum performance across all platforms. Take advantage of today's GPU capabilities.</p>
+                <ul>
+                    <li>Vulkan 1.2+ rendering backend</li>
+                    <li>Compute shaders for terrain</li>
+                    <li>Multi-threaded command buffers</li>
+                    <li>Descriptor indexing for bindless</li>
+                    <li>Ray tracing ready architecture</li>
+                </ul>
+            </div>
+            <div class="feature-screenshot">
+                ⚡
+            </div>
+        </div>
+    </section>
+    
+    <section class="feature-detail">
+        <div class="feature-detail-grid">
+            <div>
+                <h2>🔧 Built-in Modding API</h2>
+                <p>Create custom blocks, items, entities, and game mechanics without modifying the engine core.</p>
+                <ul>
+                    <li>Lua scripting support</li>
+                    <li>Custom block registration</li>
+                    <li>Item and recipe system</li>
+                    <li>Event-driven architecture</li>
+                    <li>Hot-reload during development</li>
+                </ul>
+            </div>
+            <div class="feature-screenshot">
+                🔧
+            </div>
+        </div>
+    </section>
+    
+    <section class="feature-detail">
+        <div class="feature-detail-grid reverse">
+            <div>
+                <h2>🌐 Multiplayer Ready</h2>
+                <p>Built from the ground up for multiplayer. Host your own server or join public servers.</p>
+                <ul>
+                    <li>Client-server architecture</li>
+                    <li>Authoritative server model</li>
+                    <li>Chunk synchronization</li>
+                    <li>Player authentication</li>
+                    <li>Dedicated server binary</li>
+                </ul>
+            </div>
+            <div class="feature-screenshot">
+                🌐
+            </div>
+        </div>
+    </section>
+    
+    <section class="feature-detail">
+        <div class="feature-detail-grid">
+            <div>
+                <h2>🎨 Asset Pipeline</h2>
+                <p>Import your own textures, models, and sounds. Full support for custom content.</p>
+                <ul>
+                    <li>Texture pack support</li>
+                    <li>3D model importing</li>
+                    <li>Audio system with spatial sound</li>
+                    <li>Hot-swappable assets</li>
+                    <li>Resource pack system</li>
+                </ul>
+            </div>
+            <div class="feature-screenshot">
+                🎨
+            </div>
+        </div>
+    </section>
+    
+    <section class="tech-stack">
+        <h2 style="text-align: center;">Technology Stack</h2>
+        <p style="text-align: center; color: var(--text-muted); margin-bottom: 2rem;">Built with modern, proven technologies</p>
+        
+        <div class="tech-grid">
+            <div class="tech-item">
+                <div class="tech-icon">⚡</div>
+                <h4>C++17</h4>
+                <p>Modern C++ with smart pointers, lambdas, and parallel algorithms</p>
+            </div>
+            <div class="tech-item">
+                <div class="tech-icon">🔥</div>
+                <h4>Vulkan</h4>
+                <p>Low-level graphics API for maximum control and performance</p>
+            </div>
+            <div class="tech-item">
+                <div class="tech-icon">📦</div>
+                <h4>ENet</h4>
+                <p>Lightweight UDP networking for multiplayer</p>
+            </div>
+            <div class="tech-item">
+                <div class="tech-icon">🔤</div>
+                <h4>Freetype</h4>
+                <p>Font rendering for UI and text</p>
+            </div>
+            <div class="tech-item">
+                <div class="tech-icon">📜</div>
+                <h4>Lua</h4>
+                <p>Scripting language for modding</p>
+            </div>
+            <div class="tech-item">
+                <div class="tech-icon">🔧</div>
+                <h4>CMake</h4>
+                <p>Cross-platform build system</p>
+            </div>
+        </div>
+    </section>
+    
+    <section class="comparison">
+        <h2>Comparison</h2>
+        <p style="color: var(--text-muted);">How VoxelForge compares to alternatives</p>
+        
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th>Feature</th>
+                    <th>VoxelForge</th>
+                    <th>Minetest</th>
+                    <th>Custom Engine</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Rendering API</td>
+                    <td class="check">✓ Vulkan</td>
+                    <td>OpenGL</td>
+                    <td>Varies</td>
+                </tr>
+                <tr>
+                    <td>Language</td>
+                    <td class="check">✓ C++17</td>
+                    <td>C++</td>
+                    <td>Varies</td>
+                </tr>
+                <tr>
+                    <td>Modding API</td>
+                    <td class="check">✓ Built-in Lua</td>
+                    <td>Lua</td>
+                    <td>✗ None</td>
+                </tr>
+                <tr>
+                    <td>Multiplayer</td>
+                    <td class="check">✓ Built-in</td>
+                    <td>✓ Built-in</td>
+                    <td>✗ Build yourself</td>
+                </tr>
+                <tr>
+                    <td>License</td>
+                    <td class="check">✓ MIT</td>
+                    <td>LGPL</td>
+                    <td>Varies</td>
+                </tr>
+                <tr>
+                    <td>Active Development</td>
+                    <td class="check">✓ Yes</td>
+                    <td>✓ Yes</td>
+                    <td>✗ Your time</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+    
+    <section class="cta" style="text-align: center; padding: 5rem 2rem; background: var(--surface);">
+        <h2>Ready to Build?</h2>
+        <p style="color: var(--text-muted); margin-bottom: 2rem;">Start creating your voxel world today.</p>
+        <a href="download.html" class="btn btn-primary btn-large">Download Free</a>
+        <a href="https://github.com/zarigata/PCU" class="btn btn-secondary" style="margin-left: 1rem;" target="_blank">View Source</a>
+    </section>
+    
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <span class="footer-logo">VoxelForge</span>
+                <p>Open source voxel game engine</p>
+            </div>
+            <div class="footer-links">
+                <a href="index.html">Home</a>
+                <a href="download.html">Download</a>
+                <a href="features.html">Features</a>
+                <a href="https://github.com/zarigata/PCU" target="_blank">GitHub</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 VoxelForge. MIT License.</p>
+        </div>
+    </footer>
+</body>
+</html>
