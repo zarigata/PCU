@@ -38,10 +38,6 @@ BlockRegistry::BlockRegistry() {
     VF_CORE_INFO("Block registry initialized");
 }
 
-BlockRegistry::~BlockRegistry() {
-    VF_CORE_INFO("Block registry destroyed with {} blocks", blocks.size());
-}
-
 BlockID BlockRegistry::registerBlock(const String& id, BlockDefinition definition) {
     // Check if already registered
     auto it = idToIndex.find(id);
@@ -69,7 +65,7 @@ BlockID BlockRegistry::registerBlock(const String& id, BlockDefinition definitio
     // Store states
     blockStates[newId] = blocks.back().stateVariants;
     
-    VF_CORE_DEBUG("Registered block: {} -> {}", id, newId);
+    spdlog::debug("Registered block: {} -> {}", id, newId);
     return newId;
 }
 
@@ -133,7 +129,7 @@ void BlockRegistry::generateStateVariants(BlockDefinition& def) {
         }
     }
     
-    VF_CORE_DEBUG("Generated {} state variants for {}", totalCombinations, def.id);
+    spdlog::debug("Generated {} state variants for {}", totalCombinations, def.id);
 }
 
 BlockID BlockRegistry::getBlockId(const String& id) const {

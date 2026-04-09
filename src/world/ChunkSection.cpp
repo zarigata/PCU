@@ -291,8 +291,8 @@ BlockPalette BlockPalette::deserialize(const uint8_t* data, size_t size) {
 
 ChunkSection::ChunkSection() {
     // Initialize light data to full brightness
-    skyLight.fill(15);
-    blockLight.fill(0);
+    lighting.skyLight.fill(15);
+    lighting.blockLight.fill(0);
 }
 
 BlockState ChunkSection::getBlock(int x, int y, int z) const {
@@ -349,15 +349,15 @@ bool ChunkSection::hasBlockEntity(int x, int y, int z) const {
     return blockEntities.find(getBlockEntityIndex(x, y, z)) != blockEntities.end();
 }
 
-void ChunkSection::setBlockEntity(int x, int y, int z, std::unique_ptr<BlockEntity> entity) {
-    blockEntities[getBlockEntityIndex(x, y, z)] = std::move(entity);
+void ChunkSection::setBlockEntity(int x, int y, int z, BlockEntity* entity) {
+    blockEntities[getBlockEntityIndex(x, y, z)] = entity;
     dirty = true;
 }
 
 BlockEntity* ChunkSection::getBlockEntity(int x, int y, int z) const {
     auto it = blockEntities.find(getBlockEntityIndex(x, y, z));
     if (it != blockEntities.end()) {
-        return it->second.get();
+        return it->second;
     }
     return nullptr;
 }

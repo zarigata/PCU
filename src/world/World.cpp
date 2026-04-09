@@ -4,6 +4,7 @@
  */
 
 #include <VoxelForge/world/World.hpp>
+#include <VoxelForge/world/Chunk.hpp>
 #include <VoxelForge/world/Block.hpp>
 #include <VoxelForge/core/Logger.hpp>
 #include <cmath>

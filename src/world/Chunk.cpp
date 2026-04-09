@@ -223,15 +223,15 @@ bool ChunkSection::hasBlockEntity(int x, int y, int z) const {
     return blockEntities.find(getBlockEntityIndex(x, y, z)) != blockEntities.end();
 }
 
-void ChunkSection::setBlockEntity(int x, int y, int z, std::unique_ptr<BlockEntity> entity) {
-    blockEntities[getBlockEntityIndex(x, y, z)] = std::move(entity);
+void ChunkSection::setBlockEntity(int x, int y, int z, BlockEntity* entity) {
+    blockEntities[getBlockEntityIndex(x, y, z)] = entity;
     dirty = true;
 }
 
 BlockEntity* ChunkSection::getBlockEntity(int x, int y, int z) const {
     auto it = blockEntities.find(getBlockEntityIndex(x, y, z));
     if (it != blockEntities.end()) {
-        return it->second.get();
+        return it->second;
     }
     return nullptr;
 }
@@ -399,11 +399,11 @@ BlockEntity* Chunk::getBlockEntity(const BlockPos& pos) {
     return nullptr;
 }
 
-void Chunk::setBlockEntity(const BlockPos& pos, std::unique_ptr<BlockEntity> entity) {
+void Chunk::setBlockEntity(const BlockPos& pos, BlockEntity* entity) {
     int sectionY = getSectionIndex(pos.y);
     if (hasSection(sectionY)) {
         int localY = pos.y - sectionY * SECTION_HEIGHT - CHUNK_MIN_Y;
-        sections[sectionY]->setBlockEntity(pos.x, localY, pos.z, std::move(entity));
+        sections[sectionY]->setBlockEntity(pos.x, localY, pos.z, entity);
     }
 }
 
@@ -415,9 +415,9 @@ void Chunk::removeBlockEntity(const BlockPos& pos) {
     }
 }
 
-const std::unordered_map<BlockPos, std::unique_ptr<BlockEntity>>& Chunk::getBlockEntities() const {
+const std::unordered_map<BlockPos, BlockEntity*>& Chunk::getBlockEntities() const {
     // This would need to aggregate from all sections
-    static std::unordered_map<BlockPos, std::unique_ptr<BlockEntity>> empty;
+    static std::unordered_map<BlockPos, BlockEntity*> empty;
     return empty;
 }
 

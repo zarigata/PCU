@@ -130,9 +130,13 @@ struct BlockSoundGroup {
     static BlockSoundGroup SCULK;
     static BlockSoundGroup GLASS;
     static BlockSoundGroup GRASS;
+    static BlockSoundGroup GRAVEL;
     static BlockSoundGroup METAL;
     static BlockSoundGroup SAND;
     static BlockSoundGroup WOOD;
+    static BlockSoundGroup WOOL;
+    static BlockSoundGroup LEAVES;
+    static BlockSoundGroup CROP;
 };
 
 // ============================================
@@ -274,9 +278,9 @@ struct BlockDefinition {
     float hardness = 1.0f;
     float blastResistance = 0.0f;
     float slipperiness = 0.6f;
-    
-    bool opaque = true;
+    bool flammable = false;
     bool solid = true;
+    bool opaque = true;
     bool replaceable = false;
     bool requiresTool = false;
     bool hasBlockEntity = false;
@@ -397,6 +401,8 @@ public:
 private:
     BlockRegistry();
     ~BlockRegistry() = default;
+    
+    void generateStateVariants(BlockDefinition& definition);
     
     std::vector<BlockDefinition> blocks;
     std::unordered_map<String, BlockID> idToIndex;

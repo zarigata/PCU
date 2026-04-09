@@ -7,6 +7,7 @@
 
 #include <cstdint>
 #include <functional>
+#include <glm/glm.hpp>
 
 namespace VoxelForge {
 
@@ -28,6 +29,15 @@ struct ChunkPos {
         return ChunkPos(static_cast<int>(hash & 0xFFFFFFFFLL), 
                         static_cast<int>((hash >> 32) & 0xFFFFFFFFLL));
     }
+    
+    // BlockPos is Vec3i (defined in Engine.hpp)
+    template<typename Vec3I>
+    static ChunkPos fromBlockPos(const Vec3I& pos) {
+        return ChunkPos(
+            pos.x < 0 ? (pos.x - 15) / 16 : pos.x / 16,
+            pos.z < 0 ? (pos.z - 15) / 16 : pos.z / 16
+        );
+    }
 };
 
 // Hash functor for ChunkPos
@@ -45,6 +55,14 @@ namespace std {
     struct hash<VoxelForge::ChunkPos> {
         size_t operator()(const VoxelForge::ChunkPos& pos) const {
             return std::hash<int64_t>()(pos.toHash());
+        }
+    };
+    
+    // Hash for glm::ivec3 (BlockPos)
+    template<>
+    struct hash<glm::ivec3> {
+        size_t operator()(const glm::ivec3& v) const {
+            return std::hash<int>()(v.x) ^ (std::hash<int>()(v.y) << 1) ^ (std::hash<int>()(v.z) << 2);
         }
     };
 }

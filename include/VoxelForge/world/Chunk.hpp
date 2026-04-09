@@ -68,15 +68,15 @@ struct LightData {
     std::array<uint8_t, BLOCKS_PER_SECTION> skyLight{};
     std::array<uint8_t, BLOCKS_PER_SECTION> blockLight{};
     
+    // Index calculation
+    static int getIndex(int x, int y, int z) {
+        return y << 8 | z << 4 | x;
+    }
+    
     uint8_t getSkyLight(int x, int y, int z) const;
     uint8_t getBlockLight(int x, int y, int z) const;
     void setSkyLight(int x, int y, int z, uint8_t value);
     void setBlockLight(int x, int y, int z, uint8_t value);
-    
-private:
-    static int getIndex(int x, int y, int z) {
-        return y << 8 | z << 4 | x;
-    }
 };
 
 // ============================================
@@ -118,6 +118,11 @@ private:
     // For single-value optimization
     bool isSingleValue = true;
     BlockState singleValue = BlockState();
+    
+    // Index calculation
+    static int getIndex(int x, int y, int z) {
+        return y << 8 | z << 4 | x;
+    }
 };
 
 // ============================================
@@ -141,8 +146,8 @@ public:
     
     // Block entity support
     bool hasBlockEntity(int x, int y, int z) const;
-    void setBlockEntity(int x, int y, int z, std::unique_ptr<class BlockEntity> entity);
-    BlockEntity* getBlockEntity(int x, int y, int z) const;
+    void setBlockEntity(int x, int y, int z, class BlockEntity* entity);
+    class BlockEntity* getBlockEntity(int x, int y, int z) const;
     void removeBlockEntity(int x, int y, int z);
     
     // Statistics
@@ -166,7 +171,7 @@ public:
 private:
     BlockPalette blocks;
     LightData lighting;
-    std::unordered_map<uint16_t, std::unique_ptr<BlockEntity>> blockEntities;
+    std::unordered_map<uint16_t, class BlockEntity*> blockEntities;
     
     std::atomic<int> nonAirBlocks{0};
     std::atomic<bool> dirty{false};
@@ -174,6 +179,11 @@ private:
     
     static uint16_t getBlockEntityIndex(int x, int y, int z) {
         return static_cast<uint16_t>((y << 8) | (z << 4) | x);
+    }
+    
+    // Index calculation for block storage
+    static int getIndex(int x, int y, int z) {
+        return (y << 8) | (z << 4) | x;
     }
 };
 
@@ -283,9 +293,9 @@ public:
     
     // Block entities
     BlockEntity* getBlockEntity(const BlockPos& pos);
-    void setBlockEntity(const BlockPos& pos, std::unique_ptr<BlockEntity> entity);
+    void setBlockEntity(const BlockPos& pos, class BlockEntity* entity);
     void removeBlockEntity(const BlockPos& pos);
-    const std::unordered_map<BlockPos, std::unique_ptr<BlockEntity>>& getBlockEntities() const;
+    const std::unordered_map<BlockPos, class BlockEntity*>& getBlockEntities() const;
     
     // Height maps
     int getHeight(HeightMap::Type type, int x, int z) const;
@@ -319,7 +329,7 @@ public:
 private:
     ChunkPos position;
     std::array<std::unique_ptr<ChunkSection>, SECTIONS_PER_CHUNK> sections;
-    std::unordered_map<BlockPos, std::unique_ptr<BlockEntity>> blockEntities;
+    std::unordered_map<BlockPos, class BlockEntity*> blockEntities;
     
     HeightMap worldSurfaceHeightMap;
     HeightMap motionBlockingHeightMap;
