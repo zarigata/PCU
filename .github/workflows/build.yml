@@ -103,7 +103,7 @@ jobs:
   # macOS Builds (Intel & Apple Silicon)
   # ============================================
   build-macos-intel:
-    runs-on: macos-13
+    runs-on: macos-15
     name: Build macOS Intel
     
     steps:
@@ -183,7 +183,7 @@ jobs:
           retention-days: 30
 
   build-macos-arm:
-    runs-on: macos-latest
+    runs-on: macos-latest-latest
     name: Build macOS Apple Silicon
     
     steps:
@@ -266,7 +266,7 @@ jobs:
   # Linux Builds
   # ============================================
   build-linux-appimage:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     name: Build Linux AppImage (Universal)
     
     steps:
@@ -357,7 +357,7 @@ jobs:
           retention-days: 30
 
   build-linux-debian:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     name: Build Debian/Ubuntu Package
     
     steps:
@@ -464,7 +464,7 @@ jobs:
           retention-days: 30
 
   build-linux-fedora-rpm:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     name: Build Fedora/RHEL RPM Package
     container: fedora:39
     
@@ -576,7 +576,7 @@ jobs:
           retention-days: 30
 
   build-linux-arch:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     name: Build Arch Linux Package
     container: archlinux:latest
     
