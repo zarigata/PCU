@@ -1,4 +1,9 @@
+# CMake minimum version
 cmake_minimum_required(VERSION 3.26)
+
+# Set CMP0135 to NEW for FetchContent compatibility
+set(CMAKE_POLICY_DEFAULT_CMP0135 NEW)
+cmake_policy(SET CMP0135 NEW)
 
 # Project Definition
 project(VoxelForge
