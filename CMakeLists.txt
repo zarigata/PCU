@@ -175,6 +175,12 @@ add_library(VoxelForge_Engine STATIC
     src/engine/ResourceManager.cpp
     src/engine/JobSystem.cpp
     src/engine/Config.cpp
+# Engine Systems
+    src/engine/EventSystem.cpp
+    src/engine/ResourceManager.cpp
+    src/engine/JobSystem.cpp
+    src/engine/Config.cpp
+    src/engine/ConsoleCommands.cpp
     
     # World
     src/world/World.cpp
