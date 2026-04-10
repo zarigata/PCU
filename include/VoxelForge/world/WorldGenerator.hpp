@@ -22,6 +22,8 @@
 #include <memory>
 #include <vector>
 #include <functional>
+#include <unordered_map>
+#include <future>
 
 namespace VoxelForge {
 
@@ -194,6 +196,22 @@ private:
     
     // Feature generators
     std::unordered_map<std::string, FeatureGenerator> features;
+    
+    // Tree generation
+    void generateTrees(Chunk* chunk, World* world, SeededRandom& chunkRandom);
+    void placeTree(Chunk* chunk, World* world, int x, int y, int z, const std::string& type, SeededRandom& random);
+    void placeOakTree(Chunk* chunk, int x, int y, int z, SeededRandom& random);
+    void placeBirchTree(Chunk* chunk, int x, int y, int z, SeededRandom& random);
+    void placeSpruceTree(Chunk* chunk, int x, int y, int z, SeededRandom& random);
+    void placeDarkOakTree(Chunk* chunk, int x, int y, int z, SeededRandom& random);
+    void placeAcaciaTree(Chunk* chunk, int x, int y, int z, SeededRandom& random);
+    
+    // Ore helpers
+    void placeOreVein(Chunk* chunk, const OreVein& ore, SeededRandom& random);
+    void placeOreBlob(Chunk* chunk, int startX, int startY, int startZ,
+                      BlockState ore, int size, SeededRandom& random);
+    
+    std::unique_ptr<PerlinNoise> featureNoise; // for feature placement randomness
     
     // Statistics
     Stats stats;

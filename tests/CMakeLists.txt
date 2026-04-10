@@ -7,6 +7,7 @@ set(TEST_SOURCES
     unit/test_timer.cpp
     unit/test_memory.cpp
     unit/test_ecs.cpp
+    unit/test_tree_generation.cpp
 )
 
 # Create test executable

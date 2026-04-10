@@ -66,6 +66,7 @@ WorldGenerator::WorldGenerator(uint64_t seed)
     continentalnessNoise = std::make_unique<PerlinNoise>(seed + 5);
     peaksValleysNoise = std::make_unique<PerlinNoise>(seed + 6);
     oreNoise = std::make_unique<SimplexNoise>(seed + 7);
+    featureNoise = std::make_unique<PerlinNoise>(seed + 8);
     
     LOG_INFO("WorldGenerator created with seed {}", seed);
 }
@@ -82,6 +83,7 @@ WorldGenerator::WorldGenerator(const WorldGenSettings& settings)
     continentalnessNoise = std::make_unique<PerlinNoise>(settings.seed + 5);
     peaksValleysNoise = std::make_unique<PerlinNoise>(settings.seed + 6);
     oreNoise = std::make_unique<SimplexNoise>(settings.seed + 7);
+    featureNoise = std::make_unique<PerlinNoise>(settings.seed + 8);
     
     LOG_INFO("WorldGenerator created with seed {} and custom settings", settings.seed);
 }
@@ -432,8 +434,287 @@ void WorldGenerator::placeOreBlob(Chunk* chunk, int startX, int startY, int star
 void WorldGenerator::generateFeatures(Chunk* chunk, World* world) {
     PROFILE_FUNCTION();
     
-    // TODO: Implement structure and feature generation
-    // Trees, flowers, grass, structures, etc.
+    SeededRandom chunkRandom(settings.seed ^ 
+        (static_cast<uint64_t>(chunk->getPosition().x) << 32) ^
+        static_cast<uint64_t>(chunk->getPosition().z) ^ 0xABCD1234ULL);
+    
+    generateTrees(chunk, world, chunkRandom);
+}
+
+void WorldGenerator::generateTrees(Chunk* chunk, World* world, SeededRandom& chunkRandom) {
+    auto& blockRegistry = BlockRegistry::get();
+    ChunkPos chunkPos = chunk->getPosition();
+    int worldX = chunkPos.x * CHUNK_WIDTH;
+    int worldZ = chunkPos.z * CHUNK_WIDTH;
+    
+    auto grassBlock = blockRegistry.getDefaultState("minecraft:grass_block");
+    auto dirtBlock = blockRegistry.getDefaultState("minecraft:dirt");
+    auto airBlock = blockRegistry.getDefaultState("minecraft:air");
+    
+    for (int x = 2; x < CHUNK_WIDTH - 2; x++) {
+        for (int z = 2; z < CHUNK_WIDTH - 2; z++) {
+            int wx = worldX + x;
+            int wz = worldZ + z;
+            
+            // Get biome at this column
+            BiomeId biome = getBiome(wx, 64, wz);
+            
+            // Determine tree type and density based on biome
+            std::string treeType;
+            int treeCount; // max trees per column attempt
+            float chance;  // probability of placing at this column
+            
+            switch (biome) {
+                case 1: // Plains
+                    treeType = "oak";
+                    treeCount = 1;
+                    chance = 0.008f; // sparse: ~1-3 per chunk
+                    break;
+                case 4: // Forest
+                    treeType = chunkRandom.chance(0.5f) ? "oak" : "birch";
+                    treeCount = 1;
+                    chance = 0.03f; // common: ~4-8 per chunk
+                    break;
+                case 13: // Snowy taiga -> treat as taiga
+                case 3: // Taiga (mapped from getBiome but note getBiome returns 13 for cold/humid)
+                    // Check: getBiome can return 3, but looking at the biome code,
+                    // it doesn't return 3 directly. Let's use temperature-based check.
+                    treeType = "spruce";
+                    treeCount = 1;
+                    chance = 0.025f; // common: ~4-7 per chunk
+                    break;
+                case 5: // Dark Oak Forest (Savanna in current getBiome)
+                    // getBiome returns: warm/humid -> 6 (Jungle), warm/dry -> 5 (Savanna)
+                    // We'll treat biome 5 as savanna with acacia
+                    treeType = "acacia";
+                    treeCount = 1;
+                    chance = 0.008f; // sparse: ~1-3 per chunk
+                    break;
+                case 9: // Swamp
+                    treeType = "oak";
+                    treeCount = 1;
+                    chance = 0.005f;
+                    break;
+                default:
+                    continue;
+            }
+            
+            if (!chunkRandom.chance(chance)) {
+                continue;
+            }
+            
+            // Find surface height
+            int surfaceY = chunk->getHeight(HeightMap::Type::WorldSurface, x, z);
+            if (surfaceY < settings.minHeight + 1 || surfaceY > settings.maxHeight - 12) {
+                continue;
+            }
+            
+            // Check surface block is grass or dirt
+            BlockState surface = chunk->getBlock(x, surfaceY, z);
+            if (surface != grassBlock && surface != dirtBlock) {
+                continue;
+            }
+            
+            // Check block above surface is air
+            if (!chunk->getBlock(x, surfaceY + 1, z).isAir()) {
+                continue;
+            }
+            
+            placeTree(chunk, world, x, surfaceY + 1, z, treeType, chunkRandom);
+        }
+    }
+}
+
+void WorldGenerator::placeTree(Chunk* chunk, World* world, int x, int y, int z,
+                                const std::string& type, SeededRandom& random) {
+    if (type == "oak") {
+        placeOakTree(chunk, x, y, z, random);
+    } else if (type == "birch") {
+        placeBirchTree(chunk, x, y, z, random);
+    } else if (type == "spruce") {
+        placeSpruceTree(chunk, x, y, z, random);
+    } else if (type == "dark_oak") {
+        placeDarkOakTree(chunk, x, y, z, random);
+    } else if (type == "acacia") {
+        placeAcaciaTree(chunk, x, y, z, random);
+    }
+    stats.featuresPlaced++;
+}
+
+// Helper lambda to safely set a block within chunk bounds
+static void setBlockClamped(Chunk* chunk, int x, int y, int z, BlockState state, int minY, int maxY) {
+    if (x >= 0 && x < CHUNK_WIDTH && z >= 0 && z < CHUNK_WIDTH && y >= minY && y <= maxY) {
+        if (chunk->getBlock(x, y, z).isAir()) {
+            chunk->setBlock(x, y, z, state);
+        }
+    }
+}
+
+void WorldGenerator::placeOakTree(Chunk* chunk, int x, int y, int z, SeededRandom& random) {
+    auto& blockRegistry = BlockRegistry::get();
+    auto log = blockRegistry.getDefaultState("minecraft:oak_log");
+    auto leaves = blockRegistry.getDefaultState("minecraft:oak_leaves");
+    
+    int trunkHeight = random.nextInt(4, 6);
+    
+    // Place trunk
+    for (int dy = 0; dy < trunkHeight; dy++) {
+        setBlockClamped(chunk, x, y + dy, z, log, settings.minHeight, settings.maxHeight);
+    }
+    
+    // Leaf crown - 3x3x3 centered on top of trunk, with corners randomly missing
+    int leafBase = y + trunkHeight - 2;
+    for (int dy = 0; dy < 3; dy++) {
+        int radius = (dy == 2) ? 1 : 2; // top layer is smaller
+        for (int dx = -radius; dx <= radius; dx++) {
+            for (int dz = -radius; dz <= radius; dz++) {
+                // Skip corners randomly
+                if (abs(dx) == radius && abs(dz) == radius && random.chance(0.4f)) continue;
+                // Don't overwrite trunk
+                if (dx == 0 && dz == 0 && dy < 2) continue;
+                setBlockClamped(chunk, x + dx, leafBase + dy, z + dz, leaves, settings.minHeight, settings.maxHeight);
+            }
+        }
+    }
+    // Top leaf
+    setBlockClamped(chunk, x, leafBase + 3, z, leaves, settings.minHeight, settings.maxHeight);
+}
+
+void WorldGenerator::placeBirchTree(Chunk* chunk, int x, int y, int z, SeededRandom& random) {
+    auto& blockRegistry = BlockRegistry::get();
+    auto log = blockRegistry.getDefaultState("minecraft:birch_log");
+    auto leaves = blockRegistry.getDefaultState("minecraft:birch_leaves");
+    
+    int trunkHeight = random.nextInt(5, 7);
+    
+    // Place trunk
+    for (int dy = 0; dy < trunkHeight; dy++) {
+        setBlockClamped(chunk, x, y + dy, z, log, settings.minHeight, settings.maxHeight);
+    }
+    
+    // Tall narrow leaf crown - 2 layers
+    int leafBase = y + trunkHeight - 3;
+    for (int dy = 0; dy < 3; dy++) {
+        int radius = (dy == 2) ? 0 : 1;
+        for (int dx = -radius; dx <= radius; dx++) {
+            for (int dz = -radius; dz <= radius; dz++) {
+                if (dx == 0 && dz == 0 && dy < 2) continue; // trunk space
+                setBlockClamped(chunk, x + dx, leafBase + dy, z + dz, leaves, settings.minHeight, settings.maxHeight);
+            }
+        }
+    }
+    // Extra top leaves for height
+    setBlockClamped(chunk, x, leafBase + 3, z, leaves, settings.minHeight, settings.maxHeight);
+    setBlockClamped(chunk, x + 1, leafBase + 3, z, leaves, settings.minHeight, settings.maxHeight);
+    setBlockClamped(chunk, x, leafBase + 3, z + 1, leaves, settings.minHeight, settings.maxHeight);
+}
+
+void WorldGenerator::placeSpruceTree(Chunk* chunk, int x, int y, int z, SeededRandom& random) {
+    auto& blockRegistry = BlockRegistry::get();
+    auto log = blockRegistry.getDefaultState("minecraft:spruce_log");
+    auto leaves = blockRegistry.getDefaultState("minecraft:spruce_leaves");
+    
+    int trunkHeight = random.nextInt(6, 10);
+    
+    // Place trunk
+    for (int dy = 0; dy < trunkHeight; dy++) {
+        setBlockClamped(chunk, x, y + dy, z, log, settings.minHeight, settings.maxHeight);
+    }
+    
+    // Cone-shaped leaves: wider at bottom, narrow at top
+    int leafBase = y + trunkHeight - 2;
+    int leafLayers = trunkHeight - 3;
+    if (leafLayers < 3) leafLayers = 3;
+    
+    for (int dy = 0; dy < leafLayers; dy++) {
+        // Radius decreases from bottom to top
+        int radius = (leafLayers - dy + 1) / 2;
+        if (radius < 1) radius = 1;
+        for (int dx = -radius; dx <= radius; dx++) {
+            for (int dz = -radius; dz <= radius; dz++) {
+                // Skip corners for rounder shape
+                if (abs(dx) == radius && abs(dz) == radius) continue;
+                if (dx == 0 && dz == 0) continue; // trunk
+                setBlockClamped(chunk, x + dx, leafBase - leafLayers + 1 + dy, z + dz, leaves, settings.minHeight, settings.maxHeight);
+            }
+        }
+    }
+    // Top
+    setBlockClamped(chunk, x, leafBase + 1, z, leaves, settings.minHeight, settings.maxHeight);
+}
+
+void WorldGenerator::placeDarkOakTree(Chunk* chunk, int x, int y, int z, SeededRandom& random) {
+    auto& blockRegistry = BlockRegistry::get();
+    auto log = blockRegistry.getDefaultState("minecraft:dark_oak_log");
+    auto leaves = blockRegistry.getDefaultState("minecraft:dark_oak_leaves");
+    
+    int trunkHeight = random.nextInt(6, 9);
+    
+    // 2x2 trunk
+    for (int dy = 0; dy < trunkHeight; dy++) {
+        setBlockClamped(chunk, x, y + dy, z, log, settings.minHeight, settings.maxHeight);
+        setBlockClamped(chunk, x + 1, y + dy, z, log, settings.minHeight, settings.maxHeight);
+        setBlockClamped(chunk, x, y + dy, z + 1, log, settings.minHeight, settings.maxHeight);
+        setBlockClamped(chunk, x + 1, y + dy, z + 1, log, settings.minHeight, settings.maxHeight);
+    }
+    
+    // Large irregular canopy
+    int leafBase = y + trunkHeight - 3;
+    for (int dy = 0; dy < 4; dy++) {
+        int radius = (dy < 2) ? 3 : 2;
+        for (int dx = -radius; dx <= radius; dx++) {
+            for (int dz = -radius; dz <= radius; dz++) {
+                // Skip some for irregularity
+                if (abs(dx) == radius && abs(dz) == radius && random.chance(0.5f)) continue;
+                // Don't overwrite trunk area (0,0 to 1,1)
+                if (dx >= 0 && dx <= 1 && dz >= 0 && dz <= 1 && dy < 2) continue;
+                setBlockClamped(chunk, x + dx, leafBase + dy, z + dz, leaves, settings.minHeight, settings.maxHeight);
+            }
+        }
+    }
+}
+
+void WorldGenerator::placeAcaciaTree(Chunk* chunk, int x, int y, int z, SeededRandom& random) {
+    auto& blockRegistry = BlockRegistry::get();
+    auto log = blockRegistry.getDefaultState("minecraft:acacia_log");
+    auto leaves = blockRegistry.getDefaultState("minecraft:acacia_leaves");
+    
+    // Short trunk (2-3 blocks) then angled branch
+    int trunkHeight = random.nextInt(2, 3);
+    
+    // Place trunk
+    for (int dy = 0; dy < trunkHeight; dy++) {
+        setBlockClamped(chunk, x, y + dy, z, log, settings.minHeight, settings.maxHeight);
+    }
+    
+    // Angled branch - goes diagonally up 2-3 blocks
+    int branchLen = random.nextInt(2, 3);
+    int bx = (random.chance(0.5f)) ? 1 : -1;
+    int bz = (random.chance(0.5f)) ? 1 : -1;
+    int branchX = x;
+    int branchY = y + trunkHeight;
+    int branchZ = z;
+    
+    for (int i = 0; i < branchLen; i++) {
+        branchX += bx;
+        branchY += 1;
+        branchZ += bz;
+        setBlockClamped(chunk, branchX, branchY, branchZ, log, settings.minHeight, settings.maxHeight);
+    }
+    
+    // Flat canopy at the end of branch
+    int canopyY = branchY;
+    int canopyX = branchX;
+    int canopyZ = branchZ;
+    for (int dx = -2; dx <= 2; dx++) {
+        for (int dz = -2; dz <= 2; dz++) {
+            // Roughly flat, occasional y+1
+            int dy = (abs(dx) <= 1 && abs(dz) <= 1 && random.chance(0.3f)) ? 1 : 0;
+            // Skip some edges for natural look
+            if (abs(dx) == 2 && abs(dz) == 2 && random.chance(0.6f)) continue;
+            setBlockClamped(chunk, canopyX + dx, canopyY + dy, canopyZ + dz, leaves, settings.minHeight, settings.maxHeight);
+        }
+    }
 }
 
 void WorldGenerator::generateBiomes(Chunk* chunk) {
