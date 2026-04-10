@@ -3,214 +3,315 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VoxelForge - Open Source C++ Voxel Game Engine</title>
-    <meta name="description" content="VoxelForge is a high-performance C++ voxel game engine with modding API, multiplayer support, and Vulkan rendering. Free and open source.">
-    <meta name="keywords" content="voxel game, minecraft clone, c++ game engine, open source game, vulkan, multiplayer, modding api">
-    
-    <!-- Open Graph -->
-    <meta property="og:title" content="VoxelForge - Open Source Voxel Game Engine">
-    <meta property="og:description" content="High-performance C++ voxel game engine with modding API and multiplayer support.">
+    <title>VoxelForge - Modern Voxel Game Engine</title>
+    <meta name="description" content="A modern, high-performance voxel game engine with Lua scripting, Vulkan rendering, and infinite world generation">
+    <meta name="keywords" content="voxel, game engine, minecraft clone, voxel engine, open source, cpp, vulkan">
+    <meta property="og:title" content="VoxelForge - Modern Voxel Game Engine">
+    <meta property="og:description" content="A modern, high-performance voxel game engine">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://zarigata.github.io/PCU/">
-    <meta property="og:image" content="https://zarigata.github.io/PCU/assets/images/og-image.png">
-    
-    <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="VoxelForge - Open Source Voxel Game Engine">
-    <meta name="twitter:description" content="High-performance C++ voxel game engine with modding API and multiplayer support.">
-    
-    <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
-    
-    <!-- Styles -->
     <link rel="stylesheet" href="assets/css/style.css">
-    
-    <!-- PWA -->
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#2563eb">
-    
-    <!-- Service Worker Registration -->
-    <script>
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('/sw.js')
-                .then(reg => console.log('Service Worker registered'))
-                .catch(err => console.log('Service Worker failed:', err));
-        });
-    }
-    </script>
-    
-    <!-- Structured Data -->
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "VoxelForge",
-        "applicationCategory": "Game",
-        "operatingSystem": "Windows, macOS, Linux",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "USD"
-        },
-        "description": "Open source C++ voxel game engine with modding API and multiplayer support"
-    }
-    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 </head>
 <body>
-    <header class="hero">
-        <nav class="navbar">
-            <div class="logo">
-                <img src="assets/images/logo.svg" alt="VoxelForge Logo" class="logo-img">
+    <!-- Animated Background -->
+    <div class="bg-grid"></div>
+    <div class="bg-gradient"></div>
+    <div class="bg-glow bg-glow-1"></div>
+    <div class="bg-glow bg-glow-2"></div>
+    <div class="bg-glow bg-glow-3"></div>
+    
+    <!-- Floating Particles -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <svg class="logo-img" viewBox="0 0 40 40" fill="none">
+                    <defs>
+                        <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#2563eb"/>
+                            <stop offset="100%" style="stop-color:#7c3aed"/>
+                        </linearGradient>
+                    </defs>
+                    <rect x="4" y="4" width="14" height="14" rx="2" fill="url(#logoGrad)" class="cube cube-1"/>
+                    <rect x="22" y="4" width="14" height="14" rx="2" fill="url(#logoGrad)" opacity="0.8" class="cube cube-2"/>
+                    <rect x="4" y="22" width="14" height="14" rx="2" fill="url(#logoGrad)" opacity="0.6" class="cube cube-3"/>
+                    <rect x="22" y="22" width="14" height="14" rx="2" fill="url(#logoGrad)" opacity="0.4" class="cube cube-4"/>
+                </svg>
                 <span class="logo-text">VoxelForge</span>
+            </a>
+            <div class="nav-links">
+                <a href="features.html">Features</a>
+                <a href="download.html">Download</a>
+                <a href="https://github.com/zarigata/PCU" target="_blank" rel="noopener">GitHub</a>
+                <a href="https://github.com/zarigata/PCU/wiki" target="_blank" rel="noopener">Docs</a>
             </div>
-            <ul class="nav-links">
-                <li><a href="#features">Features</a></li>
-                <li><a href="#download">Download</a></li>
-                <li><a href="#docs">Documentation</a></li>
-                <li><a href="https://github.com/zarigata/PCU" target="_blank">GitHub</a></li>
-            </ul>
-        </nav>
-        
+            <div class="nav-actions">
+                <a href="download.html" class="btn btn-primary btn-sm">
+                    <span>Get Started</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
         <div class="hero-content">
-            <h1>Build Your Voxel World</h1>
-            <p class="tagline">High-performance C++ voxel game engine with modding API &amp; multiplayer</p>
-            <div class="cta-buttons">
-                <a href="#download" class="btn btn-primary">Download Free</a>
-                <a href="https://github.com/zarigata/PCU" class="btn btn-secondary" target="_blank">View Source</a>
+            <div class="hero-badge">
+                <span class="badge-dot"></span>
+                <span>Open Source • MIT License</span>
+            </div>
+            <h1 class="hero-title">
+                <span class="title-line">Build Your</span>
+                <span class="title-line gradient-text">Voxel World</span>
+            </h1>
+            <p class="hero-description">
+                A modern, high-performance voxel game engine with Lua scripting, 
+                Vulkan rendering, and infinite procedural world generation.
+            </p>
+            <div class="hero-buttons">
+                <a href="download.html" class="btn btn-primary btn-lg">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7 10 12 15 17 10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                    <span>Download Now</span>
+                </a>
+                <a href="https://github.com/zarigata/PCU" target="_blank" rel="noopener" class="btn btn-ghost btn-lg">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+                    </svg>
+                    <span>Star on GitHub</span>
+                </a>
             </div>
             <div class="hero-stats">
                 <div class="stat">
-                    <span class="stat-number">C++17</span>
-                    <span class="stat-label">Modern Code</span>
+                    <span class="stat-number" data-count="60">0</span>
+                    <span class="stat-label">FPS Target</span>
                 </div>
                 <div class="stat">
-                    <span class="stat-number">Vulkan</span>
-                    <span class="stat-label">Rendering</span>
+                    <span class="stat-number" data-count="100">0</span>
+                    <span class="stat-label">Lua API</span>
                 </div>
                 <div class="stat">
-                    <span class="stat-number">Open</span>
-                    <span class="stat-label">Source</span>
+                    <span class="stat-number" data-count="∞">∞</span>
+                    <span class="stat-label">World Size</span>
                 </div>
             </div>
         </div>
-    </header>
-    
-    <section id="features" class="features">
-        <h2>Powerful Features</h2>
-        <div class="features-grid">
-            <div class="feature-card">
-                <div class="feature-icon">🎮</div>
-                <h3>Voxel Engine</h3>
-                <p>High-performance voxel rendering with chunked world generation and efficient memory management.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">🔧</div>
-                <h3>Modding API</h3>
-                <p>Built-in modding system with Lua scripting. Create custom blocks, items, and game mechanics.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">🌐</div>
-                <h3>Multiplayer</h3>
-                <p>Dedicated server support with client-server architecture. Play with friends on your own server.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">⚡</div>
-                <h3>Vulkan Rendering</h3>
-                <p>Modern graphics API for maximum performance. Cross-platform rendering pipeline.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">🎨</div>
-                <h3>Custom Assets</h3>
-                <p>Import custom textures, models, and sounds. Full asset pipeline support.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">📜</div>
-                <h3>Open Source</h3>
-                <p>MIT licensed. Free to use, modify, and distribute. Community-driven development.</p>
-            </div>
-        </div>
-    </section>
-    
-    <section id="download" class="download">
-        <h2>Download VoxelForge</h2>
-        <p class="download-intro">Free and open source. Available for Windows, macOS, and Linux.</p>
         
-        <div class="download-grid">
-            <div class="download-card">
-                <div class="os-icon">🪟</div>
-                <h3>Windows</h3>
-                <p>Windows 10/11 (64-bit)</p>
-                <a href="https://github.com/zarigata/PCU/releases/latest" class="btn btn-download" target="_blank">
-                    Download .exe
-                </a>
+        <!-- Animated Code Preview -->
+        <div class="code-preview">
+            <div class="code-header">
+                <div class="code-dots">
+                    <span class="dot red"></span>
+                    <span class="dot yellow"></span>
+                    <span class="dot green"></span>
+                </div>
+                <span class="code-filename">main.lua</span>
             </div>
-            <div class="download-card">
-                <div class="os-icon">🍎</div>
-                <h3>macOS</h3>
-                <p>macOS 11+ (Intel &amp; Apple Silicon)</p>
-                <a href="https://github.com/zarigata/PCU/releases/latest" class="btn btn-download" target="_blank">
-                    Download .dmg
-                </a>
-            </div>
-            <div class="download-card">
-                <div class="os-icon">🐧</div>
-                <h3>Linux</h3>
-                <p>Ubuntu, Fedora, Arch</p>
-                <a href="https://github.com/zarigata/PCU/releases/latest" class="btn btn-download" target="_blank">
-                    Download AppImage
-                </a>
-            </div>
-        </div>
-        
-        <div class="download-note">
-            <p>Binary releases coming soon. <a href="https://github.com/zarigata/PCU#build-from-source" target="_blank">Build from source</a> in the meantime.</p>
-        </div>
-    </section>
+            <pre class="code-content"><code><span class="code-keyword">function</span> <span class="code-function">onPlayerJoin</span>(player)
+    <span class="code-comment">-- Welcome message</span>
+    player:<span class="code-function">sendMessage</span>(<span class="code-string">"Welcome to VoxelForge!"</span>)
     
-    <section id="docs" class="documentation">
-        <h2>Quick Start</h2>
-        <div class="code-block">
-            <pre><code># Clone the repository
-git clone https://github.com/zarigata/PCU.git
-cd PCU
+    <span class="code-comment">-- Give starting items</span>
+    player:<span class="code-function">giveItem</span>(<span class="code-string">"minecraft:diamond_pickaxe"</span>)
+    player:<span class="code-function">giveItem</span>(<span class="code-string">"minecraft:bread"</span>, <span class="code-number">16</span>)
+    
+    <span class="code-comment">-- Teleport to spawn</span>
+    player:<span class="code-function">teleport</span>(<span class="code-number">0</span>, <span class="code-number">64</span>, <span class="code-number">0</span>)
+<span class="code-keyword">end</span>
 
-# Build with CMake
-cmake -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build --parallel
-
-# Run the game
-./build/bin/VoxelForge</code></pre>
+<span class="code-comment">-- Register custom block</span>
+<span class="code-keyword">local</span> customBlock = BlockRegistry:<span class="code-function">create</span>(<span class="code-string">"mymod:crystal"</span>)
+customBlock:setHardness(<span class="code-number">3.0</span>)
+customBlock:setLightLevel(<span class="code-number">15</span>)
+customBlock:setDrops({<span class="code-string">"mymod:crystal_shard"</span>, <span class="code-number">1</span>, <span class="code-number">3</span>})</code></pre>
         </div>
-        
-        <div class="doc-links">
-            <a href="https://github.com/zarigata/PCU/blob/main/README.md" class="doc-link" target="_blank">
-                📖 README
-            </a>
-            <a href="https://github.com/zarigata/PCU/blob/main/CONTRIBUTING.md" class="doc-link" target="_blank">
-                🤝 Contributing
-            </a>
-            <a href="https://github.com/zarigata/PCU/issues" class="doc-link" target="_blank">
-                🐛 Report Issue
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="section-container">
+            <div class="section-header">
+                <h2 class="section-title">Powerful Features</h2>
+                <p class="section-subtitle">Everything you need to build your dream voxel game</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="url(#iconGrad)" stroke-width="1.5">
+                            <defs>
+                                <linearGradient id="iconGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#2563eb"/>
+                                    <stop offset="100%" style="stop-color:#7c3aed"/>
+                                </linearGradient>
+                            </defs>
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                        </svg>
+                    </div>
+                    <h3>Vulkan Rendering</h3>
+                    <p>Modern graphics API for maximum performance. Multi-threaded rendering, dynamic lighting, and PBR materials.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="url(#iconGrad)" stroke-width="1.5">
+                            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                        </svg>
+                    </div>
+                    <h3>Lua Scripting</h3>
+                    <p>Write game logic in Lua. Create custom blocks, items, entities, and dimensions with a powerful modding API.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="url(#iconGrad)" stroke-width="1.5">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M2 12h20"/>
+                            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                        </svg>
+                    </div>
+                    <h3>Infinite Worlds</h3>
+                    <p>Procedurally generated infinite worlds with multiple biomes, structures, and cave systems.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="url(#iconGrad)" stroke-width="1.5">
+                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                            <line x1="8" y1="21" x2="16" y2="21"/>
+                            <line x1="12" y1="17" x2="12" y2="21"/>
+                        </svg>
+                    </div>
+                    <h3>Cross-Platform</h3>
+                    <p>Build for Windows, Linux, and macOS. Mobile support coming soon.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="url(#iconGrad)" stroke-width="1.5">
+                            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                            <path d="M2 17l10 5 10-5"/>
+                            <path d="M2 12l10 5 10-5"/>
+                        </svg>
+                    </div>
+                    <h3>Modular Architecture</h3>
+                    <p>Clean, modular codebase. ECS-based entity system, plugin support, and hot-reloading.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="url(#iconGrad)" stroke-width="1.5">
+                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                            <polyline points="3.27 6.96 12 12.21 20.73 6.96"/>
+                            <line x1="12" y1="22.08" x2="12" y2="12"/>
+                        </svg>
+                    </div>
+                    <h3>Resource Packs</h3>
+                    <p>Customize textures, models, sounds, and shaders with resource packs. Support for custom block models.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tech Stack Section -->
+    <section class="tech-stack">
+        <div class="section-container">
+            <div class="section-header">
+                <h2 class="section-title">Built with Modern Tech</h2>
+                <p class="section-subtitle">Industry-standard tools and libraries</p>
+            </div>
+            <div class="tech-grid">
+                <div class="tech-item">
+                    <div class="tech-icon">C++</div>
+                    <span>C++20</span>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-icon">VK</div>
+                    <span>Vulkan</span>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-icon">Lua</div>
+                    <span>LuaJIT</span>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-icon">GLM</div>
+                    <span>GLM Math</span>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-icon">SDL</div>
+                    <span>SDL3</span>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-icon">ECS</div>
+                    <span>EntityX</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta">
+        <div class="cta-content">
+            <h2>Ready to Build?</h2>
+            <p>Start creating your voxel world today. Open source and free forever.</p>
+            <a href="download.html" class="btn btn-primary btn-xl">
+                <span>Get Started for Free</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
             </a>
         </div>
     </section>
-    
+
+    <!-- Footer -->
     <footer class="footer">
-        <div class="footer-content">
-            <div class="footer-brand">
-                <span class="footer-logo">VoxelForge</span>
-                <p>Open source voxel game engine</p>
+        <div class="footer-container">
+            <div class="footer-main">
+                <div class="footer-brand">
+                    <span class="footer-logo">VoxelForge</span>
+                    <p>A modern voxel game engine for developers who demand performance and flexibility.</p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>Project</h4>
+                        <a href="features.html">Features</a>
+                        <a href="download.html">Download</a>
+                        <a href="https://github.com/zarigata/PCU/releases">Releases</a>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Development</h4>
+                        <a href="https://github.com/zarigata/PCU">GitHub</a>
+                        <a href="https://github.com/zarigata/PCU/issues">Issues</a>
+                        <a href="https://github.com/zarigata/PCU/pulls">Pull Requests</a>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Documentation</h4>
+                        <a href="https://github.com/zarigata/PCU/wiki">Wiki</a>
+                        <a href="#">API Reference</a>
+                        <a href="#">Tutorials</a>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Community</h4>
+                        <a href="#">Discord</a>
+                        <a href="#">Reddit</a>
+                        <a href="#">Twitter</a>
+                    </div>
+                </div>
             </div>
-            <div class="footer-links">
-                <a href="https://github.com/zarigata/PCU" target="_blank">GitHub</a>
-                <a href="https://github.com/zarigata/PCU/issues" target="_blank">Issues</a>
-                <a href="https://github.com/zarigata/PCU/blob/main/SECURITY.md" target="_blank">Security</a>
+            <div class="footer-bottom">
+                <p>&copy; 2024 VoxelForge. Open source under MIT License.</p>
+                <p>Made with ❤️ by the community</p>
             </div>
-        </div>
-        <div class="footer-bottom">
-            <p>&copy; 2026 VoxelForge. MIT License.</p>
         </div>
     </footer>
+
+    <script src="assets/js/main.js"></script>
 </body>
 </html>
