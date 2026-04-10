@@ -3,344 +3,221 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Features - VoxelForge Voxel Game Engine</title>
-    <meta name="description" content="VoxelForge features: High-performance voxel rendering, Vulkan graphics, modding API, multiplayer support, cross-platform.">
-    <meta name="keywords" content="voxel engine features, game engine features, vulkan rendering, modding api, multiplayer game">
-    
+    <title>Features — VoxelForge</title>
+    <meta name="description" content="VoxelForge features: infinite worlds, modding, multiplayer, survival, crafting, and more. All free and open source.">
     <meta property="og:title" content="VoxelForge Features">
-    <meta property="og:description" content="High-performance C++ voxel engine with Vulkan rendering and modding API.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://zarigata.github.io/PCU/features.html">
-    
+    <meta property="og:description" content="Everything you need in a voxel game. Free forever.">
     <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="manifest" href="manifest.json">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
-        .feature-detail {
-            padding: 5rem 2rem;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        .feature-detail:nth-child(even) {
-            background: var(--surface);
-        }
-        .feature-detail-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 4rem;
-            align-items: center;
-        }
-        .feature-detail-grid.reverse {
-            direction: rtl;
-        }
-        .feature-detail-grid.reverse > * {
-            direction: ltr;
-        }
-        .feature-screenshot {
-            background: var(--background);
-            border-radius: 1rem;
-            aspect-ratio: 16/9;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 4rem;
-            border: 1px solid var(--secondary);
-        }
-        .tech-stack {
-            padding: 5rem 2rem;
-            background: var(--surface);
-        }
-        .tech-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 2rem;
-            max-width: 1200px;
-            margin: 2rem auto 0;
-        }
-        .tech-item {
-            text-align: center;
-            padding: 2rem;
-            background: var(--background);
-            border-radius: 1rem;
-        }
-        .tech-item h4 {
-            margin-top: 1rem;
-            color: var(--text);
-        }
-        .tech-item p {
-            color: var(--text-muted);
-            font-size: 0.875rem;
-        }
-        .tech-icon {
-            font-size: 2.5rem;
-        }
-        .comparison {
-            padding: 5rem 2rem;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        .comparison-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 2rem;
-        }
-        .comparison-table th, .comparison-table td {
-            padding: 1rem;
-            text-align: left;
-            border-bottom: 1px solid var(--surface);
-        }
-        .comparison-table th {
-            background: var(--surface);
-            color: var(--text);
-        }
-        .comparison-table td {
-            color: var(--text-muted);
-        }
-        .comparison-table .check {
-            color: var(--accent);
-        }
-        @media (max-width: 768px) {
-            .feature-detail-grid {
-                grid-template-columns: 1fr;
-            }
-            .feature-detail-grid.reverse {
-                direction: ltr;
-            }
-        }
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0b0c10;--bg2:#13141a;--card:#1a1b23;--border:#2a2b35;--text:#e8e8ec;--text2:#9898a6;--accent:#4f8cff;--green:#34d399;--accent2:#7c5cfc}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-height:1.7}
+.nav{background:rgba(11,12,16,.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:1rem 1.5rem;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
+.nav-logo{font-family:'Press Start 2P',monospace;font-size:.8rem;color:var(--accent);text-decoration:none}
+.nav-links{display:flex;gap:2rem}
+.nav-links a{color:var(--text2);text-decoration:none;font-weight:500;transition:color .2s}
+.nav-links a:hover{color:var(--text)}
+
+.hero{text-align:center;padding:5rem 1.5rem 3rem}
+.hero h1{font-size:2.5rem;font-weight:800;margin-bottom:.5rem}
+.hero p{color:var(--text2);font-size:1.1rem;max-width:600px;margin:0 auto}
+
+.feat{padding:3rem 1.5rem;max-width:1000px;margin:0 auto}
+.feat-item{display:grid;grid-template-columns:auto 1fr;gap:1.5rem;align-items:start;padding:1.5rem 0;border-bottom:1px solid var(--border)}
+.feat-item:last-child{border-bottom:none}
+.feat-icon{font-size:2.5rem;text-align:center;width:60px}
+.feat-body h3{font-size:1.15rem;font-weight:700;margin-bottom:.25rem}
+.feat-body p{color:var(--text2);font-size:.95rem}
+.feat-body ul{list-style:none;margin-top:.5rem;display:flex;flex-wrap:wrap;gap:.5rem}
+.feat-body ul li{background:rgba(79,140,255,.08);border:1px solid rgba(79,140,255,.15);padding:.25rem .75rem;border-radius:.4rem;font-size:.8rem;color:var(--accent)}
+
+.feat-group{padding:4rem 1.5rem;max-width:1000px;margin:0 auto}
+.feat-group h2{font-size:1.6rem;font-weight:800;margin-bottom:2rem;padding-bottom:.5rem;border-bottom:2px solid var(--accent);display:inline-block}
+
+.cta{text-align:center;padding:5rem 1.5rem;background:var(--bg2)}
+.cta h2{font-size:2rem;font-weight:800;margin-bottom:.5rem}
+.cta p{color:var(--text2);margin-bottom:1.5rem}
+.btn{display:inline-flex;align-items:center;gap:.5rem;background:var(--accent);color:#fff;padding:.85rem 2rem;border-radius:.6rem;font-weight:600;text-decoration:none;transition:all .2s}
+.btn:hover{background:#6ba0ff;transform:translateY(-2px)}
+
+.footer{text-align:center;padding:2rem 1.5rem;border-top:1px solid var(--border);color:var(--text2);font-size:.85rem}
+@media(max-width:768px){.nav-links{display:none}.hero h1{font-size:1.8rem}.feat-item{grid-template-columns:1fr}.feat-icon{display:none}}
     </style>
 </head>
 <body>
-    <header class="hero" style="min-height: auto; padding-bottom: 2rem;">
-        <nav class="navbar">
-            <div class="logo">
-                <img src="assets/images/logo.svg" alt="VoxelForge Logo" class="logo-img">
-                <span class="logo-text">VoxelForge</span>
-            </div>
-            <ul class="nav-links">
-                <li><a href="index.html">Home</a></li>
-                <li><a href="download.html">Download</a></li>
-                <li><a href="#features" class="active">Features</a></li>
-                <li><a href="https://github.com/zarigata/PCU" target="_blank">GitHub</a></li>
-            </ul>
-        </nav>
-        
-        <div class="hero-content" style="padding: 3rem 2rem;">
-            <h1>Features</h1>
-            <p class="tagline">Everything you need to build your voxel world</p>
+    <nav class="nav">
+        <a href="index.html" class="nav-logo">⛏️ VoxelForge</a>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="download.html">Download</a>
+            <a href="https://github.com/zarigata/PCU">GitHub</a>
         </div>
-    </header>
-    
-    <section id="features" class="feature-detail">
-        <div class="feature-detail-grid">
-            <div>
-                <h2>🎮 High-Performance Voxel Engine</h2>
-                <p>Efficient chunked world generation with level-of-detail rendering. Our engine handles massive worlds with smooth framerates.</p>
-                <ul>
-                    <li>Chunk-based world storage</li>
-                    <li>Frustum culling and occlusion</li>
-                    <li>Greedy meshing for performance</li>
-                    <li>Procedural terrain generation</li>
-                    <li>Real-time lighting and shadows</li>
-                </ul>
-            </div>
-            <div class="feature-screenshot">
-                🗺️
-            </div>
-        </div>
+    </nav>
+
+    <section class="hero">
+        <h1>Features</h1>
+        <p>Everything you'd expect from a top-tier voxel game — and then some. All free, all open source.</p>
     </section>
-    
-    <section class="feature-detail">
-        <div class="feature-detail-grid reverse">
-            <div>
-                <h2>⚡ Vulkan Rendering</h2>
-                <p>Modern graphics API for maximum performance across all platforms. Take advantage of today's GPU capabilities.</p>
-                <ul>
-                    <li>Vulkan 1.2+ rendering backend</li>
-                    <li>Compute shaders for terrain</li>
-                    <li>Multi-threaded command buffers</li>
-                    <li>Descriptor indexing for bindless</li>
-                    <li>Ray tracing ready architecture</li>
-                </ul>
+
+    <!-- World & Exploration -->
+    <section class="feat-group">
+        <h2>🌍 World &amp; Exploration</h2>
+        <div class="feat">
+            <div class="feat-item">
+                <div class="feat-icon">🏔️</div>
+                <div class="feat-body">
+                    <h3>Infinite Procedural Worlds</h3>
+                    <p>Every world is unique. Multi-octave noise generation creates realistic terrain that stretches to the horizon and beyond.</p>
+                    <ul><li>60+ biome types</li><li>Smooth biome blending</li><li>Oceans &amp; rivers</li><li>Mountains &amp; valleys</li></ul>
+                </div>
             </div>
-            <div class="feature-screenshot">
-                ⚡
+            <div class="feat-item">
+                <div class="feat-icon">🕳️</div>
+                <div class="feat-body">
+                    <h3>Caves &amp; Underground</h3>
+                    <p>3D noise-carved cave systems, ravines, underground lakes, and lava flows. The underground is as rich as the surface.</p>
+                    <ul><li>3D cave carving</li><li>Ravines</li><li>Underground lakes</li><li>Lava caverns</li></ul>
+                </div>
+            </div>
+            <div class="feat-item">
+                <div class="feat-icon">🏰</div>
+                <div class="feat-body">
+                    <h3>Generated Structures</h3>
+                    <p>Discover villages, temples, dungeons, strongholds, mineshafts, ocean monuments, and more scattered across the world.</p>
+                    <ul><li>Villages</li><li>Strongholds</li><li>Temples</li><li>Dungeons &amp; spawners</li><li>Ocean monuments</li></ul>
+                </div>
+            </div>
+            <div class="feat-item">
+                <div class="feat-icon">🌀</div>
+                <div class="feat-body">
+                    <h3>Three Dimensions</h3>
+                    <p>Overworld, Nether, and End — each a fully realized dimension with unique terrain, blocks, and gameplay.</p>
+                    <ul><li>Overworld</li><li>Nether (5 biomes)</li><li>End (outer islands)</li><li>Custom dimensions via mods</li></ul>
+                </div>
             </div>
         </div>
     </section>
-    
-    <section class="feature-detail">
-        <div class="feature-detail-grid">
-            <div>
-                <h2>🔧 Built-in Modding API</h2>
-                <p>Create custom blocks, items, entities, and game mechanics without modifying the engine core.</p>
-                <ul>
-                    <li>Lua scripting support</li>
-                    <li>Custom block registration</li>
-                    <li>Item and recipe system</li>
-                    <li>Event-driven architecture</li>
-                    <li>Hot-reload during development</li>
-                </ul>
+
+    <!-- Gameplay -->
+    <section class="feat-group">
+        <h2>⚔️ Gameplay</h2>
+        <div class="feat">
+            <div class="feat-item">
+                <div class="feat-icon">🔨</div>
+                <div class="feat-body">
+                    <h3>Crafting &amp; Survival</h3>
+                    <p>Full survival loop: mine resources, craft tools and armor, build shelter, farm food, and explore. Shaped and shapeless recipes, smelting, and more.</p>
+                    <ul><li>200+ blocks</li><li>50+ items</li><li>Shaped/shapeless recipes</li><li>Smelting</li></ul>
+                </div>
             </div>
-            <div class="feature-screenshot">
-                🔧
+            <div class="feat-item">
+                <div class="feat-icon">🎒</div>
+                <div class="feat-body">
+                    <h3>Inventory &amp; Equipment</h3>
+                    <p>Full inventory system with armor slots, offhand, and drag-and-drop management. Quick-bar for fast access.</p>
+                    <ul><li>36-slot inventory</li><li>Armor slots</li><li>Offhand</li><li>Hotbar</li></ul>
+                </div>
             </div>
-        </div>
-    </section>
-    
-    <section class="feature-detail">
-        <div class="feature-detail-grid reverse">
-            <div>
-                <h2>🌐 Multiplayer Ready</h2>
-                <p>Built from the ground up for multiplayer. Host your own server or join public servers.</p>
-                <ul>
-                    <li>Client-server architecture</li>
-                    <li>Authoritative server model</li>
-                    <li>Chunk synchronization</li>
-                    <li>Player authentication</li>
-                    <li>Dedicated server binary</li>
-                </ul>
+            <div class="feat-item">
+                <div class="feat-icon">🏆</div>
+                <div class="feat-body">
+                    <h3>Achievements &amp; Stats</h3>
+                    <p>Track your progress with an advancement system and detailed player statistics. See how far you've come.</p>
+                    <ul><li>Advancement tree</li><li>Playtime tracking</li><li>Block/item stats</li><li>Distance traveled</li></ul>
+                </div>
             </div>
-            <div class="feature-screenshot">
-                🌐
-            </div>
-        </div>
-    </section>
-    
-    <section class="feature-detail">
-        <div class="feature-detail-grid">
-            <div>
-                <h2>🎨 Asset Pipeline</h2>
-                <p>Import your own textures, models, and sounds. Full support for custom content.</p>
-                <ul>
-                    <li>Texture pack support</li>
-                    <li>3D model importing</li>
-                    <li>Audio system with spatial sound</li>
-                    <li>Hot-swappable assets</li>
-                    <li>Resource pack system</li>
-                </ul>
-            </div>
-            <div class="feature-screenshot">
-                🎨
+            <div class="feat-item">
+                <div class="feat-icon">👾</div>
+                <div class="feat-body">
+                    <h3>Mobs &amp; Entities</h3>
+                    <p>Hostile and passive creatures. Animals, monsters, and NPCs with AI behaviors, pathfinding, and drops.</p>
+                    <ul><li>Passive mobs</li><li>Hostile mobs</li><li>AI behaviors</li><li>Loot drops</li></ul>
+                </div>
             </div>
         </div>
     </section>
-    
-    <section class="tech-stack">
-        <h2 style="text-align: center;">Technology Stack</h2>
-        <p style="text-align: center; color: var(--text-muted); margin-bottom: 2rem;">Built with modern, proven technologies</p>
-        
-        <div class="tech-grid">
-            <div class="tech-item">
-                <div class="tech-icon">⚡</div>
-                <h4>C++17</h4>
-                <p>Modern C++ with smart pointers, lambdas, and parallel algorithms</p>
+
+    <!-- Modding -->
+    <section class="feat-group">
+        <h2>🧩 Modding</h2>
+        <div class="feat">
+            <div class="feat-item">
+                <div class="feat-icon">📜</div>
+                <div class="feat-body">
+                    <h3>Lua Scripting</h3>
+                    <p>Write mods in Lua — create blocks, items, entities, dimensions, and game mechanics. Simple, powerful, and hot-reloadable.</p>
+                    <ul><li>Lua 5.4</li><li>Full game API</li><li>Hot reload</li><li>Sandboxed per mod</li></ul>
+                </div>
             </div>
-            <div class="tech-item">
-                <div class="tech-icon">🔥</div>
-                <h4>Vulkan</h4>
-                <p>Low-level graphics API for maximum control and performance</p>
+            <div class="feat-item">
+                <div class="feat-icon">🔧</div>
+                <div class="feat-body">
+                    <h3>Native C++ Plugins</h3>
+                    <p>Need maximum performance? Write native C++ plugins with full engine access. Same API, zero overhead.</p>
+                    <ul><li>C++20</li><li>Full engine access</li><li>Direct memory</li><li>Plugin system</li></ul>
+                </div>
             </div>
-            <div class="tech-item">
-                <div class="tech-icon">📦</div>
-                <h4>ENet</h4>
-                <p>Lightweight UDP networking for multiplayer</p>
-            </div>
-            <div class="tech-item">
-                <div class="tech-icon">🔤</div>
-                <h4>Freetype</h4>
-                <p>Font rendering for UI and text</p>
-            </div>
-            <div class="tech-item">
-                <div class="tech-icon">📜</div>
-                <h4>Lua</h4>
-                <p>Scripting language for modding</p>
-            </div>
-            <div class="tech-item">
-                <div class="tech-icon">🔧</div>
-                <h4>CMake</h4>
-                <p>Cross-platform build system</p>
+            <div class="feat-item">
+                <div class="feat-icon">🎨</div>
+                <div class="feat-body">
+                    <h3>Resource Packs</h3>
+                    <p>Replace any texture, model, sound, or shader. Install community packs or create your own. Full customization.</p>
+                    <ul><li>Custom textures</li><li>Custom models</li><li>Custom sounds</li><li>Custom shaders</li></ul>
+                </div>
             </div>
         </div>
     </section>
-    
-    <section class="comparison">
-        <h2>Comparison</h2>
-        <p style="color: var(--text-muted);">How VoxelForge compares to alternatives</p>
-        
-        <table class="comparison-table">
-            <thead>
-                <tr>
-                    <th>Feature</th>
-                    <th>VoxelForge</th>
-                    <th>Minetest</th>
-                    <th>Custom Engine</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>Rendering API</td>
-                    <td class="check">✓ Vulkan</td>
-                    <td>OpenGL</td>
-                    <td>Varies</td>
-                </tr>
-                <tr>
-                    <td>Language</td>
-                    <td class="check">✓ C++17</td>
-                    <td>C++</td>
-                    <td>Varies</td>
-                </tr>
-                <tr>
-                    <td>Modding API</td>
-                    <td class="check">✓ Built-in Lua</td>
-                    <td>Lua</td>
-                    <td>✗ None</td>
-                </tr>
-                <tr>
-                    <td>Multiplayer</td>
-                    <td class="check">✓ Built-in</td>
-                    <td>✓ Built-in</td>
-                    <td>✗ Build yourself</td>
-                </tr>
-                <tr>
-                    <td>License</td>
-                    <td class="check">✓ MIT</td>
-                    <td>LGPL</td>
-                    <td>Varies</td>
-                </tr>
-                <tr>
-                    <td>Active Development</td>
-                    <td class="check">✓ Yes</td>
-                    <td>✓ Yes</td>
-                    <td>✗ Your time</td>
-                </tr>
-            </tbody>
-        </table>
+
+    <!-- Tech -->
+    <section class="feat-group">
+        <h2>⚡ Performance &amp; Tech</h2>
+        <div class="feat">
+            <div class="feat-item">
+                <div class="feat-icon">🖥️</div>
+                <div class="feat-body">
+                    <h3>Vulkan Rendering</h3>
+                    <p>Modern graphics API for butter-smooth performance. Multi-threaded rendering, cascade shadows, bloom, FXAA, and color grading.</p>
+                    <ul><li>Vulkan 1.3</li><li>60+ FPS</li><li>Cascade shadows</li><li>Bloom &amp; FXAA</li></ul>
+                </div>
+            </div>
+            <div class="feat-item">
+                <div class="feat-icon">🌐</div>
+                <div class="feat-body">
+                    <h3>Multiplayer</h3>
+                    <p>Join friends or host your own server. ENet-powered networking with low latency, packet compression, and reliable delivery.</p>
+                    <ul><li>Dedicated server</li><li>Low latency</li><li>Packet compression</li><li>Self-hosted</li></ul>
+                </div>
+            </div>
+            <div class="feat-item">
+                <div class="feat-icon">🔊</div>
+                <div class="feat-body">
+                    <h3>Immersive Audio</h3>
+                    <p>Full positional audio with reverb, occlusion, and environmental effects. Hear the world around you.</p>
+                    <ul><li>3D positional audio</li><li>Reverb &amp; effects</li><li>Environment-aware</li><li>Music system</li></ul>
+                </div>
+            </div>
+            <div class="feat-item">
+                <div class="feat-icon">💻</div>
+                <div class="feat-body">
+                    <h3>Cross-Platform</h3>
+                    <p>Windows, macOS, and Linux. Same features, same performance, same experience on every platform.</p>
+                    <ul><li>Windows 10+</li><li>macOS 12+</li><li>Linux (x86_64)</li><li>Mobile planned</li></ul>
+                </div>
+            </div>
+        </div>
     </section>
-    
-    <section class="cta" style="text-align: center; padding: 5rem 2rem; background: var(--surface);">
-        <h2>Ready to Build?</h2>
-        <p style="color: var(--text-muted); margin-bottom: 2rem;">Start creating your voxel world today.</p>
-        <a href="download.html" class="btn btn-primary btn-large">Download Free</a>
-        <a href="https://github.com/zarigata/PCU" class="btn btn-secondary" style="margin-left: 1rem;" target="_blank">View Source</a>
+
+    <section class="cta">
+        <h2>Convinced Yet?</h2>
+        <p>It's free. Just download and play.</p>
+        <a href="download.html" class="btn">⬇ Download VoxelForge — Free</a>
     </section>
-    
+
     <footer class="footer">
-        <div class="footer-content">
-            <div class="footer-brand">
-                <span class="footer-logo">VoxelForge</span>
-                <p>Open source voxel game engine</p>
-            </div>
-            <div class="footer-links">
-                <a href="index.html">Home</a>
-                <a href="download.html">Download</a>
-                <a href="features.html">Features</a>
-                <a href="https://github.com/zarigata/PCU" target="_blank">GitHub</a>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <p>&copy; 2026 VoxelForge. MIT License.</p>
-        </div>
+        <p>© 2024 VoxelForge · MIT License · Built with ❤️ by the community</p>
     </footer>
 </body>
 </html>
