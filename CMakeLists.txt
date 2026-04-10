@@ -91,13 +91,19 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(spdlog)
 
 # Zstandard
+set(ZSTD_BUILD_STATIC ON CACHE BOOL "" FORCE)
+set(ZSTD_BUILD_SHARED OFF CACHE BOOL "" FORCE)
+set(ZSTD_BUILD_PROGRAMS OFF CACHE BOOL "" FORCE)
 FetchContent_Declare(
     zstd
     GIT_REPOSITORY https://github.com/facebook/zstd.git
     GIT_TAG        v1.5.5
     SOURCE_SUBDIR  build/cmake
 )
+# Suppress cmake_minimum_required version conflict from zstd
+set(CMAKE_POLICY_DEFAULT_CMP0048 NEW)
 FetchContent_MakeAvailable(zstd)
+unset(CMAKE_POLICY_DEFAULT_CMP0048)
 
 # ENet
 FetchContent_Declare(
@@ -291,6 +297,7 @@ target_include_directories(VoxelForge_Engine
         ${CMAKE_CURRENT_SOURCE_DIR}/include/VoxelForge
         ${sol2_SOURCE_DIR}/include
         ${CMAKE_CURRENT_BINARY_DIR}/_deps/lua-src/lua-5.4.6/include
+        ${enet_SOURCE_DIR}/include
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
