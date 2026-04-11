@@ -11,7 +11,7 @@
 namespace VoxelForge {
 
 ItemEntitySystem::ItemEntitySystem() {
-    LOG_INFO("ItemEntitySystem created");
+    VF_INFO("ItemEntitySystem created");
 }
 
 void ItemEntitySystem::update(ECSWorld& world, float deltaTime) {
@@ -32,7 +32,7 @@ void ItemEntitySystem::update(ECSWorld& world, float deltaTime) {
         item.lifespan--;
         if (item.lifespan <= 0) {
             base.isAlive = false;
-            LOG_DEBUG("Item {} despawned", entity);
+            VF_DEBUG("Item {} despawned", entity);
             continue;
         }
         
@@ -59,11 +59,11 @@ void ItemEntitySystem::onPickup(ECSWorld& world, Entity itemEntity, ItemEntityCo
     if (remaining <= 0) {
         // All items picked up
         world.getComponent<EntityBaseComponent>(itemEntity).isAlive = false;
-        LOG_DEBUG("Player picked up item {}", item.stack.count);
+        VF_DEBUG("Player picked up item {}", item.stack.count);
     } else {
         // Partial pickup
         item.stack.count = remaining;
-        LOG_DEBUG("Player picked up partial item, {} remaining", remaining);
+        VF_DEBUG("Player picked up partial item, {} remaining", remaining);
     }
 }
 

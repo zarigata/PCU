@@ -24,7 +24,7 @@ void ModRegistry::registerBlock(const std::string& modId, const std::string& blo
     
     blocks[fullId] = block;
     
-    LOG_DEBUG("Registered block: {} -> {}", fullId, block.numericId);
+    VF_DEBUG("Registered block: {} -> {}", fullId, block.numericId);
 }
 
 void ModRegistry::registerItem(const std::string& modId, const std::string& itemId,
@@ -39,7 +39,7 @@ void ModRegistry::registerItem(const std::string& modId, const std::string& item
     
     items[fullId] = item;
     
-    LOG_DEBUG("Registered item: {} -> {}", fullId, item.numericId);
+    VF_DEBUG("Registered item: {} -> {}", fullId, item.numericId);
 }
 
 void ModRegistry::registerEntity(const std::string& modId, const std::string& entityId,
@@ -53,12 +53,12 @@ void ModRegistry::registerEntity(const std::string& modId, const std::string& en
     
     entities[fullId] = entity;
     
-    LOG_DEBUG("Registered entity: {}", fullId);
+    VF_DEBUG("Registered entity: {}", fullId);
 }
 
 void ModRegistry::registerRecipe(const std::string& modId, sol::table recipe) {
     recipes.push_back(recipe);
-    LOG_DEBUG("Registered recipe from mod: {}", modId);
+    VF_DEBUG("Registered recipe from mod: {}", modId);
 }
 
 const ModRegistry::RegisteredBlock* ModRegistry::getBlock(const std::string& fullId) const {
@@ -134,7 +134,7 @@ void ModRegistry::clearModContent(const std::string& modId) {
         }
     }
     
-    LOG_INFO("Cleared all content for mod: {}", modId);
+    VF_INFO("Cleared all content for mod: {}", modId);
 }
 
 void ModRegistry::clear() {
@@ -146,7 +146,7 @@ void ModRegistry::clear() {
     nextBlockId = 1000;
     nextItemId = 1000;
     
-    LOG_INFO("ModRegistry cleared");
+    VF_INFO("ModRegistry cleared");
 }
 
 } // namespace VoxelForge

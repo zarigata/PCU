@@ -26,7 +26,7 @@ Renderer& GetRenderer() {
 
 void InitRenderer(GLFWwindow* window) {
     if (g_Renderer) {
-        LOG_WARN("Renderer already initialized");
+        VF_WARN("Renderer already initialized");
         return;
     }
     g_Renderer = new Renderer();
@@ -46,18 +46,18 @@ void ShutdownRenderer() {
 // ============================================================================
 
 Renderer::Renderer() {
-    LOG_INFO("Renderer created");
+    VF_INFO("Renderer created");
 }
 
 Renderer::~Renderer() {
     shutdown();
-    LOG_INFO("Renderer destroyed");
+    VF_INFO("Renderer destroyed");
 }
 
 void Renderer::init(GLFWwindow* window) {
     PROFILE_FUNCTION();
     
-    LOG_INFO("Initializing renderer...");
+    VF_INFO("Initializing renderer...");
     
     // Get window size
     glfwGetFramebufferSize(window, &width, &height);
@@ -81,15 +81,15 @@ void Renderer::init(GLFWwindow* window) {
     // Create synchronization objects
     createSyncObjects();
     
-    LOG_INFO("Renderer initialized successfully");
-    LOG_INFO("  Resolution: {}x{}", width, height);
-    LOG_INFO("  Swapchain format: {}", static_cast<int>(swapchainFormat));
+    VF_INFO("Renderer initialized successfully");
+    VF_INFO("  Resolution: {}x{}", width, height);
+    VF_INFO("  Swapchain format: {}", static_cast<int>(swapchainFormat));
 }
 
 void Renderer::shutdown() {
     if (!context) return;
     
-    LOG_INFO("Shutting down renderer...");
+    VF_INFO("Shutting down renderer...");
     
     // Wait for device to be idle
     context->getDevice().waitIdle();
@@ -135,7 +135,7 @@ void Renderer::shutdown() {
     // Context cleanup is handled by VulkanContext destructor
     context.reset();
     
-    LOG_INFO("Renderer shutdown complete");
+    VF_INFO("Renderer shutdown complete");
 }
 
 void Renderer::createSwapChain() {
@@ -229,7 +229,7 @@ void Renderer::createSwapChain() {
         }
     }
     
-    LOG_INFO("Swapchain created: {} images, {}x{}", 
+    VF_INFO("Swapchain created: {} images, {}x{}", 
              swapchainImages.size(), extent.width, extent.height);
 }
 
@@ -309,7 +309,7 @@ void Renderer::createRenderPass() {
         throw std::runtime_error(std::string("Failed to create render pass: ") + e.what());
     }
     
-    LOG_INFO("Render pass created");
+    VF_INFO("Render pass created");
 }
 
 void Renderer::createFramebuffers() {
@@ -339,7 +339,7 @@ void Renderer::createFramebuffers() {
         }
     }
     
-    LOG_INFO("Framebuffers created: {}", framebuffers.size());
+    VF_INFO("Framebuffers created: {}", framebuffers.size());
 }
 
 void Renderer::createCommandBuffers() {
@@ -374,7 +374,7 @@ void Renderer::createCommandBuffers() {
         throw std::runtime_error(std::string("Failed to allocate command buffers: ") + e.what());
     }
     
-    LOG_INFO("Command buffers created: {}", commandBuffers.size());
+    VF_INFO("Command buffers created: {}", commandBuffers.size());
 }
 
 void Renderer::createSyncObjects() {
@@ -401,7 +401,7 @@ void Renderer::createSyncObjects() {
         }
     }
     
-    LOG_INFO("Synchronization objects created");
+    VF_INFO("Synchronization objects created");
 }
 
 void Renderer::beginFrame() {
@@ -412,7 +412,7 @@ void Renderer::beginFrame() {
         1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
     
     if (result != vk::Result::eSuccess) {
-        LOG_ERROR("Failed to wait for fence");
+        VF_ERROR("Failed to wait for fence");
     }
     
     // Acquire next image
@@ -524,7 +524,7 @@ void Renderer::render(World* world, Camera* camera) {
     PROFILE_FUNCTION();
     
     if (!world || !camera) {
-        LOG_WARN("Render called with null world or camera");
+        VF_WARN("Render called with null world or camera");
         return;
     }
     
@@ -589,7 +589,7 @@ void Renderer::onResize(int newWidth, int newHeight) {
     context->getDevice().waitIdle();
     recreateSwapChain();
     
-    LOG_INFO("Window resized: {}x{}", width, height);
+    VF_INFO("Window resized: {}x{}", width, height);
 }
 
 void Renderer::recreateSwapChain() {
@@ -623,7 +623,7 @@ void Renderer::recreateSwapChain() {
 void Renderer::takeScreenshot(const std::string& path) {
     PROFILE_FUNCTION();
     
-    LOG_INFO("Taking screenshot: {}", path);
+    VF_INFO("Taking screenshot: {}", path);
     
     // TODO: Implement screenshot functionality
     // 1. Create a buffer image
@@ -631,20 +631,20 @@ void Renderer::takeScreenshot(const std::string& path) {
     // 3. Map and read the image data
     // 4. Save to file (PNG or BMP)
     
-    LOG_WARN("Screenshot not yet implemented");
+    VF_WARN("Screenshot not yet implemented");
 }
 
 void Renderer::reloadShaders() {
     PROFILE_FUNCTION();
     
-    LOG_INFO("Reloading shaders...");
+    VF_INFO("Reloading shaders...");
     
     // TODO: Implement shader reloading
     // 1. Destroy old pipelines
     // 2. Recreate shader modules
     // 3. Recreate pipelines
     
-    LOG_WARN("Shader reloading not yet implemented");
+    VF_WARN("Shader reloading not yet implemented");
 }
 
 // ============================================================================

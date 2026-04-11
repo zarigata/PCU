@@ -48,7 +48,7 @@ void DimensionRegistry::registerVanillaDimensions() {
     end->setBedrockCeiling(false);
     registerDimension(std::move(end));
     
-    LOG_INFO("Registered {} vanilla dimensions", dimensions.size());
+    VF_INFO("Registered {} vanilla dimensions", dimensions.size());
 }
 
 void DimensionRegistry::registerDimension(std::unique_ptr<Dimension> dimension) {

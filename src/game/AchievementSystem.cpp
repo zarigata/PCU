@@ -153,16 +153,16 @@ std::unique_ptr<Advancement> Advancement::fromJson(const nlohmann::json& json, c
 // ============================================================================
 
 AchievementSystem::AchievementSystem() {
-    LOG_INFO("AchievementSystem created");
+    VF_INFO("AchievementSystem created");
 }
 
 AchievementSystem::~AchievementSystem() {
-    LOG_INFO("AchievementSystem destroyed");
+    VF_INFO("AchievementSystem destroyed");
 }
 
 void AchievementSystem::registerAdvancement(std::unique_ptr<Advancement> advancement) {
     if (!advancement || advancement->id.empty()) {
-        LOG_ERROR("Cannot register null or empty advancement");
+        VF_ERROR("Cannot register null or empty advancement");
         return;
     }
     
@@ -176,7 +176,7 @@ void AchievementSystem::registerAdvancement(std::unique_ptr<Advancement> advance
     }
     
     advancements[id] = std::move(advancement);
-    LOG_DEBUG("Registered advancement: {}", id);
+    VF_DEBUG("Registered advancement: {}", id);
 }
 
 void AchievementSystem::unregisterAdvancement(const std::string& id) {
@@ -198,7 +198,7 @@ void AchievementSystem::unregisterAdvancement(const std::string& id) {
 }
 
 void AchievementSystem::loadAdvancements(const std::string& directory) {
-    LOG_INFO("Loading advancements from: {}", directory);
+    VF_INFO("Loading advancements from: {}", directory);
     // TODO: Load from JSON files
 }
 
@@ -444,7 +444,7 @@ void AchievementSystem::setOnAdvancementRevoked(AdvancementCallback callback) {
 }
 
 void AchievementSystem::registerVanillaAdvancements() {
-    LOG_INFO("Registering vanilla advancements...");
+    VF_INFO("Registering vanilla advancements...");
     
     // Stone Age
     auto stoneAge = std::make_unique<Advancement>();
@@ -480,7 +480,7 @@ void AchievementSystem::registerVanillaAdvancements() {
     
     registerAdvancement(std::move(ironAge));
     
-    LOG_INFO("Registered {} advancements", advancements.size());
+    VF_INFO("Registered {} advancements", advancements.size());
 }
 
 void AchievementSystem::checkAndGrant(uint32_t playerId, const std::string& advancementId) {
@@ -516,7 +516,7 @@ void AchievementSystem::checkAndGrant(uint32_t playerId, const std::string& adva
 void AchievementSystem::grantRewards(uint32_t playerId, const Advancement& advancement) {
     if (advancement.rewards.experience > 0) {
         // TODO: Grant experience to player
-        LOG_DEBUG("Granting {} XP to player {}", advancement.rewards.experience, playerId);
+        VF_DEBUG("Granting {} XP to player {}", advancement.rewards.experience, playerId);
     }
     
     if (!advancement.rewards.recipes.empty()) {

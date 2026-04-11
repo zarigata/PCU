@@ -175,7 +175,7 @@ bool InventoryComponent::isEmpty() const {
 // ============================================================================
 
 InventorySystem::InventorySystem() {
-    LOG_INFO("InventorySystem created");
+    VF_INFO("InventorySystem created");
 }
 
 void InventorySystem::update(ECSWorld& world, float deltaTime) {

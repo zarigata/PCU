@@ -11,7 +11,7 @@
 namespace VoxelForge {
 
 ProjectileSystem::ProjectileSystem() {
-    LOG_INFO("ProjectileSystem created");
+    VF_INFO("ProjectileSystem created");
 }
 
 void ProjectileSystem::update(ECSWorld& world, float deltaTime) {
@@ -43,7 +43,7 @@ void ProjectileSystem::update(ECSWorld& world, float deltaTime) {
 
 void ProjectileSystem::onHitBlock(ECSWorld& world, Entity entity, ProjectileComponent& projectile, const BlockPos& pos) {
     projectile.inGround = true;
-    LOG_DEBUG("Projectile {} hit block at ({}, {}, {})", entity, pos.x, pos.y, pos.z);
+    VF_DEBUG("Projectile {} hit block at ({}, {}, {})", entity, pos.x, pos.y, pos.z);
 }
 
 void ProjectileSystem::onHitEntity(ECSWorld& world, Entity projectileEntity, ProjectileComponent& projectile, 
@@ -51,7 +51,7 @@ void ProjectileSystem::onHitEntity(ECSWorld& world, Entity projectileEntity, Pro
     // Apply damage
     targetLiving.health -= projectile.damage;
     
-    LOG_DEBUG("Projectile {} hit entity {} for {} damage", 
+    VF_DEBUG("Projectile {} hit entity {} for {} damage", 
               projectileEntity, target, projectile.damage);
     
     // Handle piercing

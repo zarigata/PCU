@@ -11,7 +11,7 @@ namespace VoxelForge {
 
 ChunkManager::ChunkManager(World* world, int viewDistance)
     : world_(world), viewDistance_(viewDistance) {
-    LOG_INFO("ChunkManager created with view distance {}", viewDistance);
+    VF_INFO("ChunkManager created with view distance {}", viewDistance);
 }
 
 ChunkManager::~ChunkManager() {
@@ -84,7 +84,7 @@ void ChunkManager::loadChunk(const ChunkPos& pos) {
     // TODO: Call world generator
     
     loadedChunks_[pos] = std::move(chunk);
-    LOG_DEBUG("Loaded chunk ({}, {})", pos.x, pos.z);
+    VF_DEBUG("Loaded chunk ({}, {})", pos.x, pos.z);
 }
 
 void ChunkManager::unloadChunk(const ChunkPos& pos) {
@@ -92,13 +92,13 @@ void ChunkManager::unloadChunk(const ChunkPos& pos) {
     if (it != loadedChunks_.end()) {
         // TODO: Save chunk before unloading
         loadedChunks_.erase(it);
-        LOG_DEBUG("Unloaded chunk ({}, {})", pos.x, pos.z);
+        VF_DEBUG("Unloaded chunk ({}, {})", pos.x, pos.z);
     }
 }
 
 void ChunkManager::unloadAllChunks() {
     loadedChunks_.clear();
-    LOG_INFO("Unloaded all chunks");
+    VF_INFO("Unloaded all chunks");
 }
 
 size_t ChunkManager::getLoadedCount() const {

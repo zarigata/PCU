@@ -13,17 +13,17 @@ namespace VoxelForge {
 // ============================================================================
 
 Client::Client() : NetworkManager() {
-    LOG_INFO("Client created");
+    VF_INFO("Client created");
 }
 
 Client::~Client() {
     disconnect();
-    LOG_INFO("Client destroyed");
+    VF_INFO("Client destroyed");
 }
 
 bool Client::connect(const std::string& hostAddress, uint16_t port) {
     if (initialized) {
-        LOG_ERROR("Client already connected");
+        VF_ERROR("Client already connected");
         return false;
     }
     
@@ -32,7 +32,7 @@ bool Client::connect(const std::string& hostAddress, uint16_t port) {
                             config.incomingBandwidth, config.outgoingBandwidth);
     
     if (!host) {
-        LOG_ERROR("Failed to create client");
+        VF_ERROR("Failed to create client");
         return false;
     }
     
@@ -44,7 +44,7 @@ bool Client::connect(const std::string& hostAddress, uint16_t port) {
     // Connect
     serverPeer = enet_host_connect(host, &address, config.maxChannels, 0);
     if (!serverPeer) {
-        LOG_ERROR("Failed to initiate connection to {}:{}", hostAddress, port);
+        VF_ERROR("Failed to initiate connection to {}:{}", hostAddress, port);
         enet_host_destroy(host);
         host = nullptr;
         return false;
@@ -59,12 +59,12 @@ bool Client::connect(const std::string& hostAddress, uint16_t port) {
     ENetEvent event;
     if (enet_host_service(host, &event, config.connectionTimeout) > 0 &&
         event.type == ENET_EVENT_TYPE_CONNECT) {
-        LOG_INFO("Connected to {}:{}", hostAddress, port);
+        VF_INFO("Connected to {}:{}", hostAddress, port);
         state = ConnectionState::Handshaking;
         return true;
     }
     
-    LOG_ERROR("Connection to {}:{} timed out", hostAddress, port);
+    VF_ERROR("Connection to {}:{} timed out", hostAddress, port);
     enet_peer_reset(serverPeer);
     serverPeer = nullptr;
     enet_host_destroy(host);
@@ -100,12 +100,12 @@ void Client::disconnect() {
     initialized = false;
     state = ConnectionState::Disconnected;
     
-    LOG_INFO("Disconnected from server");
+    VF_INFO("Disconnected from server");
 }
 
 void Client::login(const std::string& username) {
     if (!isConnected()) {
-        LOG_ERROR("Not connected to server");
+        VF_ERROR("Not connected to server");
         return;
     }
     
@@ -120,7 +120,7 @@ void Client::login(const std::string& username) {
     packet.reliability = PacketReliability::Reliable;
     sendPacket(serverId, packet);
     
-    LOG_INFO("Logging in as {}", username);
+    VF_INFO("Logging in as {}", username);
 }
 
 void Client::sendPosition(const glm::vec3& pos, float yaw, float pitch) {

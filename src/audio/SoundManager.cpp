@@ -13,7 +13,7 @@ namespace VoxelForge {
 // ============================================================================
 
 SoundManager::SoundManager() {
-    LOG_INFO("SoundManager created");
+    VF_INFO("SoundManager created");
 }
 
 SoundManager::~SoundManager() {
@@ -23,12 +23,12 @@ SoundManager::~SoundManager() {
 void SoundManager::init(AudioSystem* audioSystem) {
     audio = audioSystem;
     if (!audio) {
-        LOG_ERROR("SoundManager: Invalid audio system");
+        VF_ERROR("SoundManager: Invalid audio system");
         return;
     }
     
     loadAllSounds();
-    LOG_INFO("SoundManager initialized");
+    VF_INFO("SoundManager initialized");
 }
 
 void SoundManager::shutdown() {
@@ -40,7 +40,7 @@ void SoundManager::shutdown() {
     musicTracks.clear();
     
     audio = nullptr;
-    LOG_INFO("SoundManager shutdown");
+    VF_INFO("SoundManager shutdown");
 }
 
 void SoundManager::loadBlockSounds() {
@@ -88,7 +88,7 @@ void SoundManager::loadBlockSounds() {
     audio->loadSound("block.metal.step", "sounds/block/metal/step.ogg", false, true);
     blockSounds["minecraft:iron_block"] = {"block.metal.break", "block.metal.place", "block.metal.step"};
     
-    LOG_INFO("Loaded block sounds");
+    VF_INFO("Loaded block sounds");
 }
 
 void SoundManager::loadEntitySounds() {
@@ -137,7 +137,7 @@ void SoundManager::loadEntitySounds() {
     audio->loadSound("entity.chicken.death", "sounds/entity/chicken/death.ogg", false, true);
     entitySounds["minecraft:chicken"] = {"entity.chicken.ambient", "entity.chicken.hurt", "entity.chicken.death"};
     
-    LOG_INFO("Loaded entity sounds");
+    VF_INFO("Loaded entity sounds");
 }
 
 void SoundManager::loadAmbientSounds() {
@@ -156,7 +156,7 @@ void SoundManager::loadAmbientSounds() {
     audio->loadSound("weather.rain", "sounds/weather/rain.ogg", true, true);
     audio->loadSound("weather.thunder", "sounds/weather/thunder.ogg", false, true);
     
-    LOG_INFO("Loaded ambient sounds");
+    VF_INFO("Loaded ambient sounds");
 }
 
 void SoundManager::loadMusic() {
@@ -179,7 +179,7 @@ void SoundManager::loadMusic() {
         audio->loadSound(track, path, true, false);
     }
     
-    LOG_INFO("Loaded {} music tracks", musicTracks.size());
+    VF_INFO("Loaded {} music tracks", musicTracks.size());
 }
 
 void SoundManager::loadUISounds() {
@@ -192,7 +192,7 @@ void SoundManager::loadUISounds() {
     audio->loadSound("ui.chat.message", "sounds/ui/chat/message.ogg", false, false);
     audio->loadSound("ui.levelup", "sounds/ui/levelup.ogg", false, false);
     
-    LOG_INFO("Loaded UI sounds");
+    VF_INFO("Loaded UI sounds");
 }
 
 void SoundManager::loadAllSounds() {
@@ -202,7 +202,7 @@ void SoundManager::loadAllSounds() {
     loadMusic();
     loadUISounds();
     
-    LOG_INFO("All sounds loaded");
+    VF_INFO("All sounds loaded");
 }
 
 uint32_t SoundManager::playBlockSound(const std::string& blockName, const std::string& action,
@@ -345,7 +345,7 @@ void SoundManager::update(float deltaTime) {
 void SoundManager::setSoundPack(const std::string& packName) {
     currentSoundPack = packName;
     // TODO: Reload all sounds from new pack
-    LOG_INFO("Switched to sound pack: {}", packName);
+    VF_INFO("Switched to sound pack: {}", packName);
 }
 
 std::string SoundManager::getRandomVariant(const std::string& baseName, int variants) {

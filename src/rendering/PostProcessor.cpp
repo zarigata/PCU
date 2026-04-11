@@ -14,7 +14,7 @@ namespace VoxelForge {
 // ============================================================================
 
 PostProcessor::PostProcessor() {
-    LOG_INFO("PostProcessor created");
+    VF_INFO("PostProcessor created");
 }
 
 PostProcessor::~PostProcessor() {
@@ -26,7 +26,7 @@ void PostProcessor::init(VulkanDevice* vulkanDevice, vk::Extent2D swapchainExten
     extent = swapchainExtent;
     
     if (!device) {
-        LOG_ERROR("PostProcessor: Invalid device");
+        VF_ERROR("PostProcessor: Invalid device");
         return;
     }
     
@@ -38,7 +38,7 @@ void PostProcessor::init(VulkanDevice* vulkanDevice, vk::Extent2D swapchainExten
     
     applyOverworldPreset();
     
-    LOG_INFO("PostProcessor initialized at {}x{}", extent.width, extent.height);
+    VF_INFO("PostProcessor initialized at {}x{}", extent.width, extent.height);
 }
 
 void PostProcessor::cleanup() {
@@ -83,7 +83,7 @@ void PostProcessor::cleanup() {
         device->getDevice().destroyImageView(historyView);
     }
     
-    LOG_INFO("PostProcessor cleaned up");
+    VF_INFO("PostProcessor cleaned up");
 }
 
 void PostProcessor::onResize(vk::Extent2D newExtent) {
@@ -100,7 +100,7 @@ void PostProcessor::onResize(vk::Extent2D newExtent) {
         // Recreate framebuffer
     }
     
-    LOG_INFO("PostProcessor resized to {}x{}", extent.width, extent.height);
+    VF_INFO("PostProcessor resized to {}x{}", extent.width, extent.height);
 }
 
 void PostProcessor::beginFrame(vk::CommandBuffer cmd, vk::ImageView color, vk::ImageView depth) {

@@ -58,17 +58,17 @@ bool Recipe::matchesShapeless(const std::vector<ItemStack>& ingredients) const {
 // ============================================================================
 
 CraftingSystem::CraftingSystem() {
-    LOG_INFO("CraftingSystem created");
+    VF_INFO("CraftingSystem created");
     registerVanillaRecipes();
 }
 
 CraftingSystem::~CraftingSystem() {
-    LOG_INFO("CraftingSystem destroyed");
+    VF_INFO("CraftingSystem destroyed");
 }
 
 void CraftingSystem::registerRecipe(const Recipe& recipe) {
     recipes_.push_back(recipe);
-    LOG_DEBUG("Registered recipe: {} -> {}", recipe.name, recipe.result.item);
+    VF_DEBUG("Registered recipe: {} -> {}", recipe.name, recipe.result.item);
 }
 
 const Recipe* CraftingSystem::findRecipe(const std::vector<ItemStack>& ingredients, 
@@ -154,7 +154,7 @@ ItemStack CraftingSystem::craft(const Recipe& recipe, std::vector<ItemStack>& in
 }
 
 void CraftingSystem::registerVanillaRecipes() {
-    LOG_INFO("Registering vanilla recipes...");
+    VF_INFO("Registering vanilla recipes...");
     
     // Wood planks from logs
     Recipe planks;
@@ -320,7 +320,7 @@ void CraftingSystem::registerVanillaRecipes() {
     bread.result = {1, 17};
     registerRecipe(bread);
     
-    LOG_INFO("Registered {} vanilla recipes", recipes_.size());
+    VF_INFO("Registered {} vanilla recipes", recipes_.size());
 }
 
 // ============================================================================
@@ -328,12 +328,12 @@ void CraftingSystem::registerVanillaRecipes() {
 // ============================================================================
 
 SmeltingSystem::SmeltingSystem() {
-    LOG_INFO("SmeltingSystem created");
+    VF_INFO("SmeltingSystem created");
     registerVanillaSmeltingRecipes();
 }
 
 SmeltingSystem::~SmeltingSystem() {
-    LOG_INFO("SmeltingSystem destroyed");
+    VF_INFO("SmeltingSystem destroyed");
 }
 
 void SmeltingSystem::registerSmeltingRecipe(const SmeltingRecipe& recipe) {
@@ -375,7 +375,7 @@ bool SmeltingSystem::isFuel(ItemId item) const {
 }
 
 void SmeltingSystem::registerVanillaSmeltingRecipes() {
-    LOG_INFO("Registering vanilla smelting recipes...");
+    VF_INFO("Registering vanilla smelting recipes...");
     
     // Iron ore -> Iron ingot
     registerSmeltingRecipe({200, 300, 10.0f, 0.7f});
@@ -410,7 +410,7 @@ void SmeltingSystem::registerVanillaSmeltingRecipes() {
     // Potato -> Baked potato
     registerSmeltingRecipe({500, 501, 10.0f, 0.35f});
     
-    LOG_INFO("Registered {} smelting recipes", smeltingRecipes_.size());
+    VF_INFO("Registered {} smelting recipes", smeltingRecipes_.size());
 }
 
 } // namespace VoxelForge

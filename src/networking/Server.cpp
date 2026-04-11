@@ -13,17 +13,17 @@ namespace VoxelForge {
 // ============================================================================
 
 Server::Server() : NetworkManager() {
-    LOG_INFO("Server created");
+    VF_INFO("Server created");
 }
 
 Server::~Server() {
     stop();
-    LOG_INFO("Server destroyed");
+    VF_INFO("Server destroyed");
 }
 
 bool Server::start(uint16_t port, uint16_t maxPlayers) {
     if (initialized) {
-        LOG_ERROR("Server already running");
+        VF_ERROR("Server already running");
         return false;
     }
     
@@ -39,14 +39,14 @@ bool Server::start(uint16_t port, uint16_t maxPlayers) {
                             config.incomingBandwidth, config.outgoingBandwidth);
     
     if (!host) {
-        LOG_ERROR("Failed to create server on port {}", port);
+        VF_ERROR("Failed to create server on port {}", port);
         return false;
     }
     
     initialized = true;
     state = ConnectionState::Connected;
     
-    LOG_INFO("Server started on port {} with max {} players", port, maxPlayers);
+    VF_INFO("Server started on port {} with max {} players", port, maxPlayers);
     return true;
 }
 
@@ -71,7 +71,7 @@ void Server::stop() {
     initialized = false;
     state = ConnectionState::Disconnected;
     
-    LOG_INFO("Server stopped");
+    VF_INFO("Server stopped");
 }
 
 void Server::kickClient(uint32_t clientId, const std::string& reason) {
@@ -93,7 +93,7 @@ void Server::kickClient(uint32_t clientId, const std::string& reason) {
         enet_peer_disconnect(peerIt->second, 0);
     }
     
-    LOG_INFO("Kicked client {}: {}", clientId, reason);
+    VF_INFO("Kicked client {}: {}", clientId, reason);
 }
 
 void Server::banClient(uint32_t clientId) {
@@ -107,7 +107,7 @@ void Server::banClient(uint32_t clientId) {
 void Server::banIP(const std::string& ip) {
     if (!isBanned(ip)) {
         bannedIPs.push_back(ip);
-        LOG_INFO("Banned IP: {}", ip);
+        VF_INFO("Banned IP: {}", ip);
     }
 }
 
@@ -160,7 +160,7 @@ void Server::broadcastChatMessage(const std::string& sender, const std::string& 
     packet.data = writer.build();
     broadcastPacket(packet);
     
-    LOG_INFO("[Chat] {}: {}", sender, message);
+    VF_INFO("[Chat] {}: {}", sender, message);
 }
 
 void Server::broadcastSystemMessage(const std::string& message) {
@@ -172,7 +172,7 @@ void Server::broadcastSystemMessage(const std::string& message) {
     packet.data = writer.build();
     broadcastPacket(packet);
     
-    LOG_INFO("[System] {}", message);
+    VF_INFO("[System] {}", message);
 }
 
 } // namespace VoxelForge

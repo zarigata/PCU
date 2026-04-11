@@ -69,11 +69,11 @@ const glm::vec2 ChunkMesher::FACE_UVS[4] = {
 // ============================================================================
 
 ChunkMesher::ChunkMesher() {
-    LOG_INFO("ChunkMesher created");
+    VF_INFO("ChunkMesher created");
 }
 
 ChunkMesher::~ChunkMesher() {
-    LOG_INFO("ChunkMesher destroyed");
+    VF_INFO("ChunkMesher destroyed");
 }
 
 void ChunkMesher::resetStats() {
@@ -85,7 +85,7 @@ ChunkMeshResult ChunkMesher::generateMesh(const Chunk* chunk, World* world) {
     result.position = chunk->getPosition();
     
     if (!chunk) {
-        LOG_ERROR("Null chunk passed to generateMesh");
+        VF_ERROR("Null chunk passed to generateMesh");
         return result;
     }
     
@@ -138,7 +138,7 @@ ChunkMeshResult ChunkMesher::generateSectionMesh(const Chunk* chunk, int section
     result.position = chunk->getPosition();
     
     if (!chunk || sectionY < 0 || sectionY >= SECTIONS_PER_CHUNK) {
-        LOG_ERROR("Invalid parameters for generateSectionMesh");
+        VF_ERROR("Invalid parameters for generateSectionMesh");
         return result;
     }
     
@@ -531,12 +531,12 @@ void ChunkMesher::addQuad(
 // ============================================================================
 
 ChunkMeshManager::ChunkMeshManager() {
-    LOG_INFO("ChunkMeshManager created");
+    VF_INFO("ChunkMeshManager created");
 }
 
 ChunkMeshManager::~ChunkMeshManager() {
     clear();
-    LOG_INFO("ChunkMeshManager destroyed");
+    VF_INFO("ChunkMeshManager destroyed");
 }
 
 void ChunkMeshManager::init(vk::Device device, vk::PhysicalDevice physicalDevice,
@@ -546,7 +546,7 @@ void ChunkMeshManager::init(vk::Device device, vk::PhysicalDevice physicalDevice
     this->queue = queue;
     this->commandPool = commandPool;
     
-    LOG_INFO("ChunkMeshManager initialized");
+    VF_INFO("ChunkMeshManager initialized");
 }
 
 bool ChunkMeshManager::uploadMesh(const ChunkPos& pos, const ChunkMeshData& meshData) {
@@ -636,7 +636,7 @@ bool ChunkMeshManager::uploadMesh(const ChunkPos& pos, const ChunkMeshData& mesh
         return true;
         
     } catch (const std::exception& e) {
-        LOG_ERROR("Failed to upload mesh for chunk ({}, {}): {}", 
+        VF_ERROR("Failed to upload mesh for chunk ({}, {}): {}", 
                   pos.x, pos.z, e.what());
         destroyBuffers(buffers);
         return false;

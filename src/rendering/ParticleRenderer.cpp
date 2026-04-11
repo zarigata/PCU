@@ -16,7 +16,7 @@ namespace VoxelForge {
 // ============================================================================
 
 ParticleRenderer::ParticleRenderer() {
-    LOG_INFO("ParticleRenderer created");
+    VF_INFO("ParticleRenderer created");
 }
 
 ParticleRenderer::~ParticleRenderer() {
@@ -26,7 +26,7 @@ ParticleRenderer::~ParticleRenderer() {
 void ParticleRenderer::init(VulkanDevice* vulkanDevice) {
     device = vulkanDevice;
     if (!device) {
-        LOG_ERROR("ParticleRenderer: Invalid device");
+        VF_ERROR("ParticleRenderer: Invalid device");
         return;
     }
     
@@ -35,7 +35,7 @@ void ParticleRenderer::init(VulkanDevice* vulkanDevice) {
     createBuffers();
     createPipeline();
     
-    LOG_INFO("ParticleRenderer initialized with max {} particles", maxParticles);
+    VF_INFO("ParticleRenderer initialized with max {} particles", maxParticles);
 }
 
 void ParticleRenderer::cleanup() {
@@ -57,7 +57,7 @@ void ParticleRenderer::cleanup() {
     systems.clear();
     allParticles.clear();
     
-    LOG_INFO("ParticleRenderer cleaned up");
+    VF_INFO("ParticleRenderer cleaned up");
 }
 
 void ParticleRenderer::beginFrame(vk::CommandBuffer cmd, Camera* camera) {
@@ -93,7 +93,7 @@ uint32_t ParticleRenderer::createSystem(const ParticleEmitter& emitter) {
     
     systems[id] = system;
     
-    LOG_DEBUG("Created particle system {} with {} max particles", id, emitter.maxParticles);
+    VF_DEBUG("Created particle system {} with {} max particles", id, emitter.maxParticles);
     return id;
 }
 

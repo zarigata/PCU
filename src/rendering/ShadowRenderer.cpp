@@ -15,7 +15,7 @@ namespace VoxelForge {
 // ============================================================================
 
 ShadowRenderer::ShadowRenderer() {
-    LOG_INFO("ShadowRenderer created");
+    VF_INFO("ShadowRenderer created");
 }
 
 ShadowRenderer::~ShadowRenderer() {
@@ -25,7 +25,7 @@ ShadowRenderer::~ShadowRenderer() {
 void ShadowRenderer::init(VulkanDevice* vulkanDevice) {
     device = vulkanDevice;
     if (!device) {
-        LOG_ERROR("ShadowRenderer: Invalid device");
+        VF_ERROR("ShadowRenderer: Invalid device");
         return;
     }
     
@@ -37,7 +37,7 @@ void ShadowRenderer::init(VulkanDevice* vulkanDevice) {
     createPipeline();
     createUniformBuffers();
     
-    LOG_INFO("ShadowRenderer initialized with {} cascades at {}x{}", 
+    VF_INFO("ShadowRenderer initialized with {} cascades at {}x{}", 
              settings.cascadeCount, settings.resolution, settings.resolution);
 }
 
@@ -66,7 +66,7 @@ void ShadowRenderer::cleanup() {
     uniformBuffers.clear();
     cascades.clear();
     
-    LOG_INFO("ShadowRenderer cleaned up");
+    VF_INFO("ShadowRenderer cleaned up");
 }
 
 void ShadowRenderer::beginFrame(Camera* camera, const glm::vec3& lightDir) {

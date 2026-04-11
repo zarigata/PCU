@@ -11,7 +11,7 @@
 namespace VoxelForge {
 
 MobAISystem::MobAISystem() {
-    LOG_INFO("MobAISystem created");
+    VF_INFO("MobAISystem created");
 }
 
 void MobAISystem::update(ECSWorld& world, float deltaTime) {

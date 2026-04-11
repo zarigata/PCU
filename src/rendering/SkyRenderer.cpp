@@ -15,7 +15,7 @@ namespace VoxelForge {
 // ============================================================================
 
 SkyRenderer::SkyRenderer() {
-    LOG_INFO("SkyRenderer created");
+    VF_INFO("SkyRenderer created");
 }
 
 SkyRenderer::~SkyRenderer() {
@@ -25,7 +25,7 @@ SkyRenderer::~SkyRenderer() {
 void SkyRenderer::init(VulkanDevice* vulkanDevice) {
     device = vulkanDevice;
     if (!device) {
-        LOG_ERROR("SkyRenderer: Invalid device");
+        VF_ERROR("SkyRenderer: Invalid device");
         return;
     }
     
@@ -46,7 +46,7 @@ void SkyRenderer::init(VulkanDevice* vulkanDevice) {
     
     setOverworldSky();
     
-    LOG_INFO("SkyRenderer initialized");
+    VF_INFO("SkyRenderer initialized");
 }
 
 void SkyRenderer::cleanup() {
@@ -71,7 +71,7 @@ void SkyRenderer::cleanup() {
         device->getDevice().destroyPipelineLayout(cloudPipelineLayout);
     }
     
-    LOG_INFO("SkyRenderer cleaned up");
+    VF_INFO("SkyRenderer cleaned up");
 }
 
 void SkyRenderer::beginFrame(vk::CommandBuffer cmd, Camera* camera) {

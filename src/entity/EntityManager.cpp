@@ -11,12 +11,12 @@ namespace VoxelForge {
 
 EntityManager::EntityManager() 
     : nextEntityId_(1) {
-    LOG_INFO("EntityManager created");
+    VF_INFO("EntityManager created");
 }
 
 EntityManager::~EntityManager() {
     entities_.clear();
-    LOG_INFO("EntityManager destroyed");
+    VF_INFO("EntityManager destroyed");
 }
 
 Entity EntityManager::createEntity() {
@@ -33,7 +33,7 @@ void EntityManager::destroyEntity(Entity entity) {
         entitySet.erase(entity);
     }
     
-    LOG_DEBUG("Destroyed entity {}", entity);
+    VF_DEBUG("Destroyed entity {}", entity);
 }
 
 bool EntityManager::exists(Entity entity) const {
@@ -91,7 +91,7 @@ void EntityManager::clear() {
     entities_.clear();
     spatialIndex_.clear();
     nextEntityId_ = 1;
-    LOG_INFO("All entities cleared");
+    VF_INFO("All entities cleared");
 }
 
 UUID EntityManager::generateUUID() {

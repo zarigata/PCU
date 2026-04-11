@@ -32,6 +32,7 @@ namespace VoxelForge {
 using BiomeId = uint16_t;
 
 // Forward declarations
+struct OreVein;
 class Biome;
 class Structure;
 

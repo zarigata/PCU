@@ -10,7 +10,7 @@
 namespace VoxelForge {
 
 LightEngine::LightEngine(World* world) : world_(world) {
-    LOG_INFO("LightEngine created");
+    VF_INFO("LightEngine created");
 }
 
 void LightEngine::updateChunk(Chunk* chunk) {

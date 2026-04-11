@@ -244,12 +244,12 @@ RecipeRegistry& RecipeRegistry::getInstance() {
 }
 
 RecipeRegistry::RecipeRegistry() {
-    LOG_INFO("RecipeRegistry created");
+    VF_INFO("RecipeRegistry created");
 }
 
 void RecipeRegistry::registerRecipe(std::unique_ptr<Recipe> recipe) {
     if (!recipe || recipe->id.empty()) {
-        LOG_ERROR("Cannot register null or empty recipe");
+        VF_ERROR("Cannot register null or empty recipe");
         return;
     }
     
@@ -269,7 +269,7 @@ void RecipeRegistry::registerRecipe(std::unique_ptr<Recipe> recipe) {
         }
     }
     
-    LOG_DEBUG("Registered recipe: {}", id);
+    VF_DEBUG("Registered recipe: {}", id);
 }
 
 void RecipeRegistry::unregisterRecipe(const std::string& id) {
@@ -293,7 +293,7 @@ void RecipeRegistry::unregisterRecipe(const std::string& id) {
     }
     
     recipes.erase(it);
-    LOG_DEBUG("Unregistered recipe: {}", id);
+    VF_DEBUG("Unregistered recipe: {}", id);
 }
 
 void RecipeRegistry::clear() {
@@ -301,7 +301,7 @@ void RecipeRegistry::clear() {
     recipesByType.clear();
     recipesByOutput.clear();
     recipesByInput.clear();
-    LOG_INFO("RecipeRegistry cleared");
+    VF_INFO("RecipeRegistry cleared");
 }
 
 void RecipeRegistry::clearModRecipes(const std::string& modId) {
@@ -418,7 +418,7 @@ bool RecipeRegistry::canCraft(const Recipe& recipe, const std::vector<ItemStack>
 }
 
 void RecipeRegistry::registerVanillaRecipes() {
-    LOG_INFO("Registering vanilla recipes...");
+    VF_INFO("Registering vanilla recipes...");
     
     // Oak planks from log
     auto planks = std::make_unique<ShapedRecipe>();
@@ -524,12 +524,12 @@ void RecipeRegistry::registerVanillaRecipes() {
     ironIngot->experience = 0.7f;
     registerRecipe(std::move(ironIngot));
     
-    LOG_INFO("Registered {} vanilla recipes", recipes.size());
+    VF_INFO("Registered {} vanilla recipes", recipes.size());
 }
 
 void RecipeRegistry::loadFromDirectory(const std::string& path) {
     // TODO: Load recipes from JSON files in directory
-    LOG_INFO("Loading recipes from directory: {}", path);
+    VF_INFO("Loading recipes from directory: {}", path);
 }
 
 void RecipeRegistry::loadFromJson(const nlohmann::json& json) {

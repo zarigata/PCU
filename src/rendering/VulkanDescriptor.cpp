@@ -40,7 +40,7 @@ vk::UniqueDescriptorSetLayout VulkanDescriptorSetLayoutBuilder::build() {
     try {
         return device_.createDescriptorSetLayoutUnique(layoutInfo);
     } catch (const vk::SystemError& e) {
-        LOG_ERROR("Failed to create descriptor set layout: {}", e.what());
+        VF_ERROR("Failed to create descriptor set layout: {}", e.what());
         return vk::UniqueDescriptorSetLayout{};
     }
 }
@@ -85,7 +85,7 @@ vk::UniqueDescriptorPool VulkanDescriptorPoolBuilder::build() {
     try {
         return device_.createDescriptorPoolUnique(poolInfo);
     } catch (const vk::SystemError& e) {
-        LOG_ERROR("Failed to create descriptor pool: {}", e.what());
+        VF_ERROR("Failed to create descriptor pool: {}", e.what());
         return vk::UniqueDescriptorPool{};
     }
 }
@@ -143,7 +143,7 @@ vk::DescriptorSet VulkanDescriptorWriter::build(vk::Device device) {
     try {
         descriptorSet = device.allocateDescriptorSets(allocInfo)[0];
     } catch (const vk::SystemError& e) {
-        LOG_ERROR("Failed to allocate descriptor set: {}", e.what());
+        VF_ERROR("Failed to allocate descriptor set: {}", e.what());
         return vk::DescriptorSet{};
     }
     
@@ -179,13 +179,13 @@ void VulkanDescriptorWriter::overwrite(vk::Device device, vk::DescriptorSet set)
 
 DescriptorSetManager::DescriptorSetManager(vk::Device device)
     : device_(device) {
-    LOG_INFO("DescriptorSetManager created");
+    VF_INFO("DescriptorSetManager created");
 }
 
 DescriptorSetManager::~DescriptorSetManager() {
     pools_.clear();
     layouts_.clear();
-    LOG_INFO("DescriptorSetManager destroyed");
+    VF_INFO("DescriptorSetManager destroyed");
 }
 
 void DescriptorSetManager::createLayout(const std::string& name,
@@ -197,7 +197,7 @@ void DescriptorSetManager::createLayout(const std::string& name,
     layoutInfo.pBindings = bindings.data();
     
     layouts_[name] = device_.createDescriptorSetLayoutUnique(layoutInfo);
-    LOG_DEBUG("Created descriptor set layout: {}", name);
+    VF_DEBUG("Created descriptor set layout: {}", name);
 }
 
 vk::DescriptorSetLayout DescriptorSetManager::getLayout(const std::string& name) const {
@@ -205,7 +205,7 @@ vk::DescriptorSetLayout DescriptorSetManager::getLayout(const std::string& name)
     if (it != layouts_.end()) {
         return it->second.get();
     }
-    LOG_WARN("Descriptor set layout not found: {}", name);
+    VF_WARN("Descriptor set layout not found: {}", name);
     return vk::DescriptorSetLayout{};
 }
 
@@ -220,7 +220,7 @@ void DescriptorSetManager::createPool(const std::string& name,
     poolInfo.pPoolSizes = poolSizes.data();
     
     pools_[name] = device_.createDescriptorPoolUnique(poolInfo);
-    LOG_DEBUG("Created descriptor pool: {}", name);
+    VF_DEBUG("Created descriptor pool: {}", name);
 }
 
 vk::DescriptorPool DescriptorSetManager::getPool(const std::string& name) const {
@@ -228,7 +228,7 @@ vk::DescriptorPool DescriptorSetManager::getPool(const std::string& name) const 
     if (it != pools_.end()) {
         return it->second.get();
     }
-    LOG_WARN("Descriptor pool not found: {}", name);
+    VF_WARN("Descriptor pool not found: {}", name);
     return vk::DescriptorPool{};
 }
 
@@ -239,7 +239,7 @@ vk::DescriptorSet DescriptorSetManager::allocate(const std::string& layoutName,
     auto pool = getPool(poolName);
     
     if (!layout || !pool) {
-        LOG_ERROR("Failed to allocate descriptor set: layout or pool not found");
+        VF_ERROR("Failed to allocate descriptor set: layout or pool not found");
         return vk::DescriptorSet{};
     }
     
@@ -252,7 +252,7 @@ vk::DescriptorSet DescriptorSetManager::allocate(const std::string& layoutName,
     try {
         return device_.allocateDescriptorSets(allocInfo)[0];
     } catch (const vk::SystemError& e) {
-        LOG_ERROR("Failed to allocate descriptor set: {}", e.what());
+        VF_ERROR("Failed to allocate descriptor set: {}", e.what());
         return vk::DescriptorSet{};
     }
 }

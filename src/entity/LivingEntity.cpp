@@ -9,7 +9,7 @@
 namespace VoxelForge {
 
 LivingEntitySystem::LivingEntitySystem() {
-    LOG_INFO("LivingEntitySystem created");
+    VF_INFO("LivingEntitySystem created");
 }
 
 void LivingEntitySystem::update(ECSWorld& world, float deltaTime) {
@@ -58,7 +58,7 @@ void LivingEntitySystem::applyEffectModifiers(LivingComponent& living, float del
 
 void LivingEntitySystem::onDeath(ECSWorld& world, Entity entity, LivingComponent& living, EntityBaseComponent& base) {
     base.isAlive = false;
-    LOG_DEBUG("Entity {} died", entity);
+    VF_DEBUG("Entity {} died", entity);
     
     // TODO: Spawn death particles
     // TODO: Drop items
@@ -96,7 +96,7 @@ void LivingEntitySystem::heal(LivingComponent& living, float amount) {
     
     float healed = living.health - oldHealth;
     if (healed > 0) {
-        LOG_DEBUG("Healed for {} HP", healed);
+        VF_DEBUG("Healed for {} HP", healed);
     }
 }
 
@@ -104,7 +104,7 @@ void LivingEntitySystem::damage(ECSWorld& world, Entity entity, LivingComponent&
     float actualDamage = calculateDamage(living, amount, type);
     living.health -= actualDamage;
     
-    LOG_DEBUG("Entity {} took {} damage (type: {})", entity, actualDamage, static_cast<int>(type));
+    VF_DEBUG("Entity {} took {} damage (type: {})", entity, actualDamage, static_cast<int>(type));
     
     if (living.health <= 0) {
         living.health = 0;

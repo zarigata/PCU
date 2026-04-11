@@ -9,12 +9,12 @@
 namespace VoxelForge {
 
 GameStateManager::GameStateManager() {
-    LOG_INFO("GameStateManager created");
+    VF_INFO("GameStateManager created");
 }
 
 GameStateManager::~GameStateManager() {
     states_.clear();
-    LOG_INFO("GameStateManager destroyed");
+    VF_INFO("GameStateManager destroyed");
 }
 
 void GameStateManager::pushState(std::unique_ptr<GameState> state) {
@@ -25,7 +25,7 @@ void GameStateManager::pushState(std::unique_ptr<GameState> state) {
     states_.push(std::move(state));
     states_.top()->onEnter();
     
-    LOG_DEBUG("Pushed game state: {}", states_.top()->getName());
+    VF_DEBUG("Pushed game state: {}", states_.top()->getName());
 }
 
 void GameStateManager::popState() {
@@ -38,7 +38,7 @@ void GameStateManager::popState() {
         states_.top()->onResume();
     }
     
-    LOG_DEBUG("Popped game state");
+    VF_DEBUG("Popped game state");
 }
 
 void GameStateManager::changeState(std::unique_ptr<GameState> state) {
@@ -50,7 +50,7 @@ void GameStateManager::changeState(std::unique_ptr<GameState> state) {
     states_.push(std::move(state));
     states_.top()->onEnter();
     
-    LOG_DEBUG("Changed to game state: {}", states_.top()->getName());
+    VF_DEBUG("Changed to game state: {}", states_.top()->getName());
 }
 
 void GameStateManager::update(float deltaTime) {
@@ -87,19 +87,19 @@ bool GameStateManager::isEmpty() const {
 // ============================================================================
 
 MainMenuState::MainMenuState() {
-    LOG_INFO("MainMenuState created");
+    VF_INFO("MainMenuState created");
 }
 
 MainMenuState::~MainMenuState() {
-    LOG_INFO("MainMenuState destroyed");
+    VF_INFO("MainMenuState destroyed");
 }
 
 void MainMenuState::onEnter() {
-    LOG_INFO("Entering main menu");
+    VF_INFO("Entering main menu");
 }
 
 void MainMenuState::onExit() {
-    LOG_INFO("Exiting main menu");
+    VF_INFO("Exiting main menu");
 }
 
 void MainMenuState::onPause() {
@@ -127,19 +127,19 @@ void MainMenuState::onHandleInput() {
 // ============================================================================
 
 PlayingState::PlayingState(World* world) : world_(world) {
-    LOG_INFO("PlayingState created");
+    VF_INFO("PlayingState created");
 }
 
 PlayingState::~PlayingState() {
-    LOG_INFO("PlayingState destroyed");
+    VF_INFO("PlayingState destroyed");
 }
 
 void PlayingState::onEnter() {
-    LOG_INFO("Entering playing state");
+    VF_INFO("Entering playing state");
 }
 
 void PlayingState::onExit() {
-    LOG_INFO("Exiting playing state");
+    VF_INFO("Exiting playing state");
 }
 
 void PlayingState::onPause() {
@@ -176,19 +176,19 @@ void PlayingState::setPaused(bool paused) {
 // ============================================================================
 
 PauseMenuState::PauseMenuState() {
-    LOG_INFO("PauseMenuState created");
+    VF_INFO("PauseMenuState created");
 }
 
 PauseMenuState::~PauseMenuState() {
-    LOG_INFO("PauseMenuState destroyed");
+    VF_INFO("PauseMenuState destroyed");
 }
 
 void PauseMenuState::onEnter() {
-    LOG_INFO("Entering pause menu");
+    VF_INFO("Entering pause menu");
 }
 
 void PauseMenuState::onExit() {
-    LOG_INFO("Exiting pause menu");
+    VF_INFO("Exiting pause menu");
 }
 
 void PauseMenuState::onPause() {
@@ -217,19 +217,19 @@ void PauseMenuState::onHandleInput() {
 
 LoadingState::LoadingState(const std::string& targetState)
     : targetState_(targetState), progress_(0.0f), complete_(false) {
-    LOG_INFO("LoadingState created for: {}", targetState);
+    VF_INFO("LoadingState created for: {}", targetState);
 }
 
 LoadingState::~LoadingState() {
-    LOG_INFO("LoadingState destroyed");
+    VF_INFO("LoadingState destroyed");
 }
 
 void LoadingState::onEnter() {
-    LOG_INFO("Entering loading state");
+    VF_INFO("Entering loading state");
 }
 
 void LoadingState::onExit() {
-    LOG_INFO("Exiting loading state");
+    VF_INFO("Exiting loading state");
 }
 
 void LoadingState::onPause() {
@@ -249,7 +249,7 @@ void LoadingState::onUpdate(float deltaTime) {
     if (progress_ >= 1.0f) {
         progress_ = 1.0f;
         complete_ = true;
-        LOG_INFO("Loading complete");
+        VF_INFO("Loading complete");
     }
 }
 
@@ -270,19 +270,19 @@ void LoadingState::setProgress(float progress) {
 // ============================================================================
 
 InventoryScreenState::InventoryScreenState() {
-    LOG_INFO("InventoryScreenState created");
+    VF_INFO("InventoryScreenState created");
 }
 
 InventoryScreenState::~InventoryScreenState() {
-    LOG_INFO("InventoryScreenState destroyed");
+    VF_INFO("InventoryScreenState destroyed");
 }
 
 void InventoryScreenState::onEnter() {
-    LOG_INFO("Entering inventory screen");
+    VF_INFO("Entering inventory screen");
 }
 
 void InventoryScreenState::onExit() {
-    LOG_INFO("Exiting inventory screen");
+    VF_INFO("Exiting inventory screen");
 }
 
 void InventoryScreenState::onPause() {

@@ -86,7 +86,7 @@ Entity createPlayer(ECSWorld& world, const Vec3& position) {
     collision.height = 1.8f;
     collision.eyeHeight = 1.62f;
     
-    LOG_DEBUG("Created player entity {}", entity);
+    VF_DEBUG("Created player entity {}", entity);
     return entity;
 }
 
@@ -131,7 +131,7 @@ Entity createZombie(ECSWorld& world, const Vec3& position) {
     collision.height = 1.95f;
     collision.eyeHeight = 1.74f;
     
-    LOG_DEBUG("Created zombie entity {}", entity);
+    VF_DEBUG("Created zombie entity {}", entity);
     return entity;
 }
 

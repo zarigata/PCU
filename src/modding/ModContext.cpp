@@ -15,15 +15,15 @@ ModContext::ModContext(const std::string& modId, ModLoader* loader)
     : modId(modId), loader(loader) {}
 
 void ModContext::logInfo(const std::string& message) {
-    LOG_INFO("[Mod:{}] {}", modId, message);
+    VF_INFO("[Mod:{}] {}", modId, message);
 }
 
 void ModContext::logWarning(const std::string& message) {
-    LOG_WARN("[Mod:{}] {}", modId, message);
+    VF_WARN("[Mod:{}] {}", modId, message);
 }
 
 void ModContext::logError(const std::string& message) {
-    LOG_ERROR("[Mod:{}] {}", modId, message);
+    VF_ERROR("[Mod:{}] {}", modId, message);
 }
 
 std::filesystem::path ModContext::getModPath() const {

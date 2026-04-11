@@ -68,7 +68,7 @@ WorldGenerator::WorldGenerator(uint64_t seed)
     oreNoise = std::make_unique<SimplexNoise>(seed + 7);
     featureNoise = std::make_unique<PerlinNoise>(seed + 8);
     
-    LOG_INFO("WorldGenerator created with seed {}", seed);
+    VF_INFO("WorldGenerator created with seed {}", seed);
 }
 
 WorldGenerator::WorldGenerator(const WorldGenSettings& settings)
@@ -85,11 +85,11 @@ WorldGenerator::WorldGenerator(const WorldGenSettings& settings)
     oreNoise = std::make_unique<SimplexNoise>(settings.seed + 7);
     featureNoise = std::make_unique<PerlinNoise>(settings.seed + 8);
     
-    LOG_INFO("WorldGenerator created with seed {} and custom settings", settings.seed);
+    VF_INFO("WorldGenerator created with seed {} and custom settings", settings.seed);
 }
 
 WorldGenerator::~WorldGenerator() {
-    LOG_INFO("WorldGenerator destroyed");
+    VF_INFO("WorldGenerator destroyed");
 }
 
 void WorldGenerator::resetStats() {
@@ -105,7 +105,7 @@ ChunkGenResult WorldGenerator::generateChunk(Chunk* chunk, World* world) {
     auto startTime = std::chrono::high_resolution_clock::now();
     
     if (!chunk) {
-        LOG_ERROR("Null chunk passed to generateChunk");
+        VF_ERROR("Null chunk passed to generateChunk");
         return result;
     }
     

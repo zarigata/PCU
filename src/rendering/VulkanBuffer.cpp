@@ -20,7 +20,7 @@ void Buffer::map(vk::Device device) {
     
     auto result = device.mapMemory(memory, 0, size, {}, &mapped);
     if (result != vk::Result::eSuccess) {
-        LOG_ERROR("Failed to map buffer memory");
+        VF_ERROR("Failed to map buffer memory");
         throw std::runtime_error("Failed to map buffer memory");
     }
 }
@@ -85,7 +85,7 @@ Buffer VulkanBuffer::createBuffer(
     try {
         buffer.buffer = device.createBuffer(bufferInfo);
     } catch (const vk::SystemError& e) {
-        LOG_ERROR("Failed to create buffer: {}", e.what());
+        VF_ERROR("Failed to create buffer: {}", e.what());
         throw;
     }
     
@@ -128,7 +128,7 @@ Buffer VulkanBuffer::createBuffer(
         buffer.memory = device.allocateMemory(allocInfo);
     } catch (const vk::SystemError& e) {
         device.destroyBuffer(buffer.buffer);
-        LOG_ERROR("Failed to allocate buffer memory: {}", e.what());
+        VF_ERROR("Failed to allocate buffer memory: {}", e.what());
         throw;
     }
     
@@ -140,7 +140,7 @@ Buffer VulkanBuffer::createBuffer(
         buffer.map(device);
     }
     
-    LOG_DEBUG("Created buffer: size={}, usage={}", size, static_cast<uint32_t>(usage));
+    VF_DEBUG("Created buffer: size={}, usage={}", size, static_cast<uint32_t>(usage));
     return buffer;
 }
 
@@ -163,7 +163,7 @@ void VulkanBuffer::copyBuffer(
     try {
         commandBuffer = device.allocateCommandBuffers(allocInfo)[0];
     } catch (const vk::SystemError& e) {
-        LOG_ERROR("Failed to allocate command buffer for copy: {}", e.what());
+        VF_ERROR("Failed to allocate command buffer for copy: {}", e.what());
         throw;
     }
     
@@ -191,7 +191,7 @@ void VulkanBuffer::copyBuffer(
         queue.submit(1, &submitInfo, vk::Fence{});
         queue.waitIdle();
     } catch (const vk::SystemError& e) {
-        LOG_ERROR("Failed to submit copy command: {}", e.what());
+        VF_ERROR("Failed to submit copy command: {}", e.what());
         device.freeCommandBuffers(pool, 1, &commandBuffer);
         throw;
     }
@@ -335,7 +335,7 @@ Buffer VulkanBuffer::createVertexBuffer(
     // Clean up staging buffer
     destroyBuffer(device, stagingBuffer);
     
-    LOG_DEBUG("Created vertex buffer: size={}", size);
+    VF_DEBUG("Created vertex buffer: size={}", size);
     return vertexBuffer;
 }
 
@@ -371,7 +371,7 @@ Buffer VulkanBuffer::createIndexBuffer(
     // Clean up staging buffer
     destroyBuffer(device, stagingBuffer);
     
-    LOG_DEBUG("Created index buffer: size={}, indexType={}", size, static_cast<uint32_t>(indexType));
+    VF_DEBUG("Created index buffer: size={}, indexType={}", size, static_cast<uint32_t>(indexType));
     return indexBuffer;
 }
 
@@ -410,7 +410,7 @@ VulkanRingBuffer::VulkanRingBuffer(
         vk::MemoryPropertyFlagBits::eHostCoherent
     );
     
-    LOG_DEBUG("Created ring buffer: size={}", size);
+    VF_DEBUG("Created ring buffer: size={}", size);
 }
 
 VulkanRingBuffer::~VulkanRingBuffer() {
@@ -422,7 +422,7 @@ vk::DeviceSize VulkanRingBuffer::allocate(vk::DeviceSize size, vk::DeviceSize al
     vk::DeviceSize alignedOffset = (offset + alignment - 1) & ~(alignment - 1);
     
     if (alignedOffset + size > capacity) {
-        LOG_ERROR("Ring buffer overflow: requested={}, available={}", 
+        VF_ERROR("Ring buffer overflow: requested={}, available={}", 
                   size, capacity - alignedOffset);
         return VK_WHOLE_SIZE; // Indicates failure
     }
@@ -447,7 +447,7 @@ VulkanBufferPool::VulkanBufferPool(
     , physicalDevice(physicalDevice)
     , chunkSize(chunkSize) {
     
-    LOG_DEBUG("Created buffer pool: chunkSize={}", chunkSize);
+    VF_DEBUG("Created buffer pool: chunkSize={}", chunkSize);
 }
 
 VulkanBufferPool::~VulkanBufferPool() {
@@ -481,14 +481,14 @@ VulkanBufferPool::Chunk& VulkanBufferPool::getOrCreateChunk() {
     newChunk.used = 0;
     
     chunks.push_back(std::move(newChunk));
-    LOG_DEBUG("Created new buffer pool chunk: total chunks={}", chunks.size());
+    VF_DEBUG("Created new buffer pool chunk: total chunks={}", chunks.size());
     
     return chunks.back();
 }
 
 VulkanBufferPool::Allocation VulkanBufferPool::allocate(vk::DeviceSize size, vk::DeviceSize alignment) {
     if (size > chunkSize) {
-        LOG_ERROR("Allocation size {} exceeds chunk size {}", size, chunkSize);
+        VF_ERROR("Allocation size {} exceeds chunk size {}", size, chunkSize);
         return {vk::Buffer{}, 0, 0, nullptr};
     }
     

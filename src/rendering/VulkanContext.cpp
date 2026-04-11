@@ -17,16 +17,16 @@ namespace VoxelForge {
 // ============================================================================
 
 VulkanContext::VulkanContext() {
-    LOG_INFO("VulkanContext created");
+    VF_INFO("VulkanContext created");
 }
 
 VulkanContext::~VulkanContext() {
     cleanup();
-    LOG_INFO("VulkanContext destroyed");
+    VF_INFO("VulkanContext destroyed");
 }
 
 void VulkanContext::init(GLFWwindow* window) {
-    LOG_INFO("Initializing Vulkan context...");
+    VF_INFO("Initializing Vulkan context...");
     
     createInstance();
     setupDebugMessenger();
@@ -34,9 +34,9 @@ void VulkanContext::init(GLFWwindow* window) {
     pickPhysicalDevice();
     createLogicalDevice();
     
-    LOG_INFO("Vulkan context initialized successfully");
-    LOG_INFO("  Device: {}", deviceProperties.deviceName);
-    LOG_INFO("  API Version: {}.{}.{}", 
+    VF_INFO("Vulkan context initialized successfully");
+    VF_INFO("  Device: {}", deviceProperties.deviceName);
+    VF_INFO("  API Version: {}.{}.{}", 
              VK_API_VERSION_MAJOR(deviceProperties.apiVersion),
              VK_API_VERSION_MINOR(deviceProperties.apiVersion),
              VK_API_VERSION_PATCH(deviceProperties.apiVersion));
@@ -68,7 +68,7 @@ void VulkanContext::cleanup() {
         instance.destroy();
     }
     
-    LOG_INFO("Vulkan context cleaned up");
+    VF_INFO("Vulkan context cleaned up");
 }
 
 void VulkanContext::createInstance() {
@@ -112,7 +112,7 @@ void VulkanContext::createInstance() {
     // Create instance
     try {
         instance = vk::createInstance(createInfo);
-        LOG_INFO("Vulkan instance created");
+        VF_INFO("Vulkan instance created");
     } catch (const vk::SystemError& e) {
         throw std::runtime_error(std::string("Failed to create Vulkan instance: ") + e.what());
     }
@@ -135,12 +135,12 @@ void VulkanContext::setupDebugMessenger() {
                                nullptr, &messenger);
         if (result == VK_SUCCESS) {
             debugMessenger = vk::DebugUtilsMessengerEXT(messenger);
-            LOG_INFO("Vulkan debug messenger set up");
+            VF_INFO("Vulkan debug messenger set up");
         } else {
-            LOG_ERROR("Failed to set up debug messenger");
+            VF_ERROR("Failed to set up debug messenger");
         }
     } else {
-        LOG_ERROR("Failed to load vkCreateDebugUtilsMessengerEXT");
+        VF_ERROR("Failed to load vkCreateDebugUtilsMessengerEXT");
     }
 }
 
@@ -163,16 +163,16 @@ void VulkanContext::populateDebugMessengerCreateInfo(vk::DebugUtilsMessengerCrea
                 LOG_TRACE("Vulkan Validation: {}", pCallbackData->pMessage);
                 break;
             case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
-                LOG_INFO("Vulkan Validation: {}", pCallbackData->pMessage);
+                VF_INFO("Vulkan Validation: {}", pCallbackData->pMessage);
                 break;
             case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
-                LOG_WARN("Vulkan Validation: {}", pCallbackData->pMessage);
+                VF_WARN("Vulkan Validation: {}", pCallbackData->pMessage);
                 break;
             case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
-                LOG_ERROR("Vulkan Validation: {}", pCallbackData->pMessage);
+                VF_ERROR("Vulkan Validation: {}", pCallbackData->pMessage);
                 break;
             default:
-                LOG_DEBUG("Vulkan Validation: {}", pCallbackData->pMessage);
+                VF_DEBUG("Vulkan Validation: {}", pCallbackData->pMessage);
         }
         return VK_FALSE;
     };
@@ -189,7 +189,7 @@ void VulkanContext::createSurface(GLFWwindow* window) {
     }
     
     surface = vk::SurfaceKHR(rawSurface);
-    LOG_INFO("Vulkan surface created");
+    VF_INFO("Vulkan surface created");
 }
 
 void VulkanContext::pickPhysicalDevice() {
@@ -199,7 +199,7 @@ void VulkanContext::pickPhysicalDevice() {
         throw std::runtime_error("Failed to find GPUs with Vulkan support!");
     }
     
-    LOG_INFO("Found {} physical device(s)", devices.size());
+    VF_INFO("Found {} physical device(s)", devices.size());
     
     // Rate each device and select the best one
     int bestScore = 0;
@@ -224,7 +224,7 @@ void VulkanContext::pickPhysicalDevice() {
             if (features.geometryShader) score += 100;
             if (features.tessellationShader) score += 100;
             
-            LOG_DEBUG("  Device '{}' scored {}", properties.deviceName, score);
+            VF_DEBUG("  Device '{}' scored {}", properties.deviceName, score);
             
             if (score > bestScore) {
                 bestScore = score;
@@ -241,7 +241,7 @@ void VulkanContext::pickPhysicalDevice() {
     deviceProperties = physicalDevice.getProperties();
     memoryProperties = physicalDevice.getMemoryProperties();
     
-    LOG_INFO("Selected physical device: {}", deviceProperties.deviceName);
+    VF_INFO("Selected physical device: {}", deviceProperties.deviceName);
 }
 
 bool VulkanContext::isDeviceSuitable(vk::PhysicalDevice device) {
@@ -415,7 +415,7 @@ void VulkanContext::createLogicalDevice() {
     
     try {
         device = physicalDevice.createDevice(createInfo);
-        LOG_INFO("Logical device created");
+        VF_INFO("Logical device created");
     } catch (const vk::SystemError& e) {
         throw std::runtime_error(std::string("Failed to create logical device: ") + e.what());
     }
@@ -437,7 +437,7 @@ void VulkanContext::createLogicalDevice() {
     }
     
     enabledFeatures = deviceFeatures;
-    LOG_INFO("Queues retrieved");
+    VF_INFO("Queues retrieved");
 }
 
 std::vector<const char*> VulkanContext::getRequiredExtensions() {
@@ -523,7 +523,7 @@ vk::ShaderModule createShaderModule(vk::Device device, const std::vector<uint8_t
     try {
         return device.createShaderModule(createInfo);
     } catch (const vk::SystemError& e) {
-        LOG_ERROR("Failed to create shader module: {}", e.what());
+        VF_ERROR("Failed to create shader module: {}", e.what());
         throw;
     }
 }

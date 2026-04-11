@@ -41,7 +41,7 @@ vk::UniqueImage VulkanImage::createImage(
     try {
         image = device.createImageUnique(imageInfo);
     } catch (const vk::SystemError& e) {
-        LOG_ERROR("Failed to create image: {}", e.what());
+        VF_ERROR("Failed to create image: {}", e.what());
         return vk::UniqueImage{};
     }
     
@@ -57,7 +57,7 @@ vk::UniqueImage VulkanImage::createImage(
     try {
         outMemory = device.allocateMemory(allocInfo);
     } catch (const vk::SystemError& e) {
-        LOG_ERROR("Failed to allocate image memory: {}", e.what());
+        VF_ERROR("Failed to allocate image memory: {}", e.what());
         return vk::UniqueImage{};
     }
     
@@ -87,7 +87,7 @@ vk::UniqueImageView VulkanImage::createImageView(
     try {
         return device.createImageViewUnique(viewInfo);
     } catch (const vk::SystemError& e) {
-        LOG_ERROR("Failed to create image view: {}", e.what());
+        VF_ERROR("Failed to create image view: {}", e.what());
         return vk::UniqueImageView{};
     }
 }
@@ -146,7 +146,7 @@ void VulkanImage::transitionImageLayout(
         srcStage = vk::PipelineStageFlagBits::eTopOfPipe;
         dstStage = vk::PipelineStageFlagBits::eEarlyFragmentTests;
     } else {
-        LOG_WARN("Unsupported layout transition");
+        VF_WARN("Unsupported layout transition");
         return;
     }
     
@@ -240,7 +240,7 @@ void Texture::createTextureImage(const void* data, uint32_t width, uint32_t heig
     // Cleanup staging buffer
     VulkanBuffer::destroyBuffer(device_, stagingBuffer);
     
-    LOG_DEBUG("Created texture image: {}x{}, {} mip levels", width, height, mipLevels);
+    VF_DEBUG("Created texture image: {}x{}, {} mip levels", width, height, mipLevels);
 }
 
 void Texture::createTextureImageView(vk::Format format) {

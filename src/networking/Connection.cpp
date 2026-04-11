@@ -25,7 +25,7 @@ Connection::~Connection() {
 
 bool Connection::connect(ENetHost* host, const std::string& address, uint16_t port) {
     if (peer) {
-        LOG_ERROR("Already connected");
+        VF_ERROR("Already connected");
         return false;
     }
     
@@ -35,7 +35,7 @@ bool Connection::connect(ENetHost* host, const std::string& address, uint16_t po
     
     peer = enet_host_connect(host, &addr, 4, 0);
     if (!peer) {
-        LOG_ERROR("Failed to initiate connection to {}:{}", address, port);
+        VF_ERROR("Failed to initiate connection to {}:{}", address, port);
         return false;
     }
     
@@ -51,11 +51,11 @@ bool Connection::connect(ENetHost* host, const std::string& address, uint16_t po
         peerId = nextClientId++;
         state = ConnectionState::Handshaking;
         stats.lastPacketTime = std::chrono::steady_clock::now();
-        LOG_INFO("Connected to {}:{}", address, port);
+        VF_INFO("Connected to {}:{}", address, port);
         return true;
     }
     
-    LOG_ERROR("Connection to {}:{} timed out", address, port);
+    VF_ERROR("Connection to {}:{} timed out", address, port);
     enet_peer_reset(peer);
     peer = nullptr;
     state = ConnectionState::Disconnected;
@@ -88,7 +88,7 @@ void Connection::disconnect() {
     peer = nullptr;
     state = ConnectionState::Disconnected;
     
-    LOG_INFO("Disconnected from {}:{}", address, port);
+    VF_INFO("Disconnected from {}:{}", address, port);
 }
 
 void Connection::disconnect(const std::string& reason) {

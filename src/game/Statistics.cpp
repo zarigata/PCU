@@ -100,12 +100,12 @@ void Leaderboard::sortEntries() {
 // ============================================================================
 
 Statistics::Statistics() {
-    LOG_INFO("Statistics system created");
+    VF_INFO("Statistics system created");
     loadVanillaStats();
 }
 
 Statistics::~Statistics() {
-    LOG_INFO("Statistics system destroyed");
+    VF_INFO("Statistics system destroyed");
 }
 
 void Statistics::registerStat(const StatType& stat) {
@@ -119,7 +119,7 @@ void Statistics::unregisterStat(const std::string& id) {
 }
 
 void Statistics::loadVanillaStats() {
-    LOG_INFO("Loading vanilla stats...");
+    VF_INFO("Loading vanilla stats...");
     
     // General stats
     registerStat({VanillaStats::LEAVE_GAME, "Leave Game", StatCategory::General, "times"});
@@ -177,7 +177,7 @@ void Statistics::loadVanillaStats() {
     registerStat({VanillaStats::BREWINGSTAND_INTERACTION, "Brewing Stands Used", StatCategory::General, "times"});
     registerStat({VanillaStats::BEACON_INTERACTION, "Beacons Used", StatCategory::General, "times"});
     
-    LOG_INFO("Loaded {} vanilla stats", stats.size());
+    VF_INFO("Loaded {} vanilla stats", stats.size());
 }
 
 const StatType* Statistics::getStat(const std::string& id) const {
@@ -302,7 +302,7 @@ void Statistics::loadPlayerStats(uint32_t playerId, const std::string& path) {
             playerStats[playerId][statId].value = value.get<int64_t>();
         }
     } catch (const std::exception& e) {
-        LOG_ERROR("Failed to load player stats: {}", e.what());
+        VF_ERROR("Failed to load player stats: {}", e.what());
     }
 }
 
@@ -373,7 +373,7 @@ void Statistics::checkMilestones(uint32_t playerId, const std::string& statId, i
         if (milestone.statId == statId && value >= milestone.targetValue) {
             // Check if already achieved
             // TODO: Track achieved milestones
-            LOG_INFO("Player {} reached milestone: {} = {}", playerId, statId, value);
+            VF_INFO("Player {} reached milestone: {} = {}", playerId, statId, value);
         }
     }
 }
@@ -418,7 +418,7 @@ void Statistics::loadServerStats(const std::string& path) {
         serverStats.highestPlayerCount = j.value("highest_player_count", 0LL);
         serverStats.serverStartTime = j.value("server_start_time", 0LL);
     } catch (const std::exception& e) {
-        LOG_ERROR("Failed to load server stats: {}", e.what());
+        VF_ERROR("Failed to load server stats: {}", e.what());
     }
 }
 

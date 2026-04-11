@@ -18,7 +18,7 @@ PacketReader::PacketReader(const uint8_t* data, size_t size)
 
 uint8_t PacketReader::readU8() {
     if (pos + 1 > size) {
-        LOG_ERROR("Packet read overflow at pos {}", pos);
+        VF_ERROR("Packet read overflow at pos {}", pos);
         return 0;
     }
     return data[pos++];
@@ -26,7 +26,7 @@ uint8_t PacketReader::readU8() {
 
 uint16_t PacketReader::readU16() {
     if (pos + 2 > size) {
-        LOG_ERROR("Packet read overflow at pos {}", pos);
+        VF_ERROR("Packet read overflow at pos {}", pos);
         return 0;
     }
     uint16_t value = static_cast<uint16_t>(data[pos]) |
@@ -37,7 +37,7 @@ uint16_t PacketReader::readU16() {
 
 uint32_t PacketReader::readU32() {
     if (pos + 4 > size) {
-        LOG_ERROR("Packet read overflow at pos {}", pos);
+        VF_ERROR("Packet read overflow at pos {}", pos);
         return 0;
     }
     uint32_t value = static_cast<uint32_t>(data[pos]) |
@@ -50,7 +50,7 @@ uint32_t PacketReader::readU32() {
 
 uint64_t PacketReader::readU64() {
     if (pos + 8 > size) {
-        LOG_ERROR("Packet read overflow at pos {}", pos);
+        VF_ERROR("Packet read overflow at pos {}", pos);
         return 0;
     }
     uint64_t value = 0;
@@ -98,7 +98,7 @@ bool PacketReader::readBool() {
 std::string PacketReader::readString() {
     uint16_t length = readU16();
     if (pos + length > size) {
-        LOG_ERROR("Packet string read overflow at pos {}", pos);
+        VF_ERROR("Packet string read overflow at pos {}", pos);
         return "";
     }
     std::string result(reinterpret_cast<const char*>(data + pos), length);
@@ -252,7 +252,7 @@ void NetworkManager::unregisterCallback(PacketType type) {
 void NetworkManager::sendPacket(uint32_t clientId, const Packet& packet) {
     auto it = peers.find(clientId);
     if (it == peers.end() || !it->second) {
-        LOG_ERROR("Invalid client ID: {}", clientId);
+        VF_ERROR("Invalid client ID: {}", clientId);
         return;
     }
     
@@ -368,7 +368,7 @@ void NetworkManager::handlePacket(uint32_t clientId, PacketType type,
 }
 
 void NetworkManager::onConnect(uint32_t clientId) {
-    LOG_INFO("Client {} connected", clientId);
+    VF_INFO("Client {} connected", clientId);
     
     NetworkEvent event;
     event.type = NetworkEvent::Type::Connect;
@@ -377,7 +377,7 @@ void NetworkManager::onConnect(uint32_t clientId) {
 }
 
 void NetworkManager::onDisconnect(uint32_t clientId) {
-    LOG_INFO("Client {} disconnected", clientId);
+    VF_INFO("Client {} disconnected", clientId);
     
     NetworkEvent event;
     event.type = NetworkEvent::Type::Disconnect;

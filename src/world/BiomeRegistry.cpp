@@ -4,7 +4,6 @@
  */
 
 #include <VoxelForge/world/BiomeRegistry.hpp>
-#include <VoxelForge/world/BlockRegistry.hpp>
 #include <VoxelForge/core/Logger.hpp>
 
 namespace VoxelForge {
@@ -14,113 +13,172 @@ BiomeRegistry& BiomeRegistry::get() {
     return instance;
 }
 
-BiomeRegistry::BiomeRegistry() {
-    registerVanillaBiomes();
-}
+void BiomeRegistry::initialize() {
+    if (!biomes.empty()) return;
 
-void BiomeRegistry::registerVanillaBiomes() {
-    LOG_INFO("Registering vanilla biomes...");
-    
-    auto& blocks = BlockRegistry::get();
-    
     // Plains
-    auto plains = std::make_unique<Biome>(1, "minecraft:plains");
-    plains->setTemperature(0.8f);
-    plains->setDownfall(0.4f);
-    plains->setSurfaceBlock(blocks.getDefaultState("minecraft:grass_block"));
-    plains->setSubsurfaceBlock(blocks.getDefaultState("minecraft:dirt"));
-    plains->setCategory(Biome::Category::Plains);
-    registerBiome(std::move(plains));
-    
+    Biome plains;
+    plains.id = 1;
+    plains.name = "minecraft:plains";
+    plains.climate.temperature = 0.8f;
+    plains.climate.humidity = 0.4f;
+    plains.baseHeight = 0.1f;
+    plains.heightVariation = 0.3f;
+    registerBiome("minecraft:plains", plains);
+
     // Desert
-    auto desert = std::make_unique<Biome>(2, "minecraft:desert");
-    desert->setTemperature(2.0f);
-    desert->setDownfall(0.0f);
-    desert->setSurfaceBlock(blocks.getDefaultState("minecraft:sand"));
-    desert->setSubsurfaceBlock(blocks.getDefaultState("minecraft:sandstone"));
-    desert->setCategory(Biome::Category::Desert);
-    registerBiome(std::move(desert));
-    
+    Biome desert;
+    desert.id = 2;
+    desert.name = "minecraft:desert";
+    desert.climate.temperature = 2.0f;
+    desert.climate.humidity = 0.0f;
+    desert.baseHeight = 0.1f;
+    desert.heightVariation = 0.2f;
+    registerBiome("minecraft:desert", desert);
+
     // Forest
-    auto forest = std::make_unique<Biome>(4, "minecraft:forest");
-    forest->setTemperature(0.7f);
-    forest->setDownfall(0.8f);
-    forest->setSurfaceBlock(blocks.getDefaultState("minecraft:grass_block"));
-    forest->setSubsurfaceBlock(blocks.getDefaultState("minecraft:dirt"));
-    forest->setCategory(Biome::Category::Forest);
-    registerBiome(std::move(forest));
-    
-    // Jungle
-    auto jungle = std::make_unique<Biome>(6, "minecraft:jungle");
-    jungle->setTemperature(0.95f);
-    jungle->setDownfall(0.9f);
-    jungle->setSurfaceBlock(blocks.getDefaultState("minecraft:grass_block"));
-    jungle->setSubsurfaceBlock(blocks.getDefaultState("minecraft:dirt"));
-    jungle->setCategory(Biome::Category::Jungle);
-    registerBiome(std::move(jungle));
-    
+    Biome forest;
+    forest.id = 3;
+    forest.name = "minecraft:forest";
+    forest.climate.temperature = 0.7f;
+    forest.climate.humidity = 0.8f;
+    forest.baseHeight = 0.1f;
+    forest.heightVariation = 0.3f;
+    registerBiome("minecraft:forest", forest);
+
+    // Taiga
+    Biome taiga;
+    taiga.id = 4;
+    taiga.name = "minecraft:taiga";
+    taiga.climate.temperature = 0.25f;
+    taiga.climate.humidity = 0.8f;
+    taiga.baseHeight = 0.2f;
+    taiga.heightVariation = 0.3f;
+    registerBiome("minecraft:taiga", taiga);
+
     // Swamp
-    auto swamp = std::make_unique<Biome>(9, "minecraft:swamp");
-    swamp->setTemperature(0.8f);
-    swamp->setDownfall(0.9f);
-    swamp->setSurfaceBlock(blocks.getDefaultState("minecraft:grass_block"));
-    swamp->setSubsurfaceBlock(blocks.getDefaultState("minecraft:dirt"));
-    swamp->setCategory(Biome::Category::Swamp);
-    registerBiome(std::move(swamp));
-    
+    Biome swamp;
+    swamp.id = 5;
+    swamp.name = "minecraft:swamp";
+    swamp.climate.temperature = 0.8f;
+    swamp.climate.humidity = 0.9f;
+    swamp.baseHeight = -0.1f;
+    swamp.heightVariation = 0.2f;
+    registerBiome("minecraft:swamp", swamp);
+
+    // Jungle
+    Biome jungle;
+    jungle.id = 6;
+    jungle.name = "minecraft:jungle";
+    jungle.climate.temperature = 0.95f;
+    jungle.climate.humidity = 0.9f;
+    jungle.baseHeight = 0.1f;
+    jungle.heightVariation = 0.4f;
+    registerBiome("minecraft:jungle", jungle);
+
     // Savanna
-    auto savanna = std::make_unique<Biome>(5, "minecraft:savanna");
-    savanna->setTemperature(1.2f);
-    savanna->setDownfall(0.0f);
-    savanna->setSurfaceBlock(blocks.getDefaultState("minecraft:grass_block"));
-    savanna->setSubsurfaceBlock(blocks.getDefaultState("minecraft:dirt"));
-    savanna->setCategory(Biome::Category::Savanna);
-    registerBiome(std::move(savanna));
-    
+    Biome savanna;
+    savanna.id = 7;
+    savanna.name = "minecraft:savanna";
+    savanna.climate.temperature = 1.2f;
+    savanna.climate.humidity = 0.0f;
+    savanna.baseHeight = 0.1f;
+    savanna.heightVariation = 0.2f;
+    registerBiome("minecraft:savanna", savanna);
+
     // Badlands
-    auto badlands = std::make_unique<Biome>(7, "minecraft:badlands");
-    badlands->setTemperature(2.0f);
-    badlands->setDownfall(0.0f);
-    badlands->setSurfaceBlock(blocks.getDefaultState("minecraft:red_sand"));
-    badlands->setSubsurfaceBlock(blocks.getDefaultState("minecraft:red_sandstone"));
-    badlands->setCategory(Biome::Category::Mesa);
-    registerBiome(std::move(badlands));
-    
+    Biome badlands;
+    badlands.id = 8;
+    badlands.name = "minecraft:badlands";
+    badlands.climate.temperature = 2.0f;
+    badlands.climate.humidity = 0.0f;
+    badlands.baseHeight = 0.3f;
+    badlands.heightVariation = 0.5f;
+    registerBiome("minecraft:badlands", badlands);
+
     // Snowy Plains
-    auto snowyPlains = std::make_unique<Biome>(12, "minecraft:snowy_plains");
-    snowyPlains->setTemperature(0.0f);
-    snowyPlains->setDownfall(0.5f);
-    snowyPlains->setPrecipitation(Biome::Precipitation::Snow);
-    snowyPlains->setSurfaceBlock(blocks.getDefaultState("minecraft:snow_block"));
-    snowyPlains->setSubsurfaceBlock(blocks.getDefaultState("minecraft:dirt"));
-    snowyPlains->setCategory(Biome::Category::Icy);
-    registerBiome(std::move(snowyPlains));
-    
+    Biome snowyPlains;
+    snowyPlains.id = 9;
+    snowyPlains.name = "minecraft:snowy_plains";
+    snowyPlains.climate.temperature = 0.0f;
+    snowyPlains.climate.humidity = 0.5f;
+    snowyPlains.baseHeight = 0.1f;
+    snowyPlains.heightVariation = 0.3f;
+    registerBiome("minecraft:snowy_plains", snowyPlains);
+
     // Ocean
-    auto ocean = std::make_unique<Biome>(0, "minecraft:ocean");
-    ocean->setTemperature(0.5f);
-    ocean->setDownfall(0.5f);
-    ocean->setBaseHeight(-1.0f);
-    ocean->setSurfaceBlock(blocks.getDefaultState("minecraft:gravel"));
-    ocean->setSubsurfaceBlock(blocks.getDefaultState("minecraft:gravel"));
-    ocean->setCategory(Biome::Category::Ocean);
-    registerBiome(std::move(ocean));
-    
-    LOG_INFO("Registered {} vanilla biomes", biomes.size());
+    Biome ocean;
+    ocean.id = 10;
+    ocean.name = "minecraft:ocean";
+    ocean.climate.temperature = 0.5f;
+    ocean.climate.humidity = 0.5f;
+    ocean.baseHeight = -1.0f;
+    ocean.heightVariation = 0.1f;
+    ocean.seaLevel = 63;
+    registerBiome("minecraft:ocean", ocean);
+
+    // Mountains
+    Biome mountains;
+    mountains.id = 11;
+    mountains.name = "minecraft:windswept_hills";
+    mountains.climate.temperature = 0.2f;
+    mountains.climate.humidity = 0.3f;
+    mountains.baseHeight = 0.5f;
+    mountains.heightVariation = 0.8f;
+    registerBiome("minecraft:windspept_hills", mountains);
+
+    // Beach
+    Biome beach;
+    beach.id = 12;
+    beach.name = "minecraft:beach";
+    beach.climate.temperature = 0.8f;
+    beach.climate.humidity = 0.4f;
+    beach.baseHeight = 0.0f;
+    beach.heightVariation = 0.1f;
+    registerBiome("minecraft:beach", beach);
+
+    // River
+    Biome river;
+    river.id = 13;
+    river.name = "minecraft:river";
+    river.climate.temperature = 0.5f;
+    river.climate.humidity = 0.5f;
+    river.baseHeight = -0.5f;
+    river.heightVariation = 0.1f;
+    registerBiome("minecraft:river", river);
+
+    VF_INFO("Registered {} vanilla biomes", biomes.size());
 }
 
-BiomeId BiomeRegistry::registerBiome(std::unique_ptr<Biome> biome) {
-    BiomeId id = biome->getId();
-    biomes[id] = std::move(biome);
+BiomeID BiomeRegistry::registerBiome(const std::string& name, const Biome& biome) {
+    BiomeID id = static_cast<BiomeID>(biomes.size());
+    Biome& stored = biomes.emplace_back(biome);
+    stored.id = id;
+    nameToId[name] = id;
     return id;
 }
 
-const Biome* BiomeRegistry::getBiome(BiomeId id) const {
-    auto it = biomes.find(id);
-    if (it != biomes.end()) {
-        return it->second.get();
+const Biome* BiomeRegistry::getBiome(BiomeID id) const {
+    if (id < biomes.size()) {
+        return &biomes[id];
     }
     return nullptr;
+}
+
+const Biome* BiomeRegistry::getBiome(const std::string& name) const {
+    auto it = nameToId.find(name);
+    if (it != nameToId.end()) {
+        return getBiome(it->second);
+    }
+    return nullptr;
+}
+
+BiomeID BiomeRegistry::getBiomeId(const std::string& name) const {
+    auto it = nameToId.find(name);
+    if (it != nameToId.end()) {
+        return it->second;
+    }
+    return INVALID_BIOME;
 }
 
 } // namespace VoxelForge

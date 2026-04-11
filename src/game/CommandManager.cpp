@@ -16,15 +16,15 @@ namespace VoxelForge {
 // ============================================================================
 
 void CommandContext::sendSuccess(const std::string& message) {
-    LOG_INFO("[Command] {}", message);
+    VF_INFO("[Command] {}", message);
 }
 
 void CommandContext::sendError(const std::string& message) {
-    LOG_ERROR("[Command] {}", message);
+    VF_ERROR("[Command] {}", message);
 }
 
 void CommandContext::sendFeedback(const std::string& message) {
-    LOG_INFO("[Command] {}", message);
+    VF_INFO("[Command] {}", message);
 }
 
 // ============================================================================
@@ -129,16 +129,16 @@ std::vector<uint32_t> Command::parseSelector(const std::string& arg, CommandCont
 // ============================================================================
 
 CommandManager::CommandManager() {
-    LOG_INFO("CommandManager created");
+    VF_INFO("CommandManager created");
 }
 
 CommandManager::~CommandManager() {
-    LOG_INFO("CommandManager destroyed");
+    VF_INFO("CommandManager destroyed");
 }
 
 void CommandManager::registerCommand(std::unique_ptr<Command> command) {
     if (!command || command->name.empty()) {
-        LOG_ERROR("Cannot register null or empty command");
+        VF_ERROR("Cannot register null or empty command");
         return;
     }
     
@@ -153,7 +153,7 @@ void CommandManager::registerCommand(std::unique_ptr<Command> command) {
     }
     
     commands[name] = std::move(command);
-    LOG_DEBUG("Registered command: {}", name);
+    VF_DEBUG("Registered command: {}", name);
 }
 
 void CommandManager::unregisterCommand(const std::string& name) {
@@ -172,7 +172,7 @@ void CommandManager::unregisterCommand(const std::string& name) {
     }
     
     commands.erase(lowerName);
-    LOG_DEBUG("Unregistered command: {}", name);
+    VF_DEBUG("Unregistered command: {}", name);
 }
 
 void CommandManager::registerAlias(const std::string& command, const std::string& alias) {
@@ -182,13 +182,13 @@ void CommandManager::registerAlias(const std::string& command, const std::string
     std::transform(lowerAlias.begin(), lowerAlias.end(), lowerAlias.begin(), ::tolower);
     
     aliases[lowerAlias] = lowerCmd;
-    LOG_DEBUG("Registered alias '{}' for command '{}'", alias, command);
+    VF_DEBUG("Registered alias '{}' for command '{}'", alias, command);
 }
 
 void CommandManager::clear() {
     commands.clear();
     aliases.clear();
-    LOG_INFO("CommandManager cleared");
+    VF_INFO("CommandManager cleared");
 }
 
 CommandResult CommandManager::execute(const std::string& input, CommandContext& context) {
@@ -300,7 +300,7 @@ std::vector<const Command*> CommandManager::getCommandsForPermission(int level) 
 }
 
 void CommandManager::registerVanillaCommands() {
-    LOG_INFO("Registering vanilla commands...");
+    VF_INFO("Registering vanilla commands...");
     
     registerCommand(Commands::createHelpCommand());
     registerCommand(Commands::createGamemodeCommand());
@@ -317,7 +317,7 @@ void CommandManager::registerVanillaCommands() {
     registerCommand(Commands::createDifficultyCommand());
     registerCommand(Commands::createSeedCommand());
     
-    LOG_INFO("Registered {} commands", commands.size());
+    VF_INFO("Registered {} commands", commands.size());
 }
 
 std::vector<std::string> CommandManager::tokenize(const std::string& input) const {

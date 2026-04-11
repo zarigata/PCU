@@ -11,7 +11,7 @@
 namespace VoxelForge {
 
 PlayerSystem::PlayerSystem() {
-    LOG_INFO("PlayerSystem created");
+    VF_INFO("PlayerSystem created");
 }
 
 void PlayerSystem::update(ECSWorld& world, float deltaTime) {
@@ -33,7 +33,7 @@ void PlayerSystem::update(ECSWorld& world, float deltaTime) {
             player.experience -= player.experienceToNextLevel;
             player.level++;
             player.experienceToNextLevel = calculateExperienceForLevel(player.level + 1);
-            LOG_INFO("Player leveled up to {}", player.level);
+            VF_INFO("Player leveled up to {}", player.level);
         }
         
         // Update cooldowns

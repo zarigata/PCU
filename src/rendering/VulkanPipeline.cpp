@@ -220,10 +220,10 @@ vk::UniquePipeline VulkanPipelineBuilder::build(vk::PipelineCache cache) {
     
     auto result = device_.createGraphicsPipelineUnique(cache, pipelineInfo);
     if (result.result == vk::Result::eSuccess) {
-        LOG_DEBUG("Created Vulkan pipeline");
+        VF_DEBUG("Created Vulkan pipeline");
         return std::move(result.value);
     } else {
-        LOG_ERROR("Failed to create Vulkan pipeline");
+        VF_ERROR("Failed to create Vulkan pipeline");
         return vk::UniquePipeline{};
     }
 }
@@ -240,7 +240,7 @@ vk::UniqueShaderModule VulkanShader::loadFromFile(vk::Device device, const std::
     std::ifstream file(filename, std::ios::ate | std::ios::binary);
     
     if (!file.is_open()) {
-        LOG_ERROR("Failed to open shader file: {}", filename);
+        VF_ERROR("Failed to open shader file: {}", filename);
         return vk::UniqueShaderModule{};
     }
     
@@ -259,7 +259,7 @@ vk::UniqueShaderModule VulkanShader::loadFromFile(vk::Device device, const std::
     try {
         return device.createShaderModuleUnique(createInfo);
     } catch (const vk::SystemError& e) {
-        LOG_ERROR("Failed to create shader module: {}", e.what());
+        VF_ERROR("Failed to create shader module: {}", e.what());
         return vk::UniqueShaderModule{};
     }
 }
@@ -273,7 +273,7 @@ vk::UniqueShaderModule VulkanShader::loadFromMemory(vk::Device device, const uin
     try {
         return device.createShaderModuleUnique(createInfo);
     } catch (const vk::SystemError& e) {
-        LOG_ERROR("Failed to create shader module: {}", e.what());
+        VF_ERROR("Failed to create shader module: {}", e.what());
         return vk::UniqueShaderModule{};
     }
 }
