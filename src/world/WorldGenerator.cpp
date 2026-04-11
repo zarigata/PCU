@@ -97,7 +97,7 @@ void WorldGenerator::resetStats() {
 }
 
 ChunkGenResult WorldGenerator::generateChunk(Chunk* chunk, World* world) {
-    PROFILE_FUNCTION();
+    VF_PROFILE_FUNCTION();
     
     ChunkGenResult result;
     result.position = chunk->getPosition();
@@ -189,8 +189,8 @@ int WorldGenerator::getHeight(int x, int z) const {
 
 BiomeId WorldGenerator::getBiome(int x, int y, int z) const {
     // Simple biome selection based on temperature and humidity
-    float temp = biomeNoise->noise2D(x * 0.005f, z * 0.005f);
-    float humidity = biomeNoise->noise2D(x * 0.005f + 1000, z * 0.005f + 1000);
+    float temp = biomeNoise->noise(x * 0.005f, z * 0.005f);
+    float humidity = biomeNoise->noise(x * 0.005f + 1000, z * 0.005f + 1000);
     
     // Normalize to 0-1
     temp = (temp + 1.0f) * 0.5f;
@@ -223,7 +223,7 @@ void WorldGenerator::registerFeature(const std::string& id, FeatureGenerator gen
 }
 
 void WorldGenerator::generateTerrain(Chunk* chunk) {
-    PROFILE_FUNCTION();
+    VF_PROFILE_FUNCTION();
     
     auto& blockRegistry = BlockRegistry::get();
     
@@ -302,7 +302,7 @@ void WorldGenerator::generateBedrock(Chunk* chunk) {
 }
 
 void WorldGenerator::generateCaves(Chunk* chunk) {
-    PROFILE_FUNCTION();
+    VF_PROFILE_FUNCTION();
     
     ChunkPos chunkPos = chunk->getPosition();
     int worldX = chunkPos.x * CHUNK_WIDTH;
@@ -319,7 +319,7 @@ void WorldGenerator::generateCaves(Chunk* chunk) {
             
             for (int y = settings.minHeight + 5; y < settings.maxHeight - 10; y++) {
                 // 3D noise for caves
-                float noise3D = caveNoise->noise3D(
+                float noise3D = caveNoise->noise(
                     wx * settings.caveFrequency,
                     y * settings.caveFrequency * 2,
                     wz * settings.caveFrequency
@@ -342,7 +342,7 @@ void WorldGenerator::generateCaves(Chunk* chunk) {
 }
 
 void WorldGenerator::generateOres(Chunk* chunk, SeededRandom& random) {
-    PROFILE_FUNCTION();
+    VF_PROFILE_FUNCTION();
     
     std::vector<OreVein> ores = {
         Ores::COAL_ORE,
@@ -432,7 +432,7 @@ void WorldGenerator::placeOreBlob(Chunk* chunk, int startX, int startY, int star
 }
 
 void WorldGenerator::generateFeatures(Chunk* chunk, World* world) {
-    PROFILE_FUNCTION();
+    VF_PROFILE_FUNCTION();
     
     SeededRandom chunkRandom(settings.seed ^ 
         (static_cast<uint64_t>(chunk->getPosition().x) << 32) ^
@@ -747,7 +747,7 @@ float WorldGenerator::calculateHeight(int x, int z) const {
     float maxAmplitude = 0.0f;
     
     for (int i = 0; i < settings.noiseOctaves; i++) {
-        noiseValue += heightNoise->noise2D(x * frequency, z * frequency) * amplitude;
+        noiseValue += heightNoise->noise(x * frequency, z * frequency) * amplitude;
         maxAmplitude += amplitude;
         amplitude *= settings.noisePersistence;
         frequency *= settings.noiseLacunarity;
@@ -773,7 +773,7 @@ float WorldGenerator::calculateHeight(int x, int z) const {
 
 float WorldGenerator::calculateDensity(int x, int y, int z) const {
     // 3D noise for terrain density (used for overhangs, caves, etc.)
-    float density = densityNoise->noise3D(
+    float density = densityNoise->noise(
         x * 0.01f,
         y * 0.01f,
         z * 0.01f
@@ -789,15 +789,15 @@ float WorldGenerator::calculateDensity(int x, int y, int z) const {
 }
 
 float WorldGenerator::calculateErosion(int x, int z) const {
-    return (erosionNoise->noise2D(x * 0.003f, z * 0.003f) + 1.0f) * 0.5f;
+    return (erosionNoise->noise(x * 0.003f, z * 0.003f) + 1.0f) * 0.5f;
 }
 
 float WorldGenerator::calculateContinentalness(int x, int z) const {
-    return (continentalnessNoise->noise2D(x * 0.002f, z * 0.002f) + 1.0f) * 0.5f;
+    return (continentalnessNoise->noise(x * 0.002f, z * 0.002f) + 1.0f) * 0.5f;
 }
 
 float WorldGenerator::calculatePeaksValleys(int x, int z) const {
-    return peaksValleysNoise->noise2D(x * 0.01f, z * 0.01f);
+    return peaksValleysNoise->noise(x * 0.01f, z * 0.01f);
 }
 
 BlockState WorldGenerator::getSurfaceBlock(int x, int y, int z, BiomeId biome) const {

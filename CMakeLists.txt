@@ -94,16 +94,17 @@ FetchContent_MakeAvailable(spdlog)
 set(ZSTD_BUILD_STATIC ON CACHE BOOL "" FORCE)
 set(ZSTD_BUILD_SHARED OFF CACHE BOOL "" FORCE)
 set(ZSTD_BUILD_PROGRAMS OFF CACHE BOOL "" FORCE)
+set(CMAKE_POLICY_DEFAULT_CMP0048 NEW)
+set(CMAKE_POLICY_DEFAULT_CMP0056 NEW)
 FetchContent_Declare(
     zstd
     GIT_REPOSITORY https://github.com/facebook/zstd.git
-    GIT_TAG        v1.5.5
+    GIT_TAG        v1.5.7
     SOURCE_SUBDIR  build/cmake
 )
-# Suppress cmake_minimum_required version conflict from zstd
-set(CMAKE_POLICY_DEFAULT_CMP0048 NEW)
 FetchContent_MakeAvailable(zstd)
 unset(CMAKE_POLICY_DEFAULT_CMP0048)
+unset(CMAKE_POLICY_DEFAULT_CMP0056)
 
 # ENet
 FetchContent_Declare(

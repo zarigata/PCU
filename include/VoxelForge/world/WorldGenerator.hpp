@@ -13,6 +13,7 @@
 #pragma once
 
 #include <string>
+#include <cstdint>
 
 #include <VoxelForge/world/Block.hpp>
 #include <VoxelForge/world/Chunk.hpp>
@@ -26,6 +27,9 @@
 #include <future>
 
 namespace VoxelForge {
+
+// Biome identifier type (unified alias)
+using BiomeId = uint16_t;
 
 // Forward declarations
 class Biome;
