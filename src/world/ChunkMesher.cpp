@@ -290,8 +290,8 @@ bool ChunkMesher::shouldRenderFace(
         return false;
     }
     
-    // Don't render face if neighbor is opaque and not see-through
-    if (!neighborDef.isSeeThrough) {
+    // Don't render face if neighbor is opaque (can't see through)
+    if (neighborDef.opaque) {
         return false;
     }
     
