@@ -21,5 +21,6 @@ BlockSoundGroup BlockSoundGroup::LEAVES{"minecraft:block.leaves.break", "minecra
 BlockSoundGroup BlockSoundGroup::CROP{"minecraft:block.crop.break", "minecraft:block.crop.step", "minecraft:block.crop.place", "minecraft:block.crop.hit", "minecraft:block.crop.fall"};
 BlockSoundGroup BlockSoundGroup::LADDER{"minecraft:block.ladder.break", "minecraft:block.ladder.step", "minecraft:block.ladder.place", "minecraft:block.ladder.hit", "minecraft:block.ladder.fall"};
 BlockSoundGroup BlockSoundGroup::SNOW{"minecraft:block.snow.break", "minecraft:block.snow.step", "minecraft:block.snow.place", "minecraft:block.snow.hit", "minecraft:block.snow.fall"};
+BlockSoundGroup BlockSoundGroup::NETHERRACK{"minecraft:block.netherrack.break", "minecraft:block.netherrack.step", "minecraft:block.netherrack.place", "minecraft:block.netherrack.hit", "minecraft:block.netherrack.fall"};
 
 } // namespace VoxelForge

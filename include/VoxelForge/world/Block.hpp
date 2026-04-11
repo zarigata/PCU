@@ -89,6 +89,8 @@ enum class Material : uint8_t {
     EndStone,
     Coral,
     Shulker,
+    Leaves,
+    NetherWood,
     Decoration,
     Technical,
     
@@ -139,6 +141,7 @@ struct BlockSoundGroup {
     static BlockSoundGroup CROP;
     static BlockSoundGroup LADDER;
     static BlockSoundGroup SNOW;
+    static BlockSoundGroup NETHERRACK;
 };
 
 // ============================================
