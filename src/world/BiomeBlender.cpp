@@ -6,6 +6,7 @@
 #include <VoxelForge/world/BiomeBlender.hpp>
 #include <VoxelForge/world/BiomeRegistry.hpp>
 #include <VoxelForge/world/World.hpp>
+#include <VoxelForge/world/Chunk.hpp>
 #include <VoxelForge/core/Logger.hpp>
 #include <algorithm>
 #include <cmath>
@@ -50,8 +51,8 @@ BiomeBlend BiomeBlender::getBlendedBiome(const BlockPos& pos) const {
 // ============================================
 
 void BiomeBlender::sampleChunk(ChunkPos chunkPos, BiomeID* biomes, int width, int depth) {
-    int worldX = chunkPos.x * VoxelForge::CHUNK_WIDTH;
-    int worldZ = chunkPos.z * VoxelForge::CHUNK_WIDTH;
+    int worldX = chunkPos.x * CHUNK_WIDTH;
+    int worldZ = chunkPos.z * CHUNK_WIDTH;
 
     for (int x = 0; x < width; ++x) {
         for (int z = 0; z < depth; ++z) {

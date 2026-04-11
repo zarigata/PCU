@@ -186,9 +186,9 @@ void ChunkMesher::addBlockFaces(
     BlockID blockId = blockState.getBlockId();
     const auto& blockDef = BlockRegistry::get().getDefinition(blockId);
     
-    glm::ivec3 blockPos(localX + chunk->getPosition().x * VoxelForge::CHUNK_WIDTH,
+    glm::ivec3 blockPos(localX + chunk->getPosition().x * CHUNK_WIDTH,
                         localY,
-                        localZ + chunk->getPosition().z * VoxelForge::CHUNK_WIDTH);
+                        localZ + chunk->getPosition().z * CHUNK_WIDTH);
     
     // Check each face
     for (int face = 0; face < 6; face++) {
