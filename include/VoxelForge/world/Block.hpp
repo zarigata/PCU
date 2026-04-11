@@ -9,6 +9,7 @@
 #pragma once
 
 #include "../Engine.hpp"
+#include "FluidTypes.hpp"
 
 #include <cstdint>
 #include <string>
@@ -265,7 +266,9 @@ public:
     
     // Fluids
     virtual bool isLiquid(const BlockState& state) const { return false; }
+    virtual int getFluidType(const BlockState& state) const { return static_cast<int>(FluidType::Empty); }
     virtual int getFluidLevel(const BlockState& state) const { return 0; }
+    virtual bool isFluidFalling(const BlockState& state) const { return false; }
     
     // Drops
     virtual std::vector<ItemStack> getDrops(World& world, const BlockPos& pos, const BlockState& state, 

@@ -1825,6 +1825,82 @@ void BlockRegistry::registerVanillaBlocks() {
     // FLUIDS (level property)
     // ============================================
     
+    // Water (source)
+    registerBlock("minecraft:water", BlockDefinition{
+        .id = "minecraft:water",
+        .name = "Water",
+        .material = Material::Water,
+        .hardness = 100.0f,
+        .blastResistance = 100.0f,
+        .solid = false,
+        .opaque = false,
+        .replaceable = true,
+        .renderType = RenderType::Translucent,
+        .collisionShape = VoxelShape::empty(),
+        .lightOpacity = 3
+    });
+    
+    // Water (flowing)
+    registerBlock("minecraft:flowing_water", BlockDefinition{
+        .id = "minecraft:flowing_water",
+        .name = "Water (Flowing)",
+        .material = Material::Water,
+        .hardness = 100.0f,
+        .blastResistance = 100.0f,
+        .solid = false,
+        .opaque = false,
+        .replaceable = true,
+        .renderType = RenderType::Translucent,
+        .collisionShape = VoxelShape::empty(),
+        .lightOpacity = 3,
+        .properties = {{
+            .name = "level",
+            .type = BlockProperty::Type::Int,
+            .minValue = 1,
+            .maxValue = 7,
+            .defaultValue = 1
+        }}
+    });
+    
+    // Lava (source)
+    registerBlock("minecraft:lava", BlockDefinition{
+        .id = "minecraft:lava",
+        .name = "Lava",
+        .material = Material::Lava,
+        .hardness = 100.0f,
+        .blastResistance = 100.0f,
+        .solid = false,
+        .opaque = false,
+        .replaceable = true,
+        .renderType = RenderType::Translucent,
+        .collisionShape = VoxelShape::empty(),
+        .lightEmission = 15,
+        .lightOpacity = 255
+    });
+    
+    // Lava (flowing)
+    registerBlock("minecraft:flowing_lava", BlockDefinition{
+        .id = "minecraft:flowing_lava",
+        .name = "Lava (Flowing)",
+        .material = Material::Lava,
+        .hardness = 100.0f,
+        .blastResistance = 100.0f,
+        .solid = false,
+        .opaque = false,
+        .replaceable = true,
+        .renderType = RenderType::Translucent,
+        .collisionShape = VoxelShape::empty(),
+        .lightEmission = 15,
+        .lightOpacity = 255,
+        .properties = {{
+            .name = "level",
+            .type = BlockProperty::Type::Int,
+            .minValue = 1,
+            .maxValue = 7,
+            .defaultValue = 1
+        }}
+    });
+    
     // Bubble Column (water with bubbles)
     registerBlock("minecraft:bubble_column", BlockDefinition{
         .id = "minecraft:bubble_column",
