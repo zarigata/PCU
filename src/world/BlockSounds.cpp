@@ -7,20 +7,20 @@
 
 namespace VoxelForge {
 
-BlockSoundGroup BlockSoundGroup::STONE{"minecraft:block.stone.break", "minecraft:block.stone.step", "minecraft:block.stone.place", "minecraft:block.stone.hit", "minecraft:block.stone.fall"};
-BlockSoundGroup BlockSoundGroup::AMETHYST{"minecraft:block.amethyst.break", "minecraft:block.amethyst.step", "minecraft:block.amethyst.place", "minecraft:block.amethyst.hit", "minecraft:block.amethyst.fall"};
-BlockSoundGroup BlockSoundGroup::SCULK{"minecraft:block.sculk.break", "minecraft:block.sculk.step", "minecraft:block.sculk.place", "minecraft:block.sculk.hit", "minecraft:block.sculk.fall"};
-BlockSoundGroup BlockSoundGroup::GLASS{"minecraft:block.glass.break", "minecraft:block.glass.step", "minecraft:block.glass.place", "minecraft:block.glass.hit", "minecraft:block.glass.fall"};
-BlockSoundGroup BlockSoundGroup::GRASS{"minecraft:block.grass.break", "minecraft:block.grass.step", "minecraft:block.grass.place", "minecraft:block.grass.hit", "minecraft:block.grass.fall"};
-BlockSoundGroup BlockSoundGroup::GRAVEL{"minecraft:block.gravel.break", "minecraft:block.gravel.step", "minecraft:block.gravel.place", "minecraft:block.gravel.hit", "minecraft:block.gravel.fall"};
-BlockSoundGroup BlockSoundGroup::METAL{"minecraft:block.metal.break", "minecraft:block.metal.step", "minecraft:block.metal.place", "minecraft:block.metal.hit", "minecraft:block.metal.fall"};
-BlockSoundGroup BlockSoundGroup::SAND{"minecraft:block.sand.break", "minecraft:block.sand.step", "minecraft:block.sand.place", "minecraft:block.sand.hit", "minecraft:block.sand.fall"};
-BlockSoundGroup BlockSoundGroup::WOOD{"minecraft:block.wood.break", "minecraft:block.wood.step", "minecraft:block.wood.place", "minecraft:block.wood.hit", "minecraft:block.wood.fall"};
-BlockSoundGroup BlockSoundGroup::WOOL{"minecraft:block.wool.break", "minecraft:block.wool.step", "minecraft:block.wool.place", "minecraft:block.wool.hit", "minecraft:block.wool.fall"};
-BlockSoundGroup BlockSoundGroup::LEAVES{"minecraft:block.leaves.break", "minecraft:block.leaves.step", "minecraft:block.leaves.place", "minecraft:block.leaves.hit", "minecraft:block.leaves.fall"};
-BlockSoundGroup BlockSoundGroup::CROP{"minecraft:block.crop.break", "minecraft:block.crop.step", "minecraft:block.crop.place", "minecraft:block.crop.hit", "minecraft:block.crop.fall"};
-BlockSoundGroup BlockSoundGroup::LADDER{"minecraft:block.ladder.break", "minecraft:block.ladder.step", "minecraft:block.ladder.place", "minecraft:block.ladder.hit", "minecraft:block.ladder.fall"};
-BlockSoundGroup BlockSoundGroup::SNOW{"minecraft:block.snow.break", "minecraft:block.snow.step", "minecraft:block.snow.place", "minecraft:block.snow.hit", "minecraft:block.snow.fall"};
-BlockSoundGroup BlockSoundGroup::NETHERRACK{"minecraft:block.netherrack.break", "minecraft:block.netherrack.step", "minecraft:block.netherrack.place", "minecraft:block.netherrack.hit", "minecraft:block.netherrack.fall"};
+BlockSoundGroup BlockSoundGroup::STONE{"poorcraftultra:block.stone.break", "poorcraftultra:block.stone.step", "poorcraftultra:block.stone.place", "poorcraftultra:block.stone.hit", "poorcraftultra:block.stone.fall"};
+BlockSoundGroup BlockSoundGroup::AMETHYST{"poorcraftultra:block.amethyst.break", "poorcraftultra:block.amethyst.step", "poorcraftultra:block.amethyst.place", "poorcraftultra:block.amethyst.hit", "poorcraftultra:block.amethyst.fall"};
+BlockSoundGroup BlockSoundGroup::SCULK{"poorcraftultra:block.sculk.break", "poorcraftultra:block.sculk.step", "poorcraftultra:block.sculk.place", "poorcraftultra:block.sculk.hit", "poorcraftultra:block.sculk.fall"};
+BlockSoundGroup BlockSoundGroup::GLASS{"poorcraftultra:block.glass.break", "poorcraftultra:block.glass.step", "poorcraftultra:block.glass.place", "poorcraftultra:block.glass.hit", "poorcraftultra:block.glass.fall"};
+BlockSoundGroup BlockSoundGroup::GRASS{"poorcraftultra:block.grass.break", "poorcraftultra:block.grass.step", "poorcraftultra:block.grass.place", "poorcraftultra:block.grass.hit", "poorcraftultra:block.grass.fall"};
+BlockSoundGroup BlockSoundGroup::GRAVEL{"poorcraftultra:block.gravel.break", "poorcraftultra:block.gravel.step", "poorcraftultra:block.gravel.place", "poorcraftultra:block.gravel.hit", "poorcraftultra:block.gravel.fall"};
+BlockSoundGroup BlockSoundGroup::METAL{"poorcraftultra:block.metal.break", "poorcraftultra:block.metal.step", "poorcraftultra:block.metal.place", "poorcraftultra:block.metal.hit", "poorcraftultra:block.metal.fall"};
+BlockSoundGroup BlockSoundGroup::SAND{"poorcraftultra:block.sand.break", "poorcraftultra:block.sand.step", "poorcraftultra:block.sand.place", "poorcraftultra:block.sand.hit", "poorcraftultra:block.sand.fall"};
+BlockSoundGroup BlockSoundGroup::WOOD{"poorcraftultra:block.wood.break", "poorcraftultra:block.wood.step", "poorcraftultra:block.wood.place", "poorcraftultra:block.wood.hit", "poorcraftultra:block.wood.fall"};
+BlockSoundGroup BlockSoundGroup::WOOL{"poorcraftultra:block.wool.break", "poorcraftultra:block.wool.step", "poorcraftultra:block.wool.place", "poorcraftultra:block.wool.hit", "poorcraftultra:block.wool.fall"};
+BlockSoundGroup BlockSoundGroup::LEAVES{"poorcraftultra:block.leaves.break", "poorcraftultra:block.leaves.step", "poorcraftultra:block.leaves.place", "poorcraftultra:block.leaves.hit", "poorcraftultra:block.leaves.fall"};
+BlockSoundGroup BlockSoundGroup::CROP{"poorcraftultra:block.crop.break", "poorcraftultra:block.crop.step", "poorcraftultra:block.crop.place", "poorcraftultra:block.crop.hit", "poorcraftultra:block.crop.fall"};
+BlockSoundGroup BlockSoundGroup::LADDER{"poorcraftultra:block.ladder.break", "poorcraftultra:block.ladder.step", "poorcraftultra:block.ladder.place", "poorcraftultra:block.ladder.hit", "poorcraftultra:block.ladder.fall"};
+BlockSoundGroup BlockSoundGroup::SNOW{"poorcraftultra:block.snow.break", "poorcraftultra:block.snow.step", "poorcraftultra:block.snow.place", "poorcraftultra:block.snow.hit", "poorcraftultra:block.snow.fall"};
+BlockSoundGroup BlockSoundGroup::NETHERRACK{"poorcraftultra:block.netherrack.break", "poorcraftultra:block.netherrack.step", "poorcraftultra:block.netherrack.place", "poorcraftultra:block.netherrack.hit", "poorcraftultra:block.netherrack.fall"};
 
 } // namespace VoxelForge

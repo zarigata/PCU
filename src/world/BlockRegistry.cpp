@@ -23,7 +23,7 @@ BlockRegistry::BlockRegistry() {
     
     // Register air first (ID 0)
     BlockDefinition airDef;
-    airDef.id = "minecraft:air";
+    airDef.id = "poorcraftultra:air";
     airDef.name = "Air";
     airDef.material = Material::Air;
     airDef.opaque = false;
@@ -33,7 +33,7 @@ BlockRegistry::BlockRegistry() {
     airDef.collisionShape = VoxelShape::empty();
     airDef.outlineShape = VoxelShape::empty();
     blocks.push_back(std::move(airDef));
-    idToIndex["minecraft:air"] = 0;
+    idToIndex["poorcraftultra:air"] = 0;
     
     VF_CORE_INFO("Block registry initialized");
 }
@@ -207,8 +207,8 @@ void BlockRegistry::registerVanillaBlocks() {
     VF_CORE_INFO("Registering vanilla blocks...");
     
     // Stone
-    registerBlock("minecraft:stone", BlockDefinition{
-        .id = "minecraft:stone",
+    registerBlock("poorcraftultra:stone", BlockDefinition{
+        .id = "poorcraftultra:stone",
         .name = "Stone",
         .material = Material::Stone,
         .hardness = 1.5f,
@@ -219,8 +219,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Grass Block
-    registerBlock("minecraft:grass_block", BlockDefinition{
-        .id = "minecraft:grass_block",
+    registerBlock("poorcraftultra:grass_block", BlockDefinition{
+        .id = "poorcraftultra:grass_block",
         .name = "Grass Block",
         .material = Material::Dirt,
         .hardness = 0.6f,
@@ -230,8 +230,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Dirt
-    registerBlock("minecraft:dirt", BlockDefinition{
-        .id = "minecraft:dirt",
+    registerBlock("poorcraftultra:dirt", BlockDefinition{
+        .id = "poorcraftultra:dirt",
         .name = "Dirt",
         .material = Material::Dirt,
         .hardness = 0.5f,
@@ -241,8 +241,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Cobblestone
-    registerBlock("minecraft:cobblestone", BlockDefinition{
-        .id = "minecraft:cobblestone",
+    registerBlock("poorcraftultra:cobblestone", BlockDefinition{
+        .id = "poorcraftultra:cobblestone",
         .name = "Cobblestone",
         .material = Material::Stone,
         .hardness = 2.0f,
@@ -253,8 +253,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Oak Planks
-    registerBlock("minecraft:oak_planks", BlockDefinition{
-        .id = "minecraft:oak_planks",
+    registerBlock("poorcraftultra:oak_planks", BlockDefinition{
+        .id = "poorcraftultra:oak_planks",
         .name = "Oak Planks",
         .material = Material::Wood,
         .hardness = 2.0f,
@@ -266,7 +266,7 @@ void BlockRegistry::registerVanillaBlocks() {
     
     // Oak Log (with axis property)
     BlockDefinition oakLog;
-    oakLog.id = "minecraft:oak_log";
+    oakLog.id = "poorcraftultra:oak_log";
     oakLog.name = "Oak Log";
     oakLog.material = Material::Wood;
     oakLog.hardness = 2.0f;
@@ -277,11 +277,11 @@ void BlockRegistry::registerVanillaBlocks() {
         {"axis", BlockProperty::Type::Direction, {"y", "x", "z"}, 0}
     };
     oakLog.defaultProperties.setEnum("axis", "y");
-    registerBlock("minecraft:oak_log", std::move(oakLog));
+    registerBlock("poorcraftultra:oak_log", std::move(oakLog));
     
     // Water
-    registerBlock("minecraft:water", BlockDefinition{
-        .id = "minecraft:water",
+    registerBlock("poorcraftultra:water", BlockDefinition{
+        .id = "poorcraftultra:water",
         .name = "Water",
         .material = Material::Water,
         .hardness = 100.0f,
@@ -294,8 +294,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Lava
-    registerBlock("minecraft:lava", BlockDefinition{
-        .id = "minecraft:lava",
+    registerBlock("poorcraftultra:lava", BlockDefinition{
+        .id = "poorcraftultra:lava",
         .name = "Lava",
         .material = Material::Lava,
         .hardness = 100.0f,
@@ -309,8 +309,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Sand
-    registerBlock("minecraft:sand", BlockDefinition{
-        .id = "minecraft:sand",
+    registerBlock("poorcraftultra:sand", BlockDefinition{
+        .id = "poorcraftultra:sand",
         .name = "Sand",
         .material = Material::Sand,
         .hardness = 0.5f,
@@ -320,8 +320,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Bedrock
-    registerBlock("minecraft:bedrock", BlockDefinition{
-        .id = "minecraft:bedrock",
+    registerBlock("poorcraftultra:bedrock", BlockDefinition{
+        .id = "poorcraftultra:bedrock",
         .name = "Bedrock",
         .material = Material::Stone,
         .hardness = -1.0f,  // Unbreakable
@@ -329,8 +329,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Iron Ore
-    registerBlock("minecraft:iron_ore", BlockDefinition{
-        .id = "minecraft:iron_ore",
+    registerBlock("poorcraftultra:iron_ore", BlockDefinition{
+        .id = "poorcraftultra:iron_ore",
         .name = "Iron Ore",
         .material = Material::Stone,
         .hardness = 3.0f,
@@ -341,8 +341,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Coal Ore
-    registerBlock("minecraft:coal_ore", BlockDefinition{
-        .id = "minecraft:coal_ore",
+    registerBlock("poorcraftultra:coal_ore", BlockDefinition{
+        .id = "poorcraftultra:coal_ore",
         .name = "Coal Ore",
         .material = Material::Stone,
         .hardness = 3.0f,
@@ -353,8 +353,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Gold Ore
-    registerBlock("minecraft:gold_ore", BlockDefinition{
-        .id = "minecraft:gold_ore",
+    registerBlock("poorcraftultra:gold_ore", BlockDefinition{
+        .id = "poorcraftultra:gold_ore",
         .name = "Gold Ore",
         .material = Material::Stone,
         .hardness = 3.0f,
@@ -365,8 +365,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Diamond Ore
-    registerBlock("minecraft:diamond_ore", BlockDefinition{
-        .id = "minecraft:diamond_ore",
+    registerBlock("poorcraftultra:diamond_ore", BlockDefinition{
+        .id = "poorcraftultra:diamond_ore",
         .name = "Diamond Ore",
         .material = Material::Stone,
         .hardness = 3.0f,
@@ -377,8 +377,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Crafting Table
-    registerBlock("minecraft:crafting_table", BlockDefinition{
-        .id = "minecraft:crafting_table",
+    registerBlock("poorcraftultra:crafting_table", BlockDefinition{
+        .id = "poorcraftultra:crafting_table",
         .name = "Crafting Table",
         .material = Material::Wood,
         .hardness = 2.5f,
@@ -390,8 +390,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Furnace
-    registerBlock("minecraft:furnace", BlockDefinition{
-        .id = "minecraft:furnace",
+    registerBlock("poorcraftultra:furnace", BlockDefinition{
+        .id = "poorcraftultra:furnace",
         .name = "Furnace",
         .material = Material::Stone,
         .hardness = 3.5f,
@@ -402,8 +402,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Chest
-    registerBlock("minecraft:chest", BlockDefinition{
-        .id = "minecraft:chest",
+    registerBlock("poorcraftultra:chest", BlockDefinition{
+        .id = "poorcraftultra:chest",
         .name = "Chest",
         .material = Material::Wood,
         .hardness = 2.5f,
@@ -415,8 +415,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Torch
-    registerBlock("minecraft:torch", BlockDefinition{
-        .id = "minecraft:torch",
+    registerBlock("poorcraftultra:torch", BlockDefinition{
+        .id = "poorcraftultra:torch",
         .name = "Torch",
         .material = Material::Decoration,
         .hardness = 0.0f,
@@ -429,8 +429,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Glass
-    registerBlock("minecraft:glass", BlockDefinition{
-        .id = "minecraft:glass",
+    registerBlock("poorcraftultra:glass", BlockDefinition{
+        .id = "poorcraftultra:glass",
         .name = "Glass",
         .material = Material::Glass,
         .hardness = 0.3f,
@@ -445,8 +445,8 @@ void BlockRegistry::registerVanillaBlocks() {
     // ============================================
     
     // Granite
-    registerBlock("minecraft:granite", BlockDefinition{
-        .id = "minecraft:granite",
+    registerBlock("poorcraftultra:granite", BlockDefinition{
+        .id = "poorcraftultra:granite",
         .name = "Granite",
         .material = Material::Stone,
         .hardness = 1.5f,
@@ -457,8 +457,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Polished Granite
-    registerBlock("minecraft:polished_granite", BlockDefinition{
-        .id = "minecraft:polished_granite",
+    registerBlock("poorcraftultra:polished_granite", BlockDefinition{
+        .id = "poorcraftultra:polished_granite",
         .name = "Polished Granite",
         .material = Material::Stone,
         .hardness = 1.5f,
@@ -469,8 +469,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Diorite
-    registerBlock("minecraft:diorite", BlockDefinition{
-        .id = "minecraft:diorite",
+    registerBlock("poorcraftultra:diorite", BlockDefinition{
+        .id = "poorcraftultra:diorite",
         .name = "Diorite",
         .material = Material::Stone,
         .hardness = 1.5f,
@@ -481,8 +481,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Polished Diorite
-    registerBlock("minecraft:polished_diorite", BlockDefinition{
-        .id = "minecraft:polished_diorite",
+    registerBlock("poorcraftultra:polished_diorite", BlockDefinition{
+        .id = "poorcraftultra:polished_diorite",
         .name = "Polished Diorite",
         .material = Material::Stone,
         .hardness = 1.5f,
@@ -493,8 +493,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Andesite
-    registerBlock("minecraft:andesite", BlockDefinition{
-        .id = "minecraft:andesite",
+    registerBlock("poorcraftultra:andesite", BlockDefinition{
+        .id = "poorcraftultra:andesite",
         .name = "Andesite",
         .material = Material::Stone,
         .hardness = 1.5f,
@@ -505,8 +505,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Polished Andesite
-    registerBlock("minecraft:polished_andesite", BlockDefinition{
-        .id = "minecraft:polished_andesite",
+    registerBlock("poorcraftultra:polished_andesite", BlockDefinition{
+        .id = "poorcraftultra:polished_andesite",
         .name = "Polished Andesite",
         .material = Material::Stone,
         .hardness = 1.5f,
@@ -517,8 +517,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Deepslate
-    registerBlock("minecraft:deepslate", BlockDefinition{
-        .id = "minecraft:deepslate",
+    registerBlock("poorcraftultra:deepslate", BlockDefinition{
+        .id = "poorcraftultra:deepslate",
         .name = "Deepslate",
         .material = Material::Stone,
         .hardness = 3.0f,
@@ -529,8 +529,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Cobbled Deepslate
-    registerBlock("minecraft:cobbled_deepslate", BlockDefinition{
-        .id = "minecraft:cobbled_deepslate",
+    registerBlock("poorcraftultra:cobbled_deepslate", BlockDefinition{
+        .id = "poorcraftultra:cobbled_deepslate",
         .name = "Cobbled Deepslate",
         .material = Material::Stone,
         .hardness = 3.5f,
@@ -541,8 +541,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Tuff
-    registerBlock("minecraft:tuff", BlockDefinition{
-        .id = "minecraft:tuff",
+    registerBlock("poorcraftultra:tuff", BlockDefinition{
+        .id = "poorcraftultra:tuff",
         .name = "Tuff",
         .material = Material::Stone,
         .hardness = 1.5f,
@@ -557,8 +557,8 @@ void BlockRegistry::registerVanillaBlocks() {
     // ============================================
     
     // Stone Bricks
-    registerBlock("minecraft:stone_bricks", BlockDefinition{
-        .id = "minecraft:stone_bricks",
+    registerBlock("poorcraftultra:stone_bricks", BlockDefinition{
+        .id = "poorcraftultra:stone_bricks",
         .name = "Stone Bricks",
         .material = Material::Stone,
         .hardness = 1.5f,
@@ -569,8 +569,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Cracked Stone Bricks
-    registerBlock("minecraft:cracked_stone_bricks", BlockDefinition{
-        .id = "minecraft:cracked_stone_bricks",
+    registerBlock("poorcraftultra:cracked_stone_bricks", BlockDefinition{
+        .id = "poorcraftultra:cracked_stone_bricks",
         .name = "Cracked Stone Bricks",
         .material = Material::Stone,
         .hardness = 1.5f,
@@ -581,8 +581,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Mossy Stone Bricks
-    registerBlock("minecraft:mossy_stone_bricks", BlockDefinition{
-        .id = "minecraft:mossy_stone_bricks",
+    registerBlock("poorcraftultra:mossy_stone_bricks", BlockDefinition{
+        .id = "poorcraftultra:mossy_stone_bricks",
         .name = "Mossy Stone Bricks",
         .material = Material::Stone,
         .hardness = 1.5f,
@@ -593,8 +593,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Chiseled Stone Bricks
-    registerBlock("minecraft:chiseled_stone_bricks", BlockDefinition{
-        .id = "minecraft:chiseled_stone_bricks",
+    registerBlock("poorcraftultra:chiseled_stone_bricks", BlockDefinition{
+        .id = "poorcraftultra:chiseled_stone_bricks",
         .name = "Chiseled Stone Bricks",
         .material = Material::Stone,
         .hardness = 1.5f,
@@ -605,8 +605,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Bricks
-    registerBlock("minecraft:bricks", BlockDefinition{
-        .id = "minecraft:bricks",
+    registerBlock("poorcraftultra:bricks", BlockDefinition{
+        .id = "poorcraftultra:bricks",
         .name = "Bricks",
         .material = Material::Stone,
         .hardness = 2.0f,
@@ -621,8 +621,8 @@ void BlockRegistry::registerVanillaBlocks() {
     // ============================================
     
     // Copper Ore
-    registerBlock("minecraft:copper_ore", BlockDefinition{
-        .id = "minecraft:copper_ore",
+    registerBlock("poorcraftultra:copper_ore", BlockDefinition{
+        .id = "poorcraftultra:copper_ore",
         .name = "Copper Ore",
         .material = Material::Stone,
         .hardness = 3.0f,
@@ -633,8 +633,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Deepslate Copper Ore
-    registerBlock("minecraft:deepslate_copper_ore", BlockDefinition{
-        .id = "minecraft:deepslate_copper_ore",
+    registerBlock("poorcraftultra:deepslate_copper_ore", BlockDefinition{
+        .id = "poorcraftultra:deepslate_copper_ore",
         .name = "Deepslate Copper Ore",
         .material = Material::Stone,
         .hardness = 4.5f,
@@ -645,8 +645,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Emerald Ore
-    registerBlock("minecraft:emerald_ore", BlockDefinition{
-        .id = "minecraft:emerald_ore",
+    registerBlock("poorcraftultra:emerald_ore", BlockDefinition{
+        .id = "poorcraftultra:emerald_ore",
         .name = "Emerald Ore",
         .material = Material::Stone,
         .hardness = 3.0f,
@@ -657,8 +657,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Deepslate Emerald Ore
-    registerBlock("minecraft:deepslate_emerald_ore", BlockDefinition{
-        .id = "minecraft:deepslate_emerald_ore",
+    registerBlock("poorcraftultra:deepslate_emerald_ore", BlockDefinition{
+        .id = "poorcraftultra:deepslate_emerald_ore",
         .name = "Deepslate Emerald Ore",
         .material = Material::Stone,
         .hardness = 4.5f,
@@ -669,8 +669,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Redstone Ore
-    registerBlock("minecraft:redstone_ore", BlockDefinition{
-        .id = "minecraft:redstone_ore",
+    registerBlock("poorcraftultra:redstone_ore", BlockDefinition{
+        .id = "poorcraftultra:redstone_ore",
         .name = "Redstone Ore",
         .material = Material::Stone,
         .hardness = 3.0f,
@@ -682,8 +682,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Deepslate Redstone Ore
-    registerBlock("minecraft:deepslate_redstone_ore", BlockDefinition{
-        .id = "minecraft:deepslate_redstone_ore",
+    registerBlock("poorcraftultra:deepslate_redstone_ore", BlockDefinition{
+        .id = "poorcraftultra:deepslate_redstone_ore",
         .name = "Deepslate Redstone Ore",
         .material = Material::Stone,
         .hardness = 4.5f,
@@ -695,8 +695,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Lapis Ore
-    registerBlock("minecraft:lapis_ore", BlockDefinition{
-        .id = "minecraft:lapis_ore",
+    registerBlock("poorcraftultra:lapis_ore", BlockDefinition{
+        .id = "poorcraftultra:lapis_ore",
         .name = "Lapis Ore",
         .material = Material::Stone,
         .hardness = 3.0f,
@@ -707,8 +707,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Deepslate Lapis Ore
-    registerBlock("minecraft:deepslate_lapis_ore", BlockDefinition{
-        .id = "minecraft:deepslate_lapis_ore",
+    registerBlock("poorcraftultra:deepslate_lapis_ore", BlockDefinition{
+        .id = "poorcraftultra:deepslate_lapis_ore",
         .name = "Deepslate Lapis Ore",
         .material = Material::Stone,
         .hardness = 4.5f,
@@ -723,8 +723,8 @@ void BlockRegistry::registerVanillaBlocks() {
     // ============================================
     
     // Coal Block
-    registerBlock("minecraft:coal_block", BlockDefinition{
-        .id = "minecraft:coal_block",
+    registerBlock("poorcraftultra:coal_block", BlockDefinition{
+        .id = "poorcraftultra:coal_block",
         .name = "Block of Coal",
         .material = Material::Stone,
         .hardness = 5.0f,
@@ -735,8 +735,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Iron Block
-    registerBlock("minecraft:iron_block", BlockDefinition{
-        .id = "minecraft:iron_block",
+    registerBlock("poorcraftultra:iron_block", BlockDefinition{
+        .id = "poorcraftultra:iron_block",
         .name = "Block of Iron",
         .material = Material::Metal,
         .hardness = 5.0f,
@@ -747,8 +747,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Gold Block
-    registerBlock("minecraft:gold_block", BlockDefinition{
-        .id = "minecraft:gold_block",
+    registerBlock("poorcraftultra:gold_block", BlockDefinition{
+        .id = "poorcraftultra:gold_block",
         .name = "Block of Gold",
         .material = Material::Metal,
         .hardness = 3.0f,
@@ -759,8 +759,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Diamond Block
-    registerBlock("minecraft:diamond_block", BlockDefinition{
-        .id = "minecraft:diamond_block",
+    registerBlock("poorcraftultra:diamond_block", BlockDefinition{
+        .id = "poorcraftultra:diamond_block",
         .name = "Block of Diamond",
         .material = Material::Metal,
         .hardness = 5.0f,
@@ -771,8 +771,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Emerald Block
-    registerBlock("minecraft:emerald_block", BlockDefinition{
-        .id = "minecraft:emerald_block",
+    registerBlock("poorcraftultra:emerald_block", BlockDefinition{
+        .id = "poorcraftultra:emerald_block",
         .name = "Block of Emerald",
         .material = Material::Metal,
         .hardness = 5.0f,
@@ -783,8 +783,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Copper Block
-    registerBlock("minecraft:copper_block", BlockDefinition{
-        .id = "minecraft:copper_block",
+    registerBlock("poorcraftultra:copper_block", BlockDefinition{
+        .id = "poorcraftultra:copper_block",
         .name = "Block of Copper",
         .material = Material::Metal,
         .hardness = 3.0f,
@@ -795,8 +795,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Lapis Block
-    registerBlock("minecraft:lapis_block", BlockDefinition{
-        .id = "minecraft:lapis_block",
+    registerBlock("poorcraftultra:lapis_block", BlockDefinition{
+        .id = "poorcraftultra:lapis_block",
         .name = "Block of Lapis Lazuli",
         .material = Material::Metal,
         .hardness = 3.0f,
@@ -807,8 +807,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Redstone Block
-    registerBlock("minecraft:redstone_block", BlockDefinition{
-        .id = "minecraft:redstone_block",
+    registerBlock("poorcraftultra:redstone_block", BlockDefinition{
+        .id = "poorcraftultra:redstone_block",
         .name = "Block of Redstone",
         .material = Material::Metal,
         .hardness = 5.0f,
@@ -824,8 +824,8 @@ void BlockRegistry::registerVanillaBlocks() {
     // ============================================
     
     // Spruce Planks
-    registerBlock("minecraft:spruce_planks", BlockDefinition{
-        .id = "minecraft:spruce_planks",
+    registerBlock("poorcraftultra:spruce_planks", BlockDefinition{
+        .id = "poorcraftultra:spruce_planks",
         .name = "Spruce Planks",
         .material = Material::Wood,
         .hardness = 2.0f,
@@ -836,8 +836,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Birch Planks
-    registerBlock("minecraft:birch_planks", BlockDefinition{
-        .id = "minecraft:birch_planks",
+    registerBlock("poorcraftultra:birch_planks", BlockDefinition{
+        .id = "poorcraftultra:birch_planks",
         .name = "Birch Planks",
         .material = Material::Wood,
         .hardness = 2.0f,
@@ -848,8 +848,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Jungle Planks
-    registerBlock("minecraft:jungle_planks", BlockDefinition{
-        .id = "minecraft:jungle_planks",
+    registerBlock("poorcraftultra:jungle_planks", BlockDefinition{
+        .id = "poorcraftultra:jungle_planks",
         .name = "Jungle Planks",
         .material = Material::Wood,
         .hardness = 2.0f,
@@ -860,8 +860,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Acacia Planks
-    registerBlock("minecraft:acacia_planks", BlockDefinition{
-        .id = "minecraft:acacia_planks",
+    registerBlock("poorcraftultra:acacia_planks", BlockDefinition{
+        .id = "poorcraftultra:acacia_planks",
         .name = "Acacia Planks",
         .material = Material::Wood,
         .hardness = 2.0f,
@@ -872,8 +872,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Dark Oak Planks
-    registerBlock("minecraft:dark_oak_planks", BlockDefinition{
-        .id = "minecraft:dark_oak_planks",
+    registerBlock("poorcraftultra:dark_oak_planks", BlockDefinition{
+        .id = "poorcraftultra:dark_oak_planks",
         .name = "Dark Oak Planks",
         .material = Material::Wood,
         .hardness = 2.0f,
@@ -884,8 +884,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Mangrove Planks
-    registerBlock("minecraft:mangrove_planks", BlockDefinition{
-        .id = "minecraft:mangrove_planks",
+    registerBlock("poorcraftultra:mangrove_planks", BlockDefinition{
+        .id = "poorcraftultra:mangrove_planks",
         .name = "Mangrove Planks",
         .material = Material::Wood,
         .hardness = 2.0f,
@@ -896,8 +896,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Cherry Planks
-    registerBlock("minecraft:cherry_planks", BlockDefinition{
-        .id = "minecraft:cherry_planks",
+    registerBlock("poorcraftultra:cherry_planks", BlockDefinition{
+        .id = "poorcraftultra:cherry_planks",
         .name = "Cherry Planks",
         .material = Material::Wood,
         .hardness = 2.0f,
@@ -908,8 +908,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Bamboo Planks
-    registerBlock("minecraft:bamboo_planks", BlockDefinition{
-        .id = "minecraft:bamboo_planks",
+    registerBlock("poorcraftultra:bamboo_planks", BlockDefinition{
+        .id = "poorcraftultra:bamboo_planks",
         .name = "Bamboo Planks",
         .material = Material::Wood,
         .hardness = 2.0f,
@@ -920,8 +920,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Crimson Planks
-    registerBlock("minecraft:crimson_planks", BlockDefinition{
-        .id = "minecraft:crimson_planks",
+    registerBlock("poorcraftultra:crimson_planks", BlockDefinition{
+        .id = "poorcraftultra:crimson_planks",
         .name = "Crimson Planks",
         .material = Material::NetherWood,
         .hardness = 2.0f,
@@ -932,8 +932,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Warped Planks
-    registerBlock("minecraft:warped_planks", BlockDefinition{
-        .id = "minecraft:warped_planks",
+    registerBlock("poorcraftultra:warped_planks", BlockDefinition{
+        .id = "poorcraftultra:warped_planks",
         .name = "Warped Planks",
         .material = Material::NetherWood,
         .hardness = 2.0f,
@@ -948,8 +948,8 @@ void BlockRegistry::registerVanillaBlocks() {
     // ============================================
     
     // Oak Leaves
-    registerBlock("minecraft:oak_leaves", BlockDefinition{
-        .id = "minecraft:oak_leaves",
+    registerBlock("poorcraftultra:oak_leaves", BlockDefinition{
+        .id = "poorcraftultra:oak_leaves",
         .name = "Oak Leaves",
         .material = Material::Leaves,
         .hardness = 0.2f,
@@ -961,8 +961,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Spruce Leaves
-    registerBlock("minecraft:spruce_leaves", BlockDefinition{
-        .id = "minecraft:spruce_leaves",
+    registerBlock("poorcraftultra:spruce_leaves", BlockDefinition{
+        .id = "poorcraftultra:spruce_leaves",
         .name = "Spruce Leaves",
         .material = Material::Leaves,
         .hardness = 0.2f,
@@ -974,8 +974,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Birch Leaves
-    registerBlock("minecraft:birch_leaves", BlockDefinition{
-        .id = "minecraft:birch_leaves",
+    registerBlock("poorcraftultra:birch_leaves", BlockDefinition{
+        .id = "poorcraftultra:birch_leaves",
         .name = "Birch Leaves",
         .material = Material::Leaves,
         .hardness = 0.2f,
@@ -987,8 +987,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Jungle Leaves
-    registerBlock("minecraft:jungle_leaves", BlockDefinition{
-        .id = "minecraft:jungle_leaves",
+    registerBlock("poorcraftultra:jungle_leaves", BlockDefinition{
+        .id = "poorcraftultra:jungle_leaves",
         .name = "Jungle Leaves",
         .material = Material::Leaves,
         .hardness = 0.2f,
@@ -1000,8 +1000,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Acacia Leaves
-    registerBlock("minecraft:acacia_leaves", BlockDefinition{
-        .id = "minecraft:acacia_leaves",
+    registerBlock("poorcraftultra:acacia_leaves", BlockDefinition{
+        .id = "poorcraftultra:acacia_leaves",
         .name = "Acacia Leaves",
         .material = Material::Leaves,
         .hardness = 0.2f,
@@ -1013,8 +1013,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Dark Oak Leaves
-    registerBlock("minecraft:dark_oak_leaves", BlockDefinition{
-        .id = "minecraft:dark_oak_leaves",
+    registerBlock("poorcraftultra:dark_oak_leaves", BlockDefinition{
+        .id = "poorcraftultra:dark_oak_leaves",
         .name = "Dark Oak Leaves",
         .material = Material::Leaves,
         .hardness = 0.2f,
@@ -1026,8 +1026,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Mangrove Leaves
-    registerBlock("minecraft:mangrove_leaves", BlockDefinition{
-        .id = "minecraft:mangrove_leaves",
+    registerBlock("poorcraftultra:mangrove_leaves", BlockDefinition{
+        .id = "poorcraftultra:mangrove_leaves",
         .name = "Mangrove Leaves",
         .material = Material::Leaves,
         .hardness = 0.2f,
@@ -1039,8 +1039,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Cherry Leaves
-    registerBlock("minecraft:cherry_leaves", BlockDefinition{
-        .id = "minecraft:cherry_leaves",
+    registerBlock("poorcraftultra:cherry_leaves", BlockDefinition{
+        .id = "poorcraftultra:cherry_leaves",
         .name = "Cherry Leaves",
         .material = Material::Leaves,
         .hardness = 0.2f,
@@ -1056,8 +1056,8 @@ void BlockRegistry::registerVanillaBlocks() {
     // ============================================
     
     // Gravel
-    registerBlock("minecraft:gravel", BlockDefinition{
-        .id = "minecraft:gravel",
+    registerBlock("poorcraftultra:gravel", BlockDefinition{
+        .id = "poorcraftultra:gravel",
         .name = "Gravel",
         .material = Material::Sand,
         .hardness = 0.6f,
@@ -1067,8 +1067,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Coarse Dirt
-    registerBlock("minecraft:coarse_dirt", BlockDefinition{
-        .id = "minecraft:coarse_dirt",
+    registerBlock("poorcraftultra:coarse_dirt", BlockDefinition{
+        .id = "poorcraftultra:coarse_dirt",
         .name = "Coarse Dirt",
         .material = Material::Dirt,
         .hardness = 0.5f,
@@ -1078,8 +1078,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Podzol
-    registerBlock("minecraft:podzol", BlockDefinition{
-        .id = "minecraft:podzol",
+    registerBlock("poorcraftultra:podzol", BlockDefinition{
+        .id = "poorcraftultra:podzol",
         .name = "Podzol",
         .material = Material::Dirt,
         .hardness = 0.5f,
@@ -1089,8 +1089,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Rooted Dirt
-    registerBlock("minecraft:rooted_dirt", BlockDefinition{
-        .id = "minecraft:rooted_dirt",
+    registerBlock("poorcraftultra:rooted_dirt", BlockDefinition{
+        .id = "poorcraftultra:rooted_dirt",
         .name = "Rooted Dirt",
         .material = Material::Dirt,
         .hardness = 0.5f,
@@ -1100,8 +1100,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Moss Block
-    registerBlock("minecraft:moss_block", BlockDefinition{
-        .id = "minecraft:moss_block",
+    registerBlock("poorcraftultra:moss_block", BlockDefinition{
+        .id = "poorcraftultra:moss_block",
         .name = "Moss Block",
         .material = Material::Dirt,
         .hardness = 0.1f,
@@ -1111,8 +1111,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Mycelium
-    registerBlock("minecraft:mycelium", BlockDefinition{
-        .id = "minecraft:mycelium",
+    registerBlock("poorcraftultra:mycelium", BlockDefinition{
+        .id = "poorcraftultra:mycelium",
         .name = "Mycelium",
         .material = Material::Dirt,
         .hardness = 0.6f,
@@ -1126,8 +1126,8 @@ void BlockRegistry::registerVanillaBlocks() {
     // ============================================
     
     // Red Sand
-    registerBlock("minecraft:red_sand", BlockDefinition{
-        .id = "minecraft:red_sand",
+    registerBlock("poorcraftultra:red_sand", BlockDefinition{
+        .id = "poorcraftultra:red_sand",
         .name = "Red Sand",
         .material = Material::Sand,
         .hardness = 0.5f,
@@ -1137,8 +1137,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Sandstone
-    registerBlock("minecraft:sandstone", BlockDefinition{
-        .id = "minecraft:sandstone",
+    registerBlock("poorcraftultra:sandstone", BlockDefinition{
+        .id = "poorcraftultra:sandstone",
         .name = "Sandstone",
         .material = Material::Stone,
         .hardness = 0.8f,
@@ -1149,8 +1149,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Red Sandstone
-    registerBlock("minecraft:red_sandstone", BlockDefinition{
-        .id = "minecraft:red_sandstone",
+    registerBlock("poorcraftultra:red_sandstone", BlockDefinition{
+        .id = "poorcraftultra:red_sandstone",
         .name = "Red Sandstone",
         .material = Material::Stone,
         .hardness = 0.8f,
@@ -1165,8 +1165,8 @@ void BlockRegistry::registerVanillaBlocks() {
     // ============================================
     
     // Netherrack
-    registerBlock("minecraft:netherrack", BlockDefinition{
-        .id = "minecraft:netherrack",
+    registerBlock("poorcraftultra:netherrack", BlockDefinition{
+        .id = "poorcraftultra:netherrack",
         .name = "Netherrack",
         .material = Material::Stone,
         .hardness = 0.4f,
@@ -1177,8 +1177,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Soul Sand
-    registerBlock("minecraft:soul_sand", BlockDefinition{
-        .id = "minecraft:soul_sand",
+    registerBlock("poorcraftultra:soul_sand", BlockDefinition{
+        .id = "poorcraftultra:soul_sand",
         .name = "Soul Sand",
         .material = Material::Sand,
         .hardness = 0.5f,
@@ -1188,8 +1188,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Soul Soil
-    registerBlock("minecraft:soul_soil", BlockDefinition{
-        .id = "minecraft:soul_soil",
+    registerBlock("poorcraftultra:soul_soil", BlockDefinition{
+        .id = "poorcraftultra:soul_soil",
         .name = "Soul Soil",
         .material = Material::Dirt,
         .hardness = 0.5f,
@@ -1199,8 +1199,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Basalt
-    registerBlock("minecraft:basalt", BlockDefinition{
-        .id = "minecraft:basalt",
+    registerBlock("poorcraftultra:basalt", BlockDefinition{
+        .id = "poorcraftultra:basalt",
         .name = "Basalt",
         .material = Material::Stone,
         .hardness = 1.25f,
@@ -1211,8 +1211,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Blackstone
-    registerBlock("minecraft:blackstone", BlockDefinition{
-        .id = "minecraft:blackstone",
+    registerBlock("poorcraftultra:blackstone", BlockDefinition{
+        .id = "poorcraftultra:blackstone",
         .name = "Blackstone",
         .material = Material::Stone,
         .hardness = 1.5f,
@@ -1223,8 +1223,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Glowstone
-    registerBlock("minecraft:glowstone", BlockDefinition{
-        .id = "minecraft:glowstone",
+    registerBlock("poorcraftultra:glowstone", BlockDefinition{
+        .id = "poorcraftultra:glowstone",
         .name = "Glowstone",
         .material = Material::Glass,
         .hardness = 0.3f,
@@ -1240,8 +1240,8 @@ void BlockRegistry::registerVanillaBlocks() {
     // ============================================
     
     // End Stone
-    registerBlock("minecraft:end_stone", BlockDefinition{
-        .id = "minecraft:end_stone",
+    registerBlock("poorcraftultra:end_stone", BlockDefinition{
+        .id = "poorcraftultra:end_stone",
         .name = "End Stone",
         .material = Material::Stone,
         .hardness = 3.0f,
@@ -1252,8 +1252,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Obsidian
-    registerBlock("minecraft:obsidian", BlockDefinition{
-        .id = "minecraft:obsidian",
+    registerBlock("poorcraftultra:obsidian", BlockDefinition{
+        .id = "poorcraftultra:obsidian",
         .name = "Obsidian",
         .material = Material::Stone,
         .hardness = 50.0f,
@@ -1264,8 +1264,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Crying Obsidian
-    registerBlock("minecraft:crying_obsidian", BlockDefinition{
-        .id = "minecraft:crying_obsidian",
+    registerBlock("poorcraftultra:crying_obsidian", BlockDefinition{
+        .id = "poorcraftultra:crying_obsidian",
         .name = "Crying Obsidian",
         .material = Material::Stone,
         .hardness = 50.0f,
@@ -1277,8 +1277,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // End Portal Frame
-    registerBlock("minecraft:end_portal_frame", BlockDefinition{
-        .id = "minecraft:end_portal_frame",
+    registerBlock("poorcraftultra:end_portal_frame", BlockDefinition{
+        .id = "poorcraftultra:end_portal_frame",
         .name = "End Portal Frame",
         .material = Material::Stone,
         .hardness = -1.0f,
@@ -1291,8 +1291,8 @@ void BlockRegistry::registerVanillaBlocks() {
     // ============================================
     
     // White Wool
-    registerBlock("minecraft:white_wool", BlockDefinition{
-        .id = "minecraft:white_wool",
+    registerBlock("poorcraftultra:white_wool", BlockDefinition{
+        .id = "poorcraftultra:white_wool",
         .name = "White Wool",
         .material = Material::Wool,
         .hardness = 0.8f,
@@ -1303,8 +1303,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Orange Wool
-    registerBlock("minecraft:orange_wool", BlockDefinition{
-        .id = "minecraft:orange_wool",
+    registerBlock("poorcraftultra:orange_wool", BlockDefinition{
+        .id = "poorcraftultra:orange_wool",
         .name = "Orange Wool",
         .material = Material::Wool,
         .hardness = 0.8f,
@@ -1315,8 +1315,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Magenta Wool
-    registerBlock("minecraft:magenta_wool", BlockDefinition{
-        .id = "minecraft:magenta_wool",
+    registerBlock("poorcraftultra:magenta_wool", BlockDefinition{
+        .id = "poorcraftultra:magenta_wool",
         .name = "Magenta Wool",
         .material = Material::Wool,
         .hardness = 0.8f,
@@ -1327,8 +1327,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Light Blue Wool
-    registerBlock("minecraft:light_blue_wool", BlockDefinition{
-        .id = "minecraft:light_blue_wool",
+    registerBlock("poorcraftultra:light_blue_wool", BlockDefinition{
+        .id = "poorcraftultra:light_blue_wool",
         .name = "Light Blue Wool",
         .material = Material::Wool,
         .hardness = 0.8f,
@@ -1339,8 +1339,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Yellow Wool
-    registerBlock("minecraft:yellow_wool", BlockDefinition{
-        .id = "minecraft:yellow_wool",
+    registerBlock("poorcraftultra:yellow_wool", BlockDefinition{
+        .id = "poorcraftultra:yellow_wool",
         .name = "Yellow Wool",
         .material = Material::Wool,
         .hardness = 0.8f,
@@ -1351,8 +1351,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Lime Wool
-    registerBlock("minecraft:lime_wool", BlockDefinition{
-        .id = "minecraft:lime_wool",
+    registerBlock("poorcraftultra:lime_wool", BlockDefinition{
+        .id = "poorcraftultra:lime_wool",
         .name = "Lime Wool",
         .material = Material::Wool,
         .hardness = 0.8f,
@@ -1363,8 +1363,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Pink Wool
-    registerBlock("minecraft:pink_wool", BlockDefinition{
-        .id = "minecraft:pink_wool",
+    registerBlock("poorcraftultra:pink_wool", BlockDefinition{
+        .id = "poorcraftultra:pink_wool",
         .name = "Pink Wool",
         .material = Material::Wool,
         .hardness = 0.8f,
@@ -1375,8 +1375,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Gray Wool
-    registerBlock("minecraft:gray_wool", BlockDefinition{
-        .id = "minecraft:gray_wool",
+    registerBlock("poorcraftultra:gray_wool", BlockDefinition{
+        .id = "poorcraftultra:gray_wool",
         .name = "Gray Wool",
         .material = Material::Wool,
         .hardness = 0.8f,
@@ -1387,8 +1387,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Light Gray Wool
-    registerBlock("minecraft:light_gray_wool", BlockDefinition{
-        .id = "minecraft:light_gray_wool",
+    registerBlock("poorcraftultra:light_gray_wool", BlockDefinition{
+        .id = "poorcraftultra:light_gray_wool",
         .name = "Light Gray Wool",
         .material = Material::Wool,
         .hardness = 0.8f,
@@ -1399,8 +1399,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Cyan Wool
-    registerBlock("minecraft:cyan_wool", BlockDefinition{
-        .id = "minecraft:cyan_wool",
+    registerBlock("poorcraftultra:cyan_wool", BlockDefinition{
+        .id = "poorcraftultra:cyan_wool",
         .name = "Cyan Wool",
         .material = Material::Wool,
         .hardness = 0.8f,
@@ -1411,8 +1411,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Purple Wool
-    registerBlock("minecraft:purple_wool", BlockDefinition{
-        .id = "minecraft:purple_wool",
+    registerBlock("poorcraftultra:purple_wool", BlockDefinition{
+        .id = "poorcraftultra:purple_wool",
         .name = "Purple Wool",
         .material = Material::Wool,
         .hardness = 0.8f,
@@ -1423,8 +1423,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Blue Wool
-    registerBlock("minecraft:blue_wool", BlockDefinition{
-        .id = "minecraft:blue_wool",
+    registerBlock("poorcraftultra:blue_wool", BlockDefinition{
+        .id = "poorcraftultra:blue_wool",
         .name = "Blue Wool",
         .material = Material::Wool,
         .hardness = 0.8f,
@@ -1435,8 +1435,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Brown Wool
-    registerBlock("minecraft:brown_wool", BlockDefinition{
-        .id = "minecraft:brown_wool",
+    registerBlock("poorcraftultra:brown_wool", BlockDefinition{
+        .id = "poorcraftultra:brown_wool",
         .name = "Brown Wool",
         .material = Material::Wool,
         .hardness = 0.8f,
@@ -1447,8 +1447,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Green Wool
-    registerBlock("minecraft:green_wool", BlockDefinition{
-        .id = "minecraft:green_wool",
+    registerBlock("poorcraftultra:green_wool", BlockDefinition{
+        .id = "poorcraftultra:green_wool",
         .name = "Green Wool",
         .material = Material::Wool,
         .hardness = 0.8f,
@@ -1459,8 +1459,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Red Wool
-    registerBlock("minecraft:red_wool", BlockDefinition{
-        .id = "minecraft:red_wool",
+    registerBlock("poorcraftultra:red_wool", BlockDefinition{
+        .id = "poorcraftultra:red_wool",
         .name = "Red Wool",
         .material = Material::Wool,
         .hardness = 0.8f,
@@ -1471,8 +1471,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Black Wool
-    registerBlock("minecraft:black_wool", BlockDefinition{
-        .id = "minecraft:black_wool",
+    registerBlock("poorcraftultra:black_wool", BlockDefinition{
+        .id = "poorcraftultra:black_wool",
         .name = "Black Wool",
         .material = Material::Wool,
         .hardness = 0.8f,
@@ -1487,8 +1487,8 @@ void BlockRegistry::registerVanillaBlocks() {
     // ============================================
     
     // Lantern
-    registerBlock("minecraft:lantern", BlockDefinition{
-        .id = "minecraft:lantern",
+    registerBlock("poorcraftultra:lantern", BlockDefinition{
+        .id = "poorcraftultra:lantern",
         .name = "Lantern",
         .material = Material::Metal,
         .hardness = 3.5f,
@@ -1501,8 +1501,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Soul Lantern
-    registerBlock("minecraft:soul_lantern", BlockDefinition{
-        .id = "minecraft:soul_lantern",
+    registerBlock("poorcraftultra:soul_lantern", BlockDefinition{
+        .id = "poorcraftultra:soul_lantern",
         .name = "Soul Lantern",
         .material = Material::Metal,
         .hardness = 3.5f,
@@ -1515,8 +1515,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Campfire
-    registerBlock("minecraft:campfire", BlockDefinition{
-        .id = "minecraft:campfire",
+    registerBlock("poorcraftultra:campfire", BlockDefinition{
+        .id = "poorcraftultra:campfire",
         .name = "Campfire",
         .material = Material::Wood,
         .hardness = 2.0f,
@@ -1528,8 +1528,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Sea Lantern
-    registerBlock("minecraft:sea_lantern", BlockDefinition{
-        .id = "minecraft:sea_lantern",
+    registerBlock("poorcraftultra:sea_lantern", BlockDefinition{
+        .id = "poorcraftultra:sea_lantern",
         .name = "Sea Lantern",
         .material = Material::Glass,
         .hardness = 0.3f,
@@ -1541,8 +1541,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Jack o'Lantern
-    registerBlock("minecraft:jack_o_lantern", BlockDefinition{
-        .id = "minecraft:jack_o_lantern",
+    registerBlock("poorcraftultra:jack_o_lantern", BlockDefinition{
+        .id = "poorcraftultra:jack_o_lantern",
         .name = "Jack o'Lantern",
         .material = Material::Vegetable,
         .hardness = 1.0f,
@@ -1552,8 +1552,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Shroomlight
-    registerBlock("minecraft:shroomlight", BlockDefinition{
-        .id = "minecraft:shroomlight",
+    registerBlock("poorcraftultra:shroomlight", BlockDefinition{
+        .id = "poorcraftultra:shroomlight",
         .name = "Shroomlight",
         .material = Material::Vegetable,
         .hardness = 1.0f,
@@ -1569,8 +1569,8 @@ void BlockRegistry::registerVanillaBlocks() {
     // ============================================
     
     // Anvil
-    registerBlock("minecraft:anvil", BlockDefinition{
-        .id = "minecraft:anvil",
+    registerBlock("poorcraftultra:anvil", BlockDefinition{
+        .id = "poorcraftultra:anvil",
         .name = "Anvil",
         .material = Material::Metal,
         .hardness = 5.0f,
@@ -1581,8 +1581,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Enchanting Table
-    registerBlock("minecraft:enchanting_table", BlockDefinition{
-        .id = "minecraft:enchanting_table",
+    registerBlock("poorcraftultra:enchanting_table", BlockDefinition{
+        .id = "poorcraftultra:enchanting_table",
         .name = "Enchanting Table",
         .material = Material::Stone,
         .hardness = 5.0f,
@@ -1594,8 +1594,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Brewing Stand
-    registerBlock("minecraft:brewing_stand", BlockDefinition{
-        .id = "minecraft:brewing_stand",
+    registerBlock("poorcraftultra:brewing_stand", BlockDefinition{
+        .id = "poorcraftultra:brewing_stand",
         .name = "Brewing Stand",
         .material = Material::Metal,
         .hardness = 0.5f,
@@ -1607,8 +1607,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Cauldron
-    registerBlock("minecraft:cauldron", BlockDefinition{
-        .id = "minecraft:cauldron",
+    registerBlock("poorcraftultra:cauldron", BlockDefinition{
+        .id = "poorcraftultra:cauldron",
         .name = "Cauldron",
         .material = Material::Metal,
         .hardness = 2.0f,
@@ -1620,8 +1620,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Bell
-    registerBlock("minecraft:bell", BlockDefinition{
-        .id = "minecraft:bell",
+    registerBlock("poorcraftultra:bell", BlockDefinition{
+        .id = "poorcraftultra:bell",
         .name = "Bell",
         .material = Material::Metal,
         .hardness = 5.0f,
@@ -1633,8 +1633,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Beehive
-    registerBlock("minecraft:beehive", BlockDefinition{
-        .id = "minecraft:beehive",
+    registerBlock("poorcraftultra:beehive", BlockDefinition{
+        .id = "poorcraftultra:beehive",
         .name = "Beehive",
         .material = Material::Wood,
         .hardness = 0.6f,
@@ -1649,8 +1649,8 @@ void BlockRegistry::registerVanillaBlocks() {
     // ============================================
     
     // Redstone Lamp
-    registerBlock("minecraft:redstone_lamp", BlockDefinition{
-        .id = "minecraft:redstone_lamp",
+    registerBlock("poorcraftultra:redstone_lamp", BlockDefinition{
+        .id = "poorcraftultra:redstone_lamp",
         .name = "Redstone Lamp",
         .material = Material::Stone,
         .hardness = 0.3f,
@@ -1659,8 +1659,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Piston
-    registerBlock("minecraft:piston", BlockDefinition{
-        .id = "minecraft:piston",
+    registerBlock("poorcraftultra:piston", BlockDefinition{
+        .id = "poorcraftultra:piston",
         .name = "Piston",
         .material = Material::Stone,
         .hardness = 1.5f,
@@ -1669,8 +1669,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Sticky Piston
-    registerBlock("minecraft:sticky_piston", BlockDefinition{
-        .id = "minecraft:sticky_piston",
+    registerBlock("poorcraftultra:sticky_piston", BlockDefinition{
+        .id = "poorcraftultra:sticky_piston",
         .name = "Sticky Piston",
         .material = Material::Stone,
         .hardness = 1.5f,
@@ -1679,8 +1679,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Dispenser
-    registerBlock("minecraft:dispenser", BlockDefinition{
-        .id = "minecraft:dispenser",
+    registerBlock("poorcraftultra:dispenser", BlockDefinition{
+        .id = "poorcraftultra:dispenser",
         .name = "Dispenser",
         .material = Material::Stone,
         .hardness = 3.5f,
@@ -1690,8 +1690,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Dropper
-    registerBlock("minecraft:dropper", BlockDefinition{
-        .id = "minecraft:dropper",
+    registerBlock("poorcraftultra:dropper", BlockDefinition{
+        .id = "poorcraftultra:dropper",
         .name = "Dropper",
         .material = Material::Stone,
         .hardness = 3.5f,
@@ -1701,8 +1701,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Observer
-    registerBlock("minecraft:observer", BlockDefinition{
-        .id = "minecraft:observer",
+    registerBlock("poorcraftultra:observer", BlockDefinition{
+        .id = "poorcraftultra:observer",
         .name = "Observer",
         .material = Material::Stone,
         .hardness = 3.5f,
@@ -1712,8 +1712,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Hopper
-    registerBlock("minecraft:hopper", BlockDefinition{
-        .id = "minecraft:hopper",
+    registerBlock("poorcraftultra:hopper", BlockDefinition{
+        .id = "poorcraftultra:hopper",
         .name = "Hopper",
         .material = Material::Metal,
         .hardness = 3.0f,
@@ -1730,8 +1730,8 @@ void BlockRegistry::registerVanillaBlocks() {
     // ============================================
     
     // Bookshelf
-    registerBlock("minecraft:bookshelf", BlockDefinition{
-        .id = "minecraft:bookshelf",
+    registerBlock("poorcraftultra:bookshelf", BlockDefinition{
+        .id = "poorcraftultra:bookshelf",
         .name = "Bookshelf",
         .material = Material::Wood,
         .hardness = 1.5f,
@@ -1742,8 +1742,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Ladder
-    registerBlock("minecraft:ladder", BlockDefinition{
-        .id = "minecraft:ladder",
+    registerBlock("poorcraftultra:ladder", BlockDefinition{
+        .id = "poorcraftultra:ladder",
         .name = "Ladder",
         .material = Material::Decoration,
         .hardness = 0.4f,
@@ -1754,8 +1754,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Snow Block
-    registerBlock("minecraft:snow_block", BlockDefinition{
-        .id = "minecraft:snow_block",
+    registerBlock("poorcraftultra:snow_block", BlockDefinition{
+        .id = "poorcraftultra:snow_block",
         .name = "Snow Block",
         .material = Material::Snow,
         .hardness = 0.2f,
@@ -1765,8 +1765,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Ice
-    registerBlock("minecraft:ice", BlockDefinition{
-        .id = "minecraft:ice",
+    registerBlock("poorcraftultra:ice", BlockDefinition{
+        .id = "poorcraftultra:ice",
         .name = "Ice",
         .material = Material::Ice,
         .hardness = 0.5f,
@@ -1777,8 +1777,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Packed Ice
-    registerBlock("minecraft:packed_ice", BlockDefinition{
-        .id = "minecraft:packed_ice",
+    registerBlock("poorcraftultra:packed_ice", BlockDefinition{
+        .id = "poorcraftultra:packed_ice",
         .name = "Packed Ice",
         .material = Material::Ice,
         .hardness = 0.5f,
@@ -1789,8 +1789,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Blue Ice
-    registerBlock("minecraft:blue_ice", BlockDefinition{
-        .id = "minecraft:blue_ice",
+    registerBlock("poorcraftultra:blue_ice", BlockDefinition{
+        .id = "poorcraftultra:blue_ice",
         .name = "Blue Ice",
         .material = Material::Ice,
         .hardness = 2.8f,
@@ -1801,8 +1801,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Clay
-    registerBlock("minecraft:clay", BlockDefinition{
-        .id = "minecraft:clay",
+    registerBlock("poorcraftultra:clay", BlockDefinition{
+        .id = "poorcraftultra:clay",
         .name = "Clay",
         .material = Material::Dirt,
         .hardness = 0.6f,
@@ -1812,8 +1812,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Sponge
-    registerBlock("minecraft:sponge", BlockDefinition{
-        .id = "minecraft:sponge",
+    registerBlock("poorcraftultra:sponge", BlockDefinition{
+        .id = "poorcraftultra:sponge",
         .name = "Sponge",
         .material = Material::Dirt,
         .hardness = 0.6f,
@@ -1826,8 +1826,8 @@ void BlockRegistry::registerVanillaBlocks() {
     // ============================================
     
     // Water (source)
-    registerBlock("minecraft:water", BlockDefinition{
-        .id = "minecraft:water",
+    registerBlock("poorcraftultra:water", BlockDefinition{
+        .id = "poorcraftultra:water",
         .name = "Water",
         .material = Material::Water,
         .hardness = 100.0f,
@@ -1841,8 +1841,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Water (flowing)
-    registerBlock("minecraft:flowing_water", BlockDefinition{
-        .id = "minecraft:flowing_water",
+    registerBlock("poorcraftultra:flowing_water", BlockDefinition{
+        .id = "poorcraftultra:flowing_water",
         .name = "Water (Flowing)",
         .material = Material::Water,
         .hardness = 100.0f,
@@ -1863,8 +1863,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Lava (source)
-    registerBlock("minecraft:lava", BlockDefinition{
-        .id = "minecraft:lava",
+    registerBlock("poorcraftultra:lava", BlockDefinition{
+        .id = "poorcraftultra:lava",
         .name = "Lava",
         .material = Material::Lava,
         .hardness = 100.0f,
@@ -1879,8 +1879,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Lava (flowing)
-    registerBlock("minecraft:flowing_lava", BlockDefinition{
-        .id = "minecraft:flowing_lava",
+    registerBlock("poorcraftultra:flowing_lava", BlockDefinition{
+        .id = "poorcraftultra:flowing_lava",
         .name = "Lava (Flowing)",
         .material = Material::Lava,
         .hardness = 100.0f,
@@ -1902,8 +1902,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Bubble Column (water with bubbles)
-    registerBlock("minecraft:bubble_column", BlockDefinition{
-        .id = "minecraft:bubble_column",
+    registerBlock("poorcraftultra:bubble_column", BlockDefinition{
+        .id = "poorcraftultra:bubble_column",
         .name = "Bubble Column",
         .material = Material::Water,
         .hardness = 100.0f,
@@ -1920,8 +1920,8 @@ void BlockRegistry::registerVanillaBlocks() {
     // ============================================
     
     // Farmland
-    registerBlock("minecraft:farmland", BlockDefinition{
-        .id = "minecraft:farmland",
+    registerBlock("poorcraftultra:farmland", BlockDefinition{
+        .id = "poorcraftultra:farmland",
         .name = "Farmland",
         .material = Material::Dirt,
         .hardness = 0.6f,
@@ -1935,8 +1935,8 @@ void BlockRegistry::registerVanillaBlocks() {
     // ============================================
     
     // Terracotta
-    registerBlock("minecraft:terracotta", BlockDefinition{
-        .id = "minecraft:terracotta",
+    registerBlock("poorcraftultra:terracotta", BlockDefinition{
+        .id = "poorcraftultra:terracotta",
         .name = "Terracotta",
         .material = Material::Stone,
         .hardness = 1.25f,
@@ -1947,8 +1947,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // White Concrete
-    registerBlock("minecraft:white_concrete", BlockDefinition{
-        .id = "minecraft:white_concrete",
+    registerBlock("poorcraftultra:white_concrete", BlockDefinition{
+        .id = "poorcraftultra:white_concrete",
         .name = "White Concrete",
         .material = Material::Stone,
         .hardness = 1.8f,
@@ -1959,8 +1959,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Black Concrete
-    registerBlock("minecraft:black_concrete", BlockDefinition{
-        .id = "minecraft:black_concrete",
+    registerBlock("poorcraftultra:black_concrete", BlockDefinition{
+        .id = "poorcraftultra:black_concrete",
         .name = "Black Concrete",
         .material = Material::Stone,
         .hardness = 1.8f,
@@ -1975,8 +1975,8 @@ void BlockRegistry::registerVanillaBlocks() {
     // ============================================
     
     // Prismarine
-    registerBlock("minecraft:prismarine", BlockDefinition{
-        .id = "minecraft:prismarine",
+    registerBlock("poorcraftultra:prismarine", BlockDefinition{
+        .id = "poorcraftultra:prismarine",
         .name = "Prismarine",
         .material = Material::Stone,
         .hardness = 1.5f,
@@ -1987,8 +1987,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Prismarine Bricks
-    registerBlock("minecraft:prismarine_bricks", BlockDefinition{
-        .id = "minecraft:prismarine_bricks",
+    registerBlock("poorcraftultra:prismarine_bricks", BlockDefinition{
+        .id = "poorcraftultra:prismarine_bricks",
         .name = "Prismarine Bricks",
         .material = Material::Stone,
         .hardness = 1.5f,
@@ -1999,8 +1999,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Dark Prismarine
-    registerBlock("minecraft:dark_prismarine", BlockDefinition{
-        .id = "minecraft:dark_prismarine",
+    registerBlock("poorcraftultra:dark_prismarine", BlockDefinition{
+        .id = "poorcraftultra:dark_prismarine",
         .name = "Dark Prismarine",
         .material = Material::Stone,
         .hardness = 1.5f,
@@ -2011,8 +2011,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Sea Pickle
-    registerBlock("minecraft:sea_pickle", BlockDefinition{
-        .id = "minecraft:sea_pickle",
+    registerBlock("poorcraftultra:sea_pickle", BlockDefinition{
+        .id = "poorcraftultra:sea_pickle",
         .name = "Sea Pickle",
         .material = Material::Decoration,
         .hardness = 0.0f,
@@ -2028,8 +2028,8 @@ void BlockRegistry::registerVanillaBlocks() {
     // ============================================
     
     // Amethyst Block
-    registerBlock("minecraft:amethyst_block", BlockDefinition{
-        .id = "minecraft:amethyst_block",
+    registerBlock("poorcraftultra:amethyst_block", BlockDefinition{
+        .id = "poorcraftultra:amethyst_block",
         .name = "Block of Amethyst",
         .material = Material::Stone,
         .hardness = 1.5f,
@@ -2040,8 +2040,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Budding Amethyst
-    registerBlock("minecraft:budding_amethyst", BlockDefinition{
-        .id = "minecraft:budding_amethyst",
+    registerBlock("poorcraftultra:budding_amethyst", BlockDefinition{
+        .id = "poorcraftultra:budding_amethyst",
         .name = "Budding Amethyst",
         .material = Material::Stone,
         .hardness = 1.5f,
@@ -2052,8 +2052,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Calcite
-    registerBlock("minecraft:calcite", BlockDefinition{
-        .id = "minecraft:calcite",
+    registerBlock("poorcraftultra:calcite", BlockDefinition{
+        .id = "poorcraftultra:calcite",
         .name = "Calcite",
         .material = Material::Stone,
         .hardness = 0.75f,
@@ -2068,8 +2068,8 @@ void BlockRegistry::registerVanillaBlocks() {
     // ============================================
     
     // Sculk
-    registerBlock("minecraft:sculk", BlockDefinition{
-        .id = "minecraft:sculk",
+    registerBlock("poorcraftultra:sculk", BlockDefinition{
+        .id = "poorcraftultra:sculk",
         .name = "Sculk",
         .material = Material::Stone,
         .hardness = 0.6f,
@@ -2078,8 +2078,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Sculk Sensor
-    registerBlock("minecraft:sculk_sensor", BlockDefinition{
-        .id = "minecraft:sculk_sensor",
+    registerBlock("poorcraftultra:sculk_sensor", BlockDefinition{
+        .id = "poorcraftultra:sculk_sensor",
         .name = "Sculk Sensor",
         .material = Material::Stone,
         .hardness = 1.5f,
@@ -2090,8 +2090,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Sculk Shrieker
-    registerBlock("minecraft:sculk_shrieker", BlockDefinition{
-        .id = "minecraft:sculk_shrieker",
+    registerBlock("poorcraftultra:sculk_shrieker", BlockDefinition{
+        .id = "poorcraftultra:sculk_shrieker",
         .name = "Sculk Shrieker",
         .material = Material::Stone,
         .hardness = 1.5f,
@@ -2100,8 +2100,8 @@ void BlockRegistry::registerVanillaBlocks() {
     });
     
     // Reinforced Deepslate
-    registerBlock("minecraft:reinforced_deepslate", BlockDefinition{
-        .id = "minecraft:reinforced_deepslate",
+    registerBlock("poorcraftultra:reinforced_deepslate", BlockDefinition{
+        .id = "poorcraftultra:reinforced_deepslate",
         .name = "Reinforced Deepslate",
         .material = Material::Stone,
         .hardness = -1.0f,

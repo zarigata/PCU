@@ -20,17 +20,17 @@ namespace VoxelForge {
 // ============================================================================
 
 namespace Ores {
-    const OreVein COAL_ORE = {"minecraft:coal_ore", 0, 192, 17, 20, 0.0f};
-    const OreVein IRON_ORE = {"minecraft:iron_ore", -64, 320, 9, 10, 0.0f};
-    const OreVein IRON_ORE_TUFF = {"minecraft:iron_ore", -64, 72, 9, 10, 0.0f};
-    const OreVein GOLD_ORE = {"minecraft:gold_ore", -64, 32, 9, 2, 0.0f};
-    const OreVein GOLD_ORE_BADLANDS = {"minecraft:gold_ore", 32, 256, 9, 5, 0.0f};
-    const OreVein DIAMOND_ORE = {"minecraft:diamond_ore", -64, 16, 8, 1, 0.5f};
-    const OreVein REDSTONE_ORE = {"minecraft:redstone_ore", -64, 16, 8, 4, 0.0f};
-    const OreVein LAPIS_ORE = {"minecraft:lapis_ore", -64, 64, 7, 2, 0.0f};
-    const OreVein COPPER_ORE = {"minecraft:copper_ore", -16, 112, 10, 6, 0.0f};
-    const OreVein EMERALD_ORE = {"minecraft:emerald_ore", -16, 256, 1, 2, 0.0f};
-    const OreVein ANCIENT_DEBRIS = {"minecraft:ancient_debris", 8, 119, 2, 1, 0.7f};
+    const OreVein COAL_ORE = {"poorcraftultra:coal_ore", 0, 192, 17, 20, 0.0f};
+    const OreVein IRON_ORE = {"poorcraftultra:iron_ore", -64, 320, 9, 10, 0.0f};
+    const OreVein IRON_ORE_TUFF = {"poorcraftultra:iron_ore", -64, 72, 9, 10, 0.0f};
+    const OreVein GOLD_ORE = {"poorcraftultra:gold_ore", -64, 32, 9, 2, 0.0f};
+    const OreVein GOLD_ORE_BADLANDS = {"poorcraftultra:gold_ore", 32, 256, 9, 5, 0.0f};
+    const OreVein DIAMOND_ORE = {"poorcraftultra:diamond_ore", -64, 16, 8, 1, 0.5f};
+    const OreVein REDSTONE_ORE = {"poorcraftultra:redstone_ore", -64, 16, 8, 4, 0.0f};
+    const OreVein LAPIS_ORE = {"poorcraftultra:lapis_ore", -64, 64, 7, 2, 0.0f};
+    const OreVein COPPER_ORE = {"poorcraftultra:copper_ore", -16, 112, 10, 6, 0.0f};
+    const OreVein EMERALD_ORE = {"poorcraftultra:emerald_ore", -16, 256, 1, 2, 0.0f};
+    const OreVein ANCIENT_DEBRIS = {"poorcraftultra:ancient_debris", 8, 119, 2, 1, 0.7f};
 }
 
 // ============================================================================
@@ -40,9 +40,9 @@ namespace Ores {
 Biome::Biome(BiomeId id, const std::string& name)
     : id(id), name(name) {
     // Set default blocks
-    surfaceBlock = BlockRegistry::get().getDefaultState("minecraft:grass_block");
-    subsurfaceBlock = BlockRegistry::get().getDefaultState("minecraft:dirt");
-    underwaterBlock = BlockRegistry::get().getDefaultState("minecraft:gravel");
+    surfaceBlock = BlockRegistry::get().getDefaultState("poorcraftultra:grass_block");
+    subsurfaceBlock = BlockRegistry::get().getDefaultState("poorcraftultra:dirt");
+    underwaterBlock = BlockRegistry::get().getDefaultState("poorcraftultra:gravel");
 }
 
 void Biome::addFeature(const std::string& featureId, int weight) {
@@ -118,17 +118,17 @@ ChunkGenResult WorldGenerator::generateChunk(Chunk* chunk, World* world) {
             for (int z = 0; z < CHUNK_WIDTH; z++) {
                 // Bedrock
                 chunk->setBlock(x, settings.bedrockFloor, z,
-                    BlockRegistry::get().getDefaultState("minecraft:bedrock"));
+                    BlockRegistry::get().getDefaultState("poorcraftultra:bedrock"));
                 
                 // Dirt layers
                 for (int y = settings.bedrockFloor + 1; y < waterLevel - 4; y++) {
                     chunk->setBlock(x, y, z,
-                        BlockRegistry::get().getDefaultState("minecraft:dirt"));
+                        BlockRegistry::get().getDefaultState("poorcraftultra:dirt"));
                 }
                 
                 // Grass on top
                 chunk->setBlock(x, waterLevel - 4, z,
-                    BlockRegistry::get().getDefaultState("minecraft:grass_block"));
+                    BlockRegistry::get().getDefaultState("poorcraftultra:grass_block"));
             }
         }
         
@@ -260,7 +260,7 @@ void WorldGenerator::generateTerrain(Chunk* chunk) {
                         block = getSubsurfaceBlock(y, biomeId);
                     } else {
                         // Deep underground
-                        block = blockRegistry.getDefaultState("minecraft:stone");
+                        block = blockRegistry.getDefaultState("poorcraftultra:stone");
                     }
                     
                     chunk->setBlock(x, y, z, block);
@@ -272,7 +272,7 @@ void WorldGenerator::generateTerrain(Chunk* chunk) {
             for (int y = terrainHeight + 1; y <= settings.seaLevel; y++) {
                 if (!chunk->getBlock(x, y, z).isSolid()) {
                     chunk->setBlock(x, y, z, 
-                        blockRegistry.getDefaultState("minecraft:water"));
+                        blockRegistry.getDefaultState("poorcraftultra:water"));
                 }
             }
         }
@@ -283,7 +283,7 @@ void WorldGenerator::generateTerrain(Chunk* chunk) {
 
 void WorldGenerator::generateBedrock(Chunk* chunk) {
     auto& blockRegistry = BlockRegistry::get();
-    auto bedrock = blockRegistry.getDefaultState("minecraft:bedrock");
+    auto bedrock = blockRegistry.getDefaultState("poorcraftultra:bedrock");
     
     for (int x = 0; x < CHUNK_WIDTH; x++) {
         for (int z = 0; z < CHUNK_WIDTH; z++) {
@@ -309,8 +309,8 @@ void WorldGenerator::generateCaves(Chunk* chunk) {
     int worldZ = chunkPos.z * CHUNK_WIDTH;
     
     auto& blockRegistry = BlockRegistry::get();
-    auto air = blockRegistry.getDefaultState("minecraft:air");
-    auto caveAir = blockRegistry.getDefaultState("minecraft:cave_air");
+    auto air = blockRegistry.getDefaultState("poorcraftultra:air");
+    auto caveAir = blockRegistry.getDefaultState("poorcraftultra:cave_air");
     
     for (int x = 0; x < CHUNK_WIDTH; x++) {
         for (int z = 0; z < CHUNK_WIDTH; z++) {
@@ -331,8 +331,8 @@ void WorldGenerator::generateCaves(Chunk* chunk) {
                     
                     // Don't carve through bedrock or water
                     if (!current.isAir() && 
-                        current.getBlockId() != blockRegistry.getBlockId("minecraft:bedrock") &&
-                        current.getBlockId() != blockRegistry.getBlockId("minecraft:water")) {
+                        current.getBlockId() != blockRegistry.getBlockId("poorcraftultra:bedrock") &&
+                        current.getBlockId() != blockRegistry.getBlockId("poorcraftultra:water")) {
                         chunk->setBlock(x, y, z, air);
                     }
                 }
@@ -362,8 +362,8 @@ void WorldGenerator::generateOres(Chunk* chunk, SeededRandom& random) {
 void WorldGenerator::placeOreVein(Chunk* chunk, const OreVein& ore, SeededRandom& random) {
     auto& blockRegistry = BlockRegistry::get();
     BlockState oreBlock = blockRegistry.getDefaultState(ore.oreBlock);
-    BlockState stoneBlock = blockRegistry.getDefaultState("minecraft:stone");
-    BlockState deepslateBlock = blockRegistry.getDefaultState("minecraft:deepslate");
+    BlockState stoneBlock = blockRegistry.getDefaultState("poorcraftultra:stone");
+    BlockState deepslateBlock = blockRegistry.getDefaultState("poorcraftultra:deepslate");
     
     for (int i = 0; i < ore.veinsPerChunk; i++) {
         // Random position
@@ -399,8 +399,8 @@ void WorldGenerator::placeOreVein(Chunk* chunk, const OreVein& ore, SeededRandom
 void WorldGenerator::placeOreBlob(Chunk* chunk, int startX, int startY, int startZ,
                                    BlockState ore, int size, SeededRandom& random) {
     auto& blockRegistry = BlockRegistry::get();
-    BlockState stone = blockRegistry.getDefaultState("minecraft:stone");
-    BlockState deepslate = blockRegistry.getDefaultState("minecraft:deepslate");
+    BlockState stone = blockRegistry.getDefaultState("poorcraftultra:stone");
+    BlockState deepslate = blockRegistry.getDefaultState("poorcraftultra:deepslate");
     
     // Simple flood-fill ore placement
     for (int i = 0; i < size; i++) {
@@ -447,9 +447,9 @@ void WorldGenerator::generateTrees(Chunk* chunk, World* world, SeededRandom& chu
     int worldX = chunkPos.x * CHUNK_WIDTH;
     int worldZ = chunkPos.z * CHUNK_WIDTH;
     
-    auto grassBlock = blockRegistry.getDefaultState("minecraft:grass_block");
-    auto dirtBlock = blockRegistry.getDefaultState("minecraft:dirt");
-    auto airBlock = blockRegistry.getDefaultState("minecraft:air");
+    auto grassBlock = blockRegistry.getDefaultState("poorcraftultra:grass_block");
+    auto dirtBlock = blockRegistry.getDefaultState("poorcraftultra:dirt");
+    auto airBlock = blockRegistry.getDefaultState("poorcraftultra:air");
     
     for (int x = 2; x < CHUNK_WIDTH - 2; x++) {
         for (int z = 2; z < CHUNK_WIDTH - 2; z++) {
@@ -552,8 +552,8 @@ static void setBlockClamped(Chunk* chunk, int x, int y, int z, BlockState state,
 
 void WorldGenerator::placeOakTree(Chunk* chunk, int x, int y, int z, SeededRandom& random) {
     auto& blockRegistry = BlockRegistry::get();
-    auto log = blockRegistry.getDefaultState("minecraft:oak_log");
-    auto leaves = blockRegistry.getDefaultState("minecraft:oak_leaves");
+    auto log = blockRegistry.getDefaultState("poorcraftultra:oak_log");
+    auto leaves = blockRegistry.getDefaultState("poorcraftultra:oak_leaves");
     
     int trunkHeight = random.nextInt(4, 6);
     
@@ -582,8 +582,8 @@ void WorldGenerator::placeOakTree(Chunk* chunk, int x, int y, int z, SeededRando
 
 void WorldGenerator::placeBirchTree(Chunk* chunk, int x, int y, int z, SeededRandom& random) {
     auto& blockRegistry = BlockRegistry::get();
-    auto log = blockRegistry.getDefaultState("minecraft:birch_log");
-    auto leaves = blockRegistry.getDefaultState("minecraft:birch_leaves");
+    auto log = blockRegistry.getDefaultState("poorcraftultra:birch_log");
+    auto leaves = blockRegistry.getDefaultState("poorcraftultra:birch_leaves");
     
     int trunkHeight = random.nextInt(5, 7);
     
@@ -611,8 +611,8 @@ void WorldGenerator::placeBirchTree(Chunk* chunk, int x, int y, int z, SeededRan
 
 void WorldGenerator::placeSpruceTree(Chunk* chunk, int x, int y, int z, SeededRandom& random) {
     auto& blockRegistry = BlockRegistry::get();
-    auto log = blockRegistry.getDefaultState("minecraft:spruce_log");
-    auto leaves = blockRegistry.getDefaultState("minecraft:spruce_leaves");
+    auto log = blockRegistry.getDefaultState("poorcraftultra:spruce_log");
+    auto leaves = blockRegistry.getDefaultState("poorcraftultra:spruce_leaves");
     
     int trunkHeight = random.nextInt(6, 10);
     
@@ -645,8 +645,8 @@ void WorldGenerator::placeSpruceTree(Chunk* chunk, int x, int y, int z, SeededRa
 
 void WorldGenerator::placeDarkOakTree(Chunk* chunk, int x, int y, int z, SeededRandom& random) {
     auto& blockRegistry = BlockRegistry::get();
-    auto log = blockRegistry.getDefaultState("minecraft:dark_oak_log");
-    auto leaves = blockRegistry.getDefaultState("minecraft:dark_oak_leaves");
+    auto log = blockRegistry.getDefaultState("poorcraftultra:dark_oak_log");
+    auto leaves = blockRegistry.getDefaultState("poorcraftultra:dark_oak_leaves");
     
     int trunkHeight = random.nextInt(6, 9);
     
@@ -676,8 +676,8 @@ void WorldGenerator::placeDarkOakTree(Chunk* chunk, int x, int y, int z, SeededR
 
 void WorldGenerator::placeAcaciaTree(Chunk* chunk, int x, int y, int z, SeededRandom& random) {
     auto& blockRegistry = BlockRegistry::get();
-    auto log = blockRegistry.getDefaultState("minecraft:acacia_log");
-    auto leaves = blockRegistry.getDefaultState("minecraft:acacia_leaves");
+    auto log = blockRegistry.getDefaultState("poorcraftultra:acacia_log");
+    auto leaves = blockRegistry.getDefaultState("poorcraftultra:acacia_leaves");
     
     // Short trunk (2-3 blocks) then angled branch
     int trunkHeight = random.nextInt(2, 3);
@@ -806,16 +806,16 @@ BlockState WorldGenerator::getSurfaceBlock(int x, int y, int z, BiomeId biome) c
     // Biome-specific surface blocks
     switch (biome) {
         case 2: // Desert
-            return blockRegistry.getDefaultState("minecraft:sand");
+            return blockRegistry.getDefaultState("poorcraftultra:sand");
         case 12: // Snowy plains
         case 13: // Snowy taiga
-            return blockRegistry.getDefaultState("minecraft:snow_block");
+            return blockRegistry.getDefaultState("poorcraftultra:snow_block");
         case 9: // Swamp
-            return blockRegistry.getDefaultState("minecraft:grass_block");
+            return blockRegistry.getDefaultState("poorcraftultra:grass_block");
         case 7: // Badlands
-            return blockRegistry.getDefaultState("minecraft:red_sand");
+            return blockRegistry.getDefaultState("poorcraftultra:red_sand");
         default:
-            return blockRegistry.getDefaultState("minecraft:grass_block");
+            return blockRegistry.getDefaultState("poorcraftultra:grass_block");
     }
 }
 
@@ -824,16 +824,16 @@ BlockState WorldGenerator::getSubsurfaceBlock(int y, BiomeId biome) const {
     
     // Use deepslate below Y=0
     if (y < 0) {
-        return blockRegistry.getDefaultState("minecraft:deepslate");
+        return blockRegistry.getDefaultState("poorcraftultra:deepslate");
     }
     
     switch (biome) {
         case 2: // Desert
-            return blockRegistry.getDefaultState("minecraft:sandstone");
+            return blockRegistry.getDefaultState("poorcraftultra:sandstone");
         case 7: // Badlands
-            return blockRegistry.getDefaultState("minecraft:red_sandstone");
+            return blockRegistry.getDefaultState("poorcraftultra:red_sandstone");
         default:
-            return blockRegistry.getDefaultState("minecraft:dirt");
+            return blockRegistry.getDefaultState("poorcraftultra:dirt");
     }
 }
 
@@ -842,9 +842,9 @@ BlockState WorldGenerator::getUnderwaterBlock(int y, BiomeId biome) const {
     
     switch (biome) {
         case 9: // Swamp
-            return blockRegistry.getDefaultState("minecraft:clay");
+            return blockRegistry.getDefaultState("poorcraftultra:clay");
         default:
-            return blockRegistry.getDefaultState("minecraft:gravel");
+            return blockRegistry.getDefaultState("poorcraftultra:gravel");
     }
 }
 

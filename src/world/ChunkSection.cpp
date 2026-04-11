@@ -462,7 +462,7 @@ void HeightMap::update(const ChunkSection* section, int sectionY, Type type) {
                     case Type::MotionBlocking:
                         // Include solid blocks and water
                         include = state.isSolid() || 
-                            state.getBlockId() == BlockRegistry::get().getBlockId("minecraft:water");
+                            state.getBlockId() == BlockRegistry::get().getBlockId("poorcraftultra:water");
                         break;
                     case Type::OceanFloor:
                         // Include solid blocks

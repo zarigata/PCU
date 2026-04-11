@@ -19,7 +19,7 @@ DimensionRegistry::DimensionRegistry() {
 
 void DimensionRegistry::registerVanillaDimensions() {
     // Overworld
-    auto overworld = std::make_unique<Dimension>(0, "minecraft:overworld");
+    auto overworld = std::make_unique<Dimension>(0, "poorcraftultra:overworld");
     overworld->setMinHeight(-64);
     overworld->setMaxHeight(320);
     overworld->setHasSky(true);
@@ -29,7 +29,7 @@ void DimensionRegistry::registerVanillaDimensions() {
     registerDimension(std::move(overworld));
     
     // Nether
-    auto nether = std::make_unique<Dimension>(-1, "minecraft:the_nether");
+    auto nether = std::make_unique<Dimension>(-1, "poorcraftultra:the_nether");
     nether->setMinHeight(0);
     nether->setMaxHeight(256);
     nether->setHasSky(false);
@@ -39,7 +39,7 @@ void DimensionRegistry::registerVanillaDimensions() {
     registerDimension(std::move(nether));
     
     // End
-    auto end = std::make_unique<Dimension>(1, "minecraft:the_end");
+    auto end = std::make_unique<Dimension>(1, "poorcraftultra:the_end");
     end->setMinHeight(0);
     end->setMaxHeight(256);
     end->setHasSky(false);

@@ -76,14 +76,14 @@ TEST_F(TreeGenerationTest, OakTreeGeneration) {
     World world(static_cast<int64_t>(settings.seed));
     Chunk chunk(ChunkPos(0, 0));
 
-    auto grass = BlockRegistry::get().getDefaultState("minecraft:grass_block");
+    auto grass = BlockRegistry::get().getDefaultState("poorcraftultra:grass_block");
     fillLayer(chunk, 64, grass);
 
     auto result = gen.generateChunk(&chunk, &world);
     ASSERT_TRUE(result.success);
 
-    auto oakLog    = BlockRegistry::get().getDefaultState("minecraft:oak_log");
-    auto oakLeaves = BlockRegistry::get().getDefaultState("minecraft:oak_leaves");
+    auto oakLog    = BlockRegistry::get().getDefaultState("poorcraftultra:oak_log");
+    auto oakLeaves = BlockRegistry::get().getDefaultState("poorcraftultra:oak_leaves");
 
     bool foundLog = chunkHasBlockId(chunk, 65, 100, oakLog.getBlockId());
     if (foundLog) {
@@ -105,14 +105,14 @@ TEST_F(TreeGenerationTest, BirchTreeGeneration) {
     World world(static_cast<int64_t>(settings.seed));
     Chunk chunk(ChunkPos(0, 0));
 
-    auto grass = BlockRegistry::get().getDefaultState("minecraft:grass_block");
+    auto grass = BlockRegistry::get().getDefaultState("poorcraftultra:grass_block");
     fillLayer(chunk, 64, grass);
 
     auto result = gen.generateChunk(&chunk, &world);
     ASSERT_TRUE(result.success);
 
-    auto birchLog    = BlockRegistry::get().getDefaultState("minecraft:birch_log");
-    auto birchLeaves = BlockRegistry::get().getDefaultState("minecraft:birch_leaves");
+    auto birchLog    = BlockRegistry::get().getDefaultState("poorcraftultra:birch_log");
+    auto birchLeaves = BlockRegistry::get().getDefaultState("poorcraftultra:birch_leaves");
 
     bool foundLog = chunkHasBlockId(chunk, 65, 100, birchLog.getBlockId());
     if (foundLog) {
@@ -134,14 +134,14 @@ TEST_F(TreeGenerationTest, SpruceTreeGeneration) {
     World world(static_cast<int64_t>(settings.seed));
     Chunk chunk(ChunkPos(0, 0));
 
-    auto grass = BlockRegistry::get().getDefaultState("minecraft:grass_block");
+    auto grass = BlockRegistry::get().getDefaultState("poorcraftultra:grass_block");
     fillLayer(chunk, 64, grass);
 
     auto result = gen.generateChunk(&chunk, &world);
     ASSERT_TRUE(result.success);
 
-    auto spruceLog    = BlockRegistry::get().getDefaultState("minecraft:spruce_log");
-    auto spruceLeaves = BlockRegistry::get().getDefaultState("minecraft:spruce_leaves");
+    auto spruceLog    = BlockRegistry::get().getDefaultState("poorcraftultra:spruce_log");
+    auto spruceLeaves = BlockRegistry::get().getDefaultState("poorcraftultra:spruce_leaves");
 
     // Find a spruce log column
     int sx = -1, sz = -1;
@@ -183,13 +183,13 @@ TEST_F(TreeGenerationTest, DarkOakTreeGeneration) {
     World world(static_cast<int64_t>(settings.seed));
     Chunk chunk(ChunkPos(0, 0));
 
-    auto grass = BlockRegistry::get().getDefaultState("minecraft:grass_block");
+    auto grass = BlockRegistry::get().getDefaultState("poorcraftultra:grass_block");
     fillLayer(chunk, 64, grass);
 
     auto result = gen.generateChunk(&chunk, &world);
     ASSERT_TRUE(result.success);
 
-    auto darkOakLog = BlockRegistry::get().getDefaultState("minecraft:dark_oak_log");
+    auto darkOakLog = BlockRegistry::get().getDefaultState("poorcraftultra:dark_oak_log");
     BlockID logId = darkOakLog.getBlockId();
 
     int logCount = 0;
@@ -222,14 +222,14 @@ TEST_F(TreeGenerationTest, AcaciaTreeGeneration) {
     World world(static_cast<int64_t>(settings.seed));
     Chunk chunk(ChunkPos(0, 0));
 
-    auto grass = BlockRegistry::get().getDefaultState("minecraft:grass_block");
+    auto grass = BlockRegistry::get().getDefaultState("poorcraftultra:grass_block");
     fillLayer(chunk, 64, grass);
 
     auto result = gen.generateChunk(&chunk, &world);
     ASSERT_TRUE(result.success);
 
-    auto acaciaLog    = BlockRegistry::get().getDefaultState("minecraft:acacia_log");
-    auto acaciaLeaves = BlockRegistry::get().getDefaultState("minecraft:acacia_leaves");
+    auto acaciaLog    = BlockRegistry::get().getDefaultState("poorcraftultra:acacia_log");
+    auto acaciaLeaves = BlockRegistry::get().getDefaultState("poorcraftultra:acacia_leaves");
 
     bool foundLog = chunkHasBlockId(chunk, 65, 100, acaciaLog.getBlockId());
     if (foundLog) {
@@ -252,7 +252,7 @@ TEST_F(TreeGenerationTest, NoTreeOnNonGrass) {
     Chunk chunk(ChunkPos(0, 0));
 
     // Surface is stone, not grass
-    auto stone = BlockRegistry::get().getDefaultState("minecraft:stone");
+    auto stone = BlockRegistry::get().getDefaultState("poorcraftultra:stone");
     fillLayer(chunk, 64, stone);
 
     auto result = gen.generateChunk(&chunk, &world);
@@ -260,11 +260,11 @@ TEST_F(TreeGenerationTest, NoTreeOnNonGrass) {
 
     // Pre-fetch known log block IDs to scan for
     BlockID logIds[] = {
-        BlockRegistry::get().getDefaultState("minecraft:oak_log").getBlockId(),
-        BlockRegistry::get().getDefaultState("minecraft:birch_log").getBlockId(),
-        BlockRegistry::get().getDefaultState("minecraft:spruce_log").getBlockId(),
-        BlockRegistry::get().getDefaultState("minecraft:dark_oak_log").getBlockId(),
-        BlockRegistry::get().getDefaultState("minecraft:acacia_log").getBlockId(),
+        BlockRegistry::get().getDefaultState("poorcraftultra:oak_log").getBlockId(),
+        BlockRegistry::get().getDefaultState("poorcraftultra:birch_log").getBlockId(),
+        BlockRegistry::get().getDefaultState("poorcraftultra:spruce_log").getBlockId(),
+        BlockRegistry::get().getDefaultState("poorcraftultra:dark_oak_log").getBlockId(),
+        BlockRegistry::get().getDefaultState("poorcraftultra:acacia_log").getBlockId(),
     };
 
     int logCount = 0;
@@ -319,7 +319,7 @@ TEST_F(TreeGenerationTest, TreeWithinChunkBounds) {
     WorldGenerator gen(settings);
     World world(static_cast<int64_t>(settings.seed));
 
-    auto grass = BlockRegistry::get().getDefaultState("minecraft:grass_block");
+    auto grass = BlockRegistry::get().getDefaultState("poorcraftultra:grass_block");
 
     for (int cx = -1; cx <= 1; ++cx) {
         for (int cz = -1; cz <= 1; ++cz) {
@@ -352,7 +352,7 @@ TEST_F(TreeGenerationTest, DeterministicGeneration) {
     Chunk chunk1(ChunkPos(0, 0));
     Chunk chunk2(ChunkPos(0, 0));
 
-    auto grass = BlockRegistry::get().getDefaultState("minecraft:grass_block");
+    auto grass = BlockRegistry::get().getDefaultState("poorcraftultra:grass_block");
     fillLayer(chunk1, 64, grass);
     fillLayer(chunk2, 64, grass);
 
@@ -387,7 +387,7 @@ TEST_F(TreeGenerationTest, NoTreeBelowSeaLevel) {
     World world(static_cast<int64_t>(settings.seed));
     Chunk chunk(ChunkPos(0, 0));
 
-    auto water = BlockRegistry::get().getDefaultState("minecraft:water");
+    auto water = BlockRegistry::get().getDefaultState("poorcraftultra:water");
     for (int y = CHUNK_MIN_Y; y <= settings.seaLevel; ++y) {
         fillLayer(chunk, y, water);
     }
@@ -397,11 +397,11 @@ TEST_F(TreeGenerationTest, NoTreeBelowSeaLevel) {
 
     // Check for any log blocks just above sea level
     BlockID logIds[] = {
-        BlockRegistry::get().getDefaultState("minecraft:oak_log").getBlockId(),
-        BlockRegistry::get().getDefaultState("minecraft:birch_log").getBlockId(),
-        BlockRegistry::get().getDefaultState("minecraft:spruce_log").getBlockId(),
-        BlockRegistry::get().getDefaultState("minecraft:dark_oak_log").getBlockId(),
-        BlockRegistry::get().getDefaultState("minecraft:acacia_log").getBlockId(),
+        BlockRegistry::get().getDefaultState("poorcraftultra:oak_log").getBlockId(),
+        BlockRegistry::get().getDefaultState("poorcraftultra:birch_log").getBlockId(),
+        BlockRegistry::get().getDefaultState("poorcraftultra:spruce_log").getBlockId(),
+        BlockRegistry::get().getDefaultState("poorcraftultra:dark_oak_log").getBlockId(),
+        BlockRegistry::get().getDefaultState("poorcraftultra:acacia_log").getBlockId(),
     };
 
     int logCount = 0;
@@ -435,7 +435,7 @@ TEST_F(TreeGenerationTest, FeatureStatsUpdated) {
     EXPECT_EQ(stats.chunksGenerated, 0u);
     EXPECT_EQ(stats.featuresPlaced, 0u);
 
-    auto grass = BlockRegistry::get().getDefaultState("minecraft:grass_block");
+    auto grass = BlockRegistry::get().getDefaultState("poorcraftultra:grass_block");
     for (int cx = 0; cx < 5; ++cx) {
         for (int cz = 0; cz < 5; ++cz) {
             Chunk chunk(ChunkPos(cx, cz));

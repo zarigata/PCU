@@ -280,7 +280,7 @@ public:
 // ============================================
 
 struct BlockDefinition {
-    String id;                          // e.g., "minecraft:stone"
+    String id;                          // e.g., "poorcraftultra:stone"
     String name;                        // Display name
     Material material;
     float hardness = 1.0f;

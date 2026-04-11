@@ -150,7 +150,7 @@ TEST_F(ChunkMesherTest, GenerateMesh_SingleBlock) {
     Chunk chunk(pos);
     
     // Place a single stone block
-    auto stoneState = BlockRegistry::get().getDefaultState("minecraft:stone");
+    auto stoneState = BlockRegistry::get().getDefaultState("poorcraftultra:stone");
     chunk.setBlock(8, 64, 8, stoneState); // Center of chunk
     
     auto result = mesher->generateMesh(&chunk, nullptr);

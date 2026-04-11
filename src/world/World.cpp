@@ -196,7 +196,7 @@ void World::generateTerrain(Chunk& chunk) {
                 if (y > height) {
                     // Above terrain
                     if (y < settings.seaLevel) {
-                        block = BlockRegistry::get().getDefaultState("minecraft:water");
+                        block = BlockRegistry::get().getDefaultState("poorcraftultra:water");
                     } else {
                         // Air
                         continue;
@@ -204,19 +204,19 @@ void World::generateTerrain(Chunk& chunk) {
                 } else if (y == height) {
                     // Surface
                     if (y < settings.seaLevel) {
-                        block = BlockRegistry::get().getDefaultState("minecraft:gravel");
+                        block = BlockRegistry::get().getDefaultState("poorcraftultra:gravel");
                     } else {
-                        block = BlockRegistry::get().getDefaultState("minecraft:grass_block");
+                        block = BlockRegistry::get().getDefaultState("poorcraftultra:grass_block");
                     }
                 } else if (y > height - 4) {
                     // Subsurface
-                    block = BlockRegistry::get().getDefaultState("minecraft:dirt");
+                    block = BlockRegistry::get().getDefaultState("poorcraftultra:dirt");
                 } else {
                     // Deep underground
                     if (y < settings.minBuildHeight + 5) {
-                        block = BlockRegistry::get().getDefaultState("minecraft:bedrock");
+                        block = BlockRegistry::get().getDefaultState("poorcraftultra:bedrock");
                     } else {
-                        block = BlockRegistry::get().getDefaultState("minecraft:stone");
+                        block = BlockRegistry::get().getDefaultState("poorcraftultra:stone");
                     }
                 }
                 

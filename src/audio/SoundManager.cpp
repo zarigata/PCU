@@ -51,42 +51,42 @@ void SoundManager::loadBlockSounds() {
     audio->loadSound("block.stone.place", "sounds/block/stone/place.ogg", false, true);
     audio->loadSound("block.stone.step", "sounds/block/stone/step.ogg", false, true);
     audio->loadSound("block.stone.hit", "sounds/block/stone/hit.ogg", false, true);
-    blockSounds["minecraft:stone"] = {"block.stone.break", "block.stone.place", "block.stone.step"};
+    blockSounds["poorcraftultra:stone"] = {"block.stone.break", "block.stone.place", "block.stone.step"};
     
     // Dirt sounds
     audio->loadSound("block.dirt.break", "sounds/block/dirt/break.ogg", false, true);
     audio->loadSound("block.dirt.place", "sounds/block/dirt/place.ogg", false, true);
     audio->loadSound("block.dirt.step", "sounds/block/dirt/step.ogg", false, true);
-    blockSounds["minecraft:dirt"] = {"block.dirt.break", "block.dirt.place", "block.dirt.step"};
+    blockSounds["poorcraftultra:dirt"] = {"block.dirt.break", "block.dirt.place", "block.dirt.step"};
     
     // Grass sounds
     audio->loadSound("block.grass.break", "sounds/block/grass/break.ogg", false, true);
     audio->loadSound("block.grass.place", "sounds/block/grass/place.ogg", false, true);
     audio->loadSound("block.grass.step", "sounds/block/grass/step.ogg", false, true);
-    blockSounds["minecraft:grass_block"] = {"block.grass.break", "block.grass.place", "block.grass.step"};
+    blockSounds["poorcraftultra:grass_block"] = {"block.grass.break", "block.grass.place", "block.grass.step"};
     
     // Wood sounds
     audio->loadSound("block.wood.break", "sounds/block/wood/break.ogg", false, true);
     audio->loadSound("block.wood.place", "sounds/block/wood/place.ogg", false, true);
     audio->loadSound("block.wood.step", "sounds/block/wood/step.ogg", false, true);
-    blockSounds["minecraft:oak_planks"] = {"block.wood.break", "block.wood.place", "block.wood.step"};
+    blockSounds["poorcraftultra:oak_planks"] = {"block.wood.break", "block.wood.place", "block.wood.step"};
     
     // Sand sounds
     audio->loadSound("block.sand.break", "sounds/block/sand/break.ogg", false, true);
     audio->loadSound("block.sand.place", "sounds/block/sand/place.ogg", false, true);
     audio->loadSound("block.sand.step", "sounds/block/sand/step.ogg", false, true);
-    blockSounds["minecraft:sand"] = {"block.sand.break", "block.sand.place", "block.sand.step"};
+    blockSounds["poorcraftultra:sand"] = {"block.sand.break", "block.sand.place", "block.sand.step"};
     
     // Glass sounds
     audio->loadSound("block.glass.break", "sounds/block/glass/break.ogg", false, true);
     audio->loadSound("block.glass.place", "sounds/block/glass/place.ogg", false, true);
-    blockSounds["minecraft:glass"] = {"block.glass.break", "block.glass.place"};
+    blockSounds["poorcraftultra:glass"] = {"block.glass.break", "block.glass.place"};
     
     // Metal sounds
     audio->loadSound("block.metal.break", "sounds/block/metal/break.ogg", false, true);
     audio->loadSound("block.metal.place", "sounds/block/metal/place.ogg", false, true);
     audio->loadSound("block.metal.step", "sounds/block/metal/step.ogg", false, true);
-    blockSounds["minecraft:iron_block"] = {"block.metal.break", "block.metal.place", "block.metal.step"};
+    blockSounds["poorcraftultra:iron_block"] = {"block.metal.break", "block.metal.place", "block.metal.step"};
     
     VF_INFO("Loaded block sounds");
 }
@@ -99,43 +99,43 @@ void SoundManager::loadEntitySounds() {
     audio->loadSound("entity.player.death", "sounds/entity/player/death.ogg", false, true);
     audio->loadSound("entity.player.burp", "sounds/entity/player/burp.ogg", false, true);
     audio->loadSound("entity.player.breath", "sounds/entity/player/breath.ogg", false, true);
-    entitySounds["minecraft:player"] = {"entity.player.hurt", "entity.player.death"};
+    entitySounds["poorcraftultra:player"] = {"entity.player.hurt", "entity.player.death"};
     
     // Zombie sounds
     audio->loadSound("entity.zombie.ambient", "sounds/entity/zombie/ambient.ogg", false, true);
     audio->loadSound("entity.zombie.hurt", "sounds/entity/zombie/hurt.ogg", false, true);
     audio->loadSound("entity.zombie.death", "sounds/entity/zombie/death.ogg", false, true);
-    entitySounds["minecraft:zombie"] = {"entity.zombie.ambient", "entity.zombie.hurt", "entity.zombie.death"};
+    entitySounds["poorcraftultra:zombie"] = {"entity.zombie.ambient", "entity.zombie.hurt", "entity.zombie.death"};
     
     // Skeleton sounds
     audio->loadSound("entity.skeleton.ambient", "sounds/entity/skeleton/ambient.ogg", false, true);
     audio->loadSound("entity.skeleton.hurt", "sounds/entity/skeleton/hurt.ogg", false, true);
     audio->loadSound("entity.skeleton.death", "sounds/entity/skeleton/death.ogg", false, true);
-    entitySounds["minecraft:skeleton"] = {"entity.skeleton.ambient", "entity.skeleton.hurt", "entity.skeleton.death"};
+    entitySounds["poorcraftultra:skeleton"] = {"entity.skeleton.ambient", "entity.skeleton.hurt", "entity.skeleton.death"};
     
     // Creeper sounds
     audio->loadSound("entity.creeper.primed", "sounds/entity/creeper/primed.ogg", false, true);
     audio->loadSound("entity.creeper.hurt", "sounds/entity/creeper/hurt.ogg", false, true);
     audio->loadSound("entity.creeper.death", "sounds/entity/creeper/death.ogg", false, true);
-    entitySounds["minecraft:creeper"] = {"entity.creeper.primed", "entity.creeper.hurt", "entity.creeper.death"};
+    entitySounds["poorcraftultra:creeper"] = {"entity.creeper.primed", "entity.creeper.hurt", "entity.creeper.death"};
     
     // Cow sounds
     audio->loadSound("entity.cow.ambient", "sounds/entity/cow/ambient.ogg", false, true);
     audio->loadSound("entity.cow.hurt", "sounds/entity/cow/hurt.ogg", false, true);
     audio->loadSound("entity.cow.death", "sounds/entity/cow/death.ogg", false, true);
-    entitySounds["minecraft:cow"] = {"entity.cow.ambient", "entity.cow.hurt", "entity.cow.death"};
+    entitySounds["poorcraftultra:cow"] = {"entity.cow.ambient", "entity.cow.hurt", "entity.cow.death"};
     
     // Pig sounds
     audio->loadSound("entity.pig.ambient", "sounds/entity/pig/ambient.ogg", false, true);
     audio->loadSound("entity.pig.hurt", "sounds/entity/pig/hurt.ogg", false, true);
     audio->loadSound("entity.pig.death", "sounds/entity/pig/death.ogg", false, true);
-    entitySounds["minecraft:pig"] = {"entity.pig.ambient", "entity.pig.hurt", "entity.pig.death"};
+    entitySounds["poorcraftultra:pig"] = {"entity.pig.ambient", "entity.pig.hurt", "entity.pig.death"};
     
     // Chicken sounds
     audio->loadSound("entity.chicken.ambient", "sounds/entity/chicken/ambient.ogg", false, true);
     audio->loadSound("entity.chicken.hurt", "sounds/entity/chicken/hurt.ogg", false, true);
     audio->loadSound("entity.chicken.death", "sounds/entity/chicken/death.ogg", false, true);
-    entitySounds["minecraft:chicken"] = {"entity.chicken.ambient", "entity.chicken.hurt", "entity.chicken.death"};
+    entitySounds["poorcraftultra:chicken"] = {"entity.chicken.ambient", "entity.chicken.hurt", "entity.chicken.death"};
     
     VF_INFO("Loaded entity sounds");
 }

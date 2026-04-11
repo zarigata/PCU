@@ -422,104 +422,104 @@ void RecipeRegistry::registerVanillaRecipes() {
     
     // Oak planks from log
     auto planks = std::make_unique<ShapedRecipe>();
-    planks->id = "minecraft:oak_planks";
+    planks->id = "poorcraftultra:oak_planks";
     planks->type = RecipeType::Crafting;
     planks->category = RecipeCategory::Building;
-    planks->ingredients = {Ingredient{{"minecraft:oak_log"}, 1}};
-    planks->result = {"minecraft:oak_planks", 4};
+    planks->ingredients = {Ingredient{{"poorcraftultra:oak_log"}, 1}};
+    planks->result = {"poorcraftultra:oak_planks", 4};
     planks->width = 1;
     planks->height = 1;
     registerRecipe(std::move(planks));
     
     // Sticks
     auto sticks = std::make_unique<ShapedRecipe>();
-    sticks->id = "minecraft:sticks";
+    sticks->id = "poorcraftultra:sticks";
     sticks->type = RecipeType::Crafting;
     sticks->category = RecipeCategory::Misc;
     sticks->ingredients = {
-        Ingredient{{"minecraft:oak_planks"}, 1},
-        Ingredient{{"minecraft:oak_planks"}, 1}
+        Ingredient{{"poorcraftultra:oak_planks"}, 1},
+        Ingredient{{"poorcraftultra:oak_planks"}, 1}
     };
-    sticks->result = {"minecraft:stick", 4};
+    sticks->result = {"poorcraftultra:stick", 4};
     sticks->width = 1;
     sticks->height = 2;
     sticks->pattern = {"P", "P"};
-    sticks->key = {{'P', Ingredient{{"minecraft:oak_planks"}, 1}}};
+    sticks->key = {{'P', Ingredient{{"poorcraftultra:oak_planks"}, 1}}};
     registerRecipe(std::move(sticks));
     
     // Crafting table
     auto craftingTable = std::make_unique<ShapedRecipe>();
-    craftingTable->id = "minecraft:crafting_table";
+    craftingTable->id = "poorcraftultra:crafting_table";
     craftingTable->type = RecipeType::Crafting;
     craftingTable->category = RecipeCategory::Building;
     craftingTable->ingredients = {
-        Ingredient{{"minecraft:oak_planks"}, 1},
-        Ingredient{{"minecraft:oak_planks"}, 1},
-        Ingredient{{"minecraft:oak_planks"}, 1},
-        Ingredient{{"minecraft:oak_planks"}, 1}
+        Ingredient{{"poorcraftultra:oak_planks"}, 1},
+        Ingredient{{"poorcraftultra:oak_planks"}, 1},
+        Ingredient{{"poorcraftultra:oak_planks"}, 1},
+        Ingredient{{"poorcraftultra:oak_planks"}, 1}
     };
-    craftingTable->result = {"minecraft:crafting_table", 1};
+    craftingTable->result = {"poorcraftultra:crafting_table", 1};
     craftingTable->width = 2;
     craftingTable->height = 2;
     craftingTable->pattern = {"PP", "PP"};
-    craftingTable->key = {{'P', Ingredient{{"minecraft:oak_planks"}, 1}}};
+    craftingTable->key = {{'P', Ingredient{{"poorcraftultra:oak_planks"}, 1}}};
     registerRecipe(std::move(craftingTable));
     
     // Furnace
     auto furnace = std::make_unique<ShapedRecipe>();
-    furnace->id = "minecraft:furnace";
+    furnace->id = "poorcraftultra:furnace";
     furnace->type = RecipeType::Crafting;
     furnace->category = RecipeCategory::Misc;
     furnace->ingredients = {
-        Ingredient{{"minecraft:cobblestone"}, 1},
-        Ingredient{{"minecraft:cobblestone"}, 1},
-        Ingredient{{"minecraft:cobblestone"}, 1},
-        Ingredient{{"minecraft:cobblestone"}, 1},
+        Ingredient{{"poorcraftultra:cobblestone"}, 1},
+        Ingredient{{"poorcraftultra:cobblestone"}, 1},
+        Ingredient{{"poorcraftultra:cobblestone"}, 1},
+        Ingredient{{"poorcraftultra:cobblestone"}, 1},
         Ingredient{},
-        Ingredient{{"minecraft:cobblestone"}, 1},
-        Ingredient{{"minecraft:cobblestone"}, 1},
-        Ingredient{{"minecraft:cobblestone"}, 1},
-        Ingredient{{"minecraft:cobblestone"}, 1}
+        Ingredient{{"poorcraftultra:cobblestone"}, 1},
+        Ingredient{{"poorcraftultra:cobblestone"}, 1},
+        Ingredient{{"poorcraftultra:cobblestone"}, 1},
+        Ingredient{{"poorcraftultra:cobblestone"}, 1}
     };
-    furnace->result = {"minecraft:furnace", 1};
+    furnace->result = {"poorcraftultra:furnace", 1};
     furnace->width = 3;
     furnace->height = 3;
     furnace->pattern = {"CCC", "C C", "CCC"};
-    furnace->key = {{'C', Ingredient{{"minecraft:cobblestone"}, 1}}};
+    furnace->key = {{'C', Ingredient{{"poorcraftultra:cobblestone"}, 1}}};
     registerRecipe(std::move(furnace));
     
     // Wooden pickaxe
     auto pickaxe = std::make_unique<ShapedRecipe>();
-    pickaxe->id = "minecraft:wooden_pickaxe";
+    pickaxe->id = "poorcraftultra:wooden_pickaxe";
     pickaxe->type = RecipeType::Crafting;
     pickaxe->category = RecipeCategory::Equipment;
     pickaxe->ingredients = {
-        Ingredient{{"minecraft:oak_planks"}, 1},
-        Ingredient{{"minecraft:oak_planks"}, 1},
-        Ingredient{{"minecraft:oak_planks"}, 1},
+        Ingredient{{"poorcraftultra:oak_planks"}, 1},
+        Ingredient{{"poorcraftultra:oak_planks"}, 1},
+        Ingredient{{"poorcraftultra:oak_planks"}, 1},
         Ingredient{},
-        Ingredient{{"minecraft:stick"}, 1},
+        Ingredient{{"poorcraftultra:stick"}, 1},
         Ingredient{},
         Ingredient{},
-        Ingredient{{"minecraft:stick"}, 1},
+        Ingredient{{"poorcraftultra:stick"}, 1},
         Ingredient{}
     };
-    pickaxe->result = {"minecraft:wooden_pickaxe", 1};
+    pickaxe->result = {"poorcraftultra:wooden_pickaxe", 1};
     pickaxe->width = 3;
     pickaxe->height = 3;
     pickaxe->pattern = {"PPP", " S ", " S "};
     pickaxe->key = {
-        {'P', Ingredient{{"minecraft:oak_planks"}, 1}},
-        {'S', Ingredient{{"minecraft:stick"}, 1}}
+        {'P', Ingredient{{"poorcraftultra:oak_planks"}, 1}},
+        {'S', Ingredient{{"poorcraftultra:stick"}, 1}}
     };
     registerRecipe(std::move(pickaxe));
     
     // Iron ingot (smelting)
     auto ironIngot = std::make_unique<CookingRecipe>();
-    ironIngot->id = "minecraft:iron_ingot";
+    ironIngot->id = "poorcraftultra:iron_ingot";
     ironIngot->type = RecipeType::Smelting;
-    ironIngot->ingredients = {Ingredient{{"minecraft:iron_ore"}, 1}};
-    ironIngot->result = {"minecraft:iron_ingot", 1};
+    ironIngot->ingredients = {Ingredient{{"poorcraftultra:iron_ore"}, 1}};
+    ironIngot->result = {"poorcraftultra:iron_ingot", 1};
     ironIngot->cookingTime = 10.0f;
     ironIngot->experience = 0.7f;
     registerRecipe(std::move(ironIngot));

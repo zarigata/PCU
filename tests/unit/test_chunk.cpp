@@ -28,7 +28,7 @@ TEST_F(ChunkTest, ChunkCreation) {
 TEST_F(ChunkTest, BlockSetAndGet) {
     Chunk chunk(ChunkPos(0, 0));
     
-    auto stone = BlockRegistry::get().getDefaultState("minecraft:stone");
+    auto stone = BlockRegistry::get().getDefaultState("poorcraftultra:stone");
     chunk.setBlock(5, 70, 7, stone);
     
     BlockState retrieved = chunk.getBlock(5, 70, 7);
@@ -84,7 +84,7 @@ TEST_F(ChunkTest, ChunkDirty) {
     
     EXPECT_FALSE(chunk.isDirty());
     
-    auto stone = BlockRegistry::get().getDefaultState("minecraft:stone");
+    auto stone = BlockRegistry::get().getDefaultState("poorcraftultra:stone");
     chunk.setBlock(0, 0, 0, stone);
     
     EXPECT_TRUE(chunk.isDirty());
@@ -93,7 +93,7 @@ TEST_F(ChunkTest, ChunkDirty) {
 TEST_F(ChunkTest, ChunkMarkClean) {
     Chunk chunk(ChunkPos(0, 0));
     
-    auto stone = BlockRegistry::get().getDefaultState("minecraft:stone");
+    auto stone = BlockRegistry::get().getDefaultState("poorcraftultra:stone");
     chunk.setBlock(0, 0, 0, stone);
     
     EXPECT_TRUE(chunk.isDirty());
@@ -142,8 +142,8 @@ TEST_F(ChunkTest, ChunkPosHash) {
 TEST_F(ChunkTest, MultipleBlocks) {
     Chunk chunk(ChunkPos(0, 0));
     
-    auto stone = BlockRegistry::get().getDefaultState("minecraft:stone");
-    auto dirt = BlockRegistry::get().getDefaultState("minecraft:dirt");
+    auto stone = BlockRegistry::get().getDefaultState("poorcraftultra:stone");
+    auto dirt = BlockRegistry::get().getDefaultState("poorcraftultra:dirt");
     
     for (int y = 60; y < 70; y++) {
         for (int x = 0; x < 16; x++) {
@@ -171,7 +171,7 @@ TEST_F(ChunkTest, SectionNonAirCount) {
     
     EXPECT_EQ(section->getNonAirBlockCount(), 0);
     
-    auto stone = BlockRegistry::get().getDefaultState("minecraft:stone");
+    auto stone = BlockRegistry::get().getDefaultState("poorcraftultra:stone");
     chunk.setBlock(0, 64, 0, stone);
     
     // Refresh section pointer

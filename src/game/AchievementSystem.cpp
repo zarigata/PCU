@@ -124,7 +124,7 @@ std::unique_ptr<Advancement> Advancement::fromJson(const nlohmann::json& json, c
         for (auto& [key, value] : json["criteria"].items()) {
             auto criterion = std::make_shared<Criterion>();
             criterion->id = key;
-            criterion->trigger = value.value("trigger", "minecraft:impossible");
+            criterion->trigger = value.value("trigger", "poorcraftultra:impossible");
             if (value.contains("conditions")) {
                 for (auto& [k, v] : value["conditions"].items()) {
                     criterion->conditions[k] = v.get<std::string>();
@@ -448,26 +448,26 @@ void AchievementSystem::registerVanillaAdvancements() {
     
     // Stone Age
     auto stoneAge = std::make_unique<Advancement>();
-    stoneAge->id = "minecraft:story/stone_age";
+    stoneAge->id = "poorcraftultra:story/stone_age";
     stoneAge->display = std::make_shared<AdvancementDisplay>();
-    stoneAge->display->icon = "minecraft:cobblestone";
+    stoneAge->display->icon = "poorcraftultra:cobblestone";
     stoneAge->display->title = "Stone Age";
     stoneAge->display->description = "Mine stone with your new pickaxe";
     stoneAge->display->frame = "task";
     
     auto criterion = std::make_shared<Criterion>();
     criterion->id = "get_cobblestone";
-    criterion->trigger = "minecraft:inventory_changed";
+    criterion->trigger = "poorcraftultra:inventory_changed";
     stoneAge->criteria.push_back(criterion);
     
     registerAdvancement(std::move(stoneAge));
     
     // Iron Age
     auto ironAge = std::make_unique<Advancement>();
-    ironAge->id = "minecraft:story/iron_age";
-    ironAge->parent = "minecraft:story/stone_age";
+    ironAge->id = "poorcraftultra:story/iron_age";
+    ironAge->parent = "poorcraftultra:story/stone_age";
     ironAge->display = std::make_shared<AdvancementDisplay>();
-    ironAge->display->icon = "minecraft:iron_ingot";
+    ironAge->display->icon = "poorcraftultra:iron_ingot";
     ironAge->display->title = "Isn't It Iron Pick";
     ironAge->display->description = "Upgrade your pickaxe";
     ironAge->display->frame = "task";
@@ -475,7 +475,7 @@ void AchievementSystem::registerVanillaAdvancements() {
     
     criterion = std::make_shared<Criterion>();
     criterion->id = "get_iron_ingot";
-    criterion->trigger = "minecraft:inventory_changed";
+    criterion->trigger = "poorcraftultra:inventory_changed";
     ironAge->criteria.push_back(criterion);
     
     registerAdvancement(std::move(ironAge));

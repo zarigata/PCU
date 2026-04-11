@@ -223,13 +223,13 @@ void FluidSystem::handleFluidMixing(World& world, const BlockPos& pos, FluidType
 
     // Water + Lava = Obsidian
     if (existing.type == FluidType::Water && incoming == FluidType::Lava) {
-        BlockState obsidian = BlockState::fromBlockId(BlockRegistry::get().getBlockId("minecraft:obsidian"));
+        BlockState obsidian = BlockState::fromBlockId(BlockRegistry::get().getBlockId("poorcraftultra:obsidian"));
         world.setBlock(pos, obsidian);
         return;
     }
 
     if (existing.type == FluidType::Lava && incoming == FluidType::Water) {
-        BlockState obsidian = BlockState::fromBlockId(BlockRegistry::get().getBlockId("minecraft:obsidian"));
+        BlockState obsidian = BlockState::fromBlockId(BlockRegistry::get().getBlockId("poorcraftultra:obsidian"));
         world.setBlock(pos, obsidian);
         return;
     }
@@ -240,7 +240,7 @@ void FluidSystem::handleFluidMixing(World& world, const BlockPos& pos, FluidType
         // Check for lava below
         BlockPos below(pos.x, pos.y - 1, pos.z);
         if (isFluidSource(world, below) && getFluid(world, below).type == FluidType::Lava) {
-            BlockState cobblestone = BlockState::fromBlockId(BlockRegistry::get().getBlockId("minecraft:cobblestone"));
+            BlockState cobblestone = BlockState::fromBlockId(BlockRegistry::get().getBlockId("poorcraftultra:cobblestone"));
             world.setBlock(pos, cobblestone);
         }
     }
@@ -254,9 +254,9 @@ BlockState FluidSystem::getFlowingBlockState(FluidType type, uint8_t level, bool
     String blockId;
 
     if (type == FluidType::Water) {
-        blockId = "minecraft:flowing_water";
+        blockId = "poorcraftultra:flowing_water";
     } else if (type == FluidType::Lava) {
-        blockId = "minecraft:flowing_lava";
+        blockId = "poorcraftultra:flowing_lava";
     } else {
         return BlockState::fromBlockId(BlockRegistry::AIR_BLOCK);
     }
@@ -279,9 +279,9 @@ BlockState FluidSystem::getSourceBlockState(FluidType type) const {
     String blockId;
 
     if (type == FluidType::Water) {
-        blockId = "minecraft:water";
+        blockId = "poorcraftultra:water";
     } else if (type == FluidType::Lava) {
-        blockId = "minecraft:lava";
+        blockId = "poorcraftultra:lava";
     } else {
         return BlockState::fromBlockId(BlockRegistry::AIR_BLOCK);
     }
@@ -367,12 +367,12 @@ int FluidSystem::getFluidLevelFromBlock(const BlockState& state) const {
     const auto& def = BlockRegistry::get().getDefinition(id);
 
     // Source blocks have level 0
-    if (def.id == "minecraft:water" || def.id == "minecraft:lava") {
+    if (def.id == "poorcraftultra:water" || def.id == "poorcraftultra:lava") {
         return 0;
     }
 
     // Flowing blocks have level property
-    if (def.id == "minecraft:flowing_water" || def.id == "minecraft:flowing_lava") {
+    if (def.id == "poorcraftultra:flowing_water" || def.id == "poorcraftultra:flowing_lava") {
         int level = state.getInt("level");
         return level; // 0-7 (but for flowing, we'll interpret as 1-7)
     }

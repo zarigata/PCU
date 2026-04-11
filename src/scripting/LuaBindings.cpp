@@ -370,7 +370,7 @@ void registerWorld(sol::state& lua) {
     
     world["getBlock"] = [](int x, int y, int z) -> std::string {
         // Placeholder
-        return "minecraft:air";
+        return "poorcraftultra:air";
     };
     
     world["setBlock"] = [](int x, int y, int z, const std::string& blockId) {
