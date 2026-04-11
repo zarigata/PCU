@@ -47,6 +47,16 @@ void Game::onUpdate(float deltaTime) {
         return;
     }
     
+    // Update day/night cycle time
+    settings.dayTime += deltaTime;
+    
+    // Check for day/night cycle advancement (every 20 minutes = 12000 ticks)
+    float cycleProgress = getDayProgress();
+    if (cycleProgress >= 1.0f) {
+        // Day ended, transition to night
+        resetDayNightCycle();
+    }
+    
     gameTime += deltaTime;
     
     // Game tick (20 TPS)
@@ -120,10 +130,60 @@ void Game::updateWorld(float deltaTime) {
     }
 }
 
-// Game factory function
-Application* createApplication() {
-    ApplicationProps props;
-    props.name = "VoxelForge";
+float Game::getDayProgress() const {
+    // Calculate progress through current day (0.0 = dawn, 1.0 = full day)
+    // Based on SkyRenderer's time of day: Dawn=0-6000, Day=6000-12000, Dusk=12000-18000, Night=18000-24000
+    // Normalize to 0.0-1.0 range
+    float normalizedTime = std::fmod(settings.dayTime, 24000.0f) / 24000.0f;
+    
+    // Map phases to progress:
+    // 0.0 - 0.25: Dawn
+    // 0.25 - 0.75: Day
+    // 0.75 - 1.0: Dusk
+    // 1.0+: Night
+    
+    if (normalizedTime < 0.25f) {
+        return normalizedTime / 0.25f;  // 0.0 to 1.0 during dawn
+    } else if (normalizedTime < 0.75f) {
+        return 0.25f + (normalizedTime - 0.25f) / 0.5f;  // 0.25 to 1.0 during day
+    } else if (normalizedTime < 1.0f) {
+        return 0.75f + (normalizedTime - 0.75f) / 0.25f;  // 0.75 to 1.0 during dusk
+    }
+    // Night phase - can go beyond 1.0 but clamped later
+    return std::min(1.0f, normalizedTime - 1.0f);  // Night starts at 1.0 and goes to 2.0
+}
+
+void Game::advanceDayNightCycle() {
+    // Advance to next day/night phase by adding one cycle duration
+    settings.dayTime += settings.dayNightCycleDuration;
+    // Normalize to keep within 0-24000 range
+    while (settings.dayTime >= 24000.0f) {
+        settings.dayTime -= 24000.0f;
+    }
+    // Cycle: Day -> Night -> Day...
+    VF_INFO("Day/Night cycle advanced: new time = {}", settings.dayTime);
+}
+
+void Game::resetDayNightCycle() {
+    // Reset to dawn (start of day)
+    settings.dayTime = 0.0f;
+    VF_INFO("Day/Night cycle reset to dawn");
+}
+
+bool Game::isDay() const {
+    // Dawn = 0-6000 ticks, Day = 6000-18000 ticks
+    // Night = 18000-24000 ticks
+    float time = settings.dayTime;
+    if (time >= 0 && time < 18000) {
+        return true;
+    }
+    return false;
+}
+
+bool Game::isNight() const {
+    return !isDay();
+}
+
     props.windowWidth = 1280;
     props.windowHeight = 720;
     props.vsync = true;

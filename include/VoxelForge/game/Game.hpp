@@ -7,6 +7,7 @@
 
 #include <VoxelForge/core/Application.hpp>
 #include <VoxelForge/core/ECS.hpp>
+#include <VoxelForge/rendering/SkyRenderer.hpp>
 #include <memory>
 
 namespace VoxelForge {
@@ -26,6 +27,10 @@ struct GameSettings {
     bool vsync = true;
     bool fullscreen = false;
     int maxFPS = 120;
+    
+    // Day/Night cycle
+    float dayNightCycleDuration = 12000.0f;  // 20 minutes (in ticks)
+    float dayStartTime = 0.0f;           // When day started (in ticks since world time)
 };
 
 class Game : public Application {
@@ -50,6 +55,17 @@ public:
     enum class GameMode { Survival, Creative, Adventure, Spectator };
     GameMode getGameMode() const { return gameMode; }
     void setGameMode(GameMode mode) { gameMode = mode; }
+
+    // Day/Night cycle management
+    float getDayTime() const { return settings.dayTime; }
+    void setDayTime(float time) { settings.dayTime = time; }
+    
+    bool isDay() const;  // Returns true during day phase
+    bool isNight() const;  // Returns true during night phase
+    float getDayProgress() const;  // 0.0 to 1.0 through current day
+    void advanceDayNightCycle();  // Manually advance to next phase
+    void resetDayNightCycle();  // Reset to dawn
+
     
 protected:
     void onInit() override;
