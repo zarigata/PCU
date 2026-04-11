@@ -12,14 +12,13 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
 ## Build Status
 - **Latest successful build:** ~10 hours ago (fix(build) - disabled broken source files)
 - **Current build status:**
-  - NEW FIX (queued): fix(build): resolve compilation errors across multiple files
-    - Fixed 7 compilation errors in 5 files
-    - ChunkPos.hpp: Added CHUNK_WIDTH constant
-    - ChunkMesher.hpp: BlockRenderType → RenderType
-    - ChunkMesher.cpp: Fixed BlockRegistry API calls
-    - FluidSystem.cpp: Fixed BlockState constructors and logging
-    - BiomeBlender.cpp: Fixed CHUNK_WIDTH scope
-  - Previous builds: All 4 Linux platforms failing
+  - LATEST FIX (queued): fix(build): resolve redefinition and hash function errors
+    - Fixed 2 major errors introduced in previous fix
+    - ChunkPos.hpp: Removed duplicate CHUNK_WIDTH constants (redefinition error)
+    - ChunkPos.hpp: Fixed incomplete std:: namespace block
+    - BiomeBlender.cpp: Added Chunk.hpp include
+    - ChunkMesher.cpp: Simplified CHUNK_WIDTH references
+  - Previous build: All 5 platforms failed (redefinition + hash errors)
   - Windows: failed (previous build)
   - macOS Apple Silicon: queued
   - macOS Intel: cancelled
@@ -28,8 +27,8 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
 
 ## Action Items
 - ✅ CI build stuck for >30 min → Created GitHub issue #6
-- ✅ CI build fails twice in a row → Paused cron, fixed 7 compilation errors, pushed fix
-- ⏳ Verify new build passes across all platforms → Monitoring CI
+- ✅ CI build fails → Fixed redefinition and hash errors (2nd round of fixes)
+- ⏳ Verify new build passes → Monitoring CI for latest commit
 - ⏸️ All builds green → Cron will spawn sub-agents for feature implementation
 
 ## Notes
@@ -40,7 +39,7 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
   - Next run: ~10 hours from now
   - Rate limit handling: 60s initial wait, 300s on 429, 1 retry
   - Timeout: 3600s (1 hour)
-- Recent commits (rebrand + 8 fixes):
+- Recent commits (rebrand + 9 fixes):
   - Rebranding: minecraft: → poorcraftultra: (629 occurrences)
   - CMake version conflict: enet dependency fixed
   - DayTime field access: Game class fixed
@@ -48,7 +47,8 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
   - Designated initializer order: fluid blocks
   - BlockProperty initializer order: fluid level properties
   - BlockRenderType error: replaced with RenderType
-  - NEW (current): Fix 7 compilation errors in 5 files (ChunkPos, ChunkMesher, FluidSystem, BiomeBlender)
+  - Fix 7 compilation errors (1st attempt): ChunkPos, ChunkMesher, FluidSystem, BiomeBlender
+  - NEW (current): Fix redefinition and hash errors (2nd attempt): ChunkPos duplicate constants, malformed namespace
 - Recent features implemented:
   - Fluid Physics System (water/lava flow simulation, scheduled updates, fluid mixing)
   - ChunkManager/LightEngine/AnvilLoader headers (world management infrastructure)
