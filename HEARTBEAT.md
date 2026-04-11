@@ -12,11 +12,11 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
 ## Build Status
 - **Latest successful build:** ~10 hours ago (fix(build) - disabled broken source files)
 - **Current build status:**
-  - LATEST FIX (queued): fix(build): resolve missing types and logging macros (6th round)
+  - LATEST FIX (queued): fix(build): resolve circular dependency and Entity type errors (7th round)
     - Fixed 2 categories of errors in 2 files
-    - ECS.hpp: Added <cstdint> and Engine.hpp includes for type definitions
-    - AnvilLoader.cpp: Changed VF_* logging macros to SPDLOG_*
-  - Previous builds: All 5+ platforms failed over 6 rounds of fixes
+    - ECS.hpp: Removed Engine.hpp include (circular dependency), defined types inline
+    - Entity.cpp: Changed Entity to EntityID in function signatures and variables
+  - Previous builds: All 5+ platforms failed over 7 rounds of fixes
   - Windows: failed (previous build)
   - macOS Apple Silicon: queued
   - macOS Intel: cancelled
@@ -25,8 +25,8 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
 
 ## Action Items
 - ✅ CI build stuck for >30 min → Created GitHub issue #6
-- ✅ CI build fails (6 rounds total) → Fixed missing types and logging macros
-- ⏳ Verify new build passes → Monitoring CI for latest commit (6th round of fixes)
+- ✅ CI build fails (7 rounds total) → Fixed circular dependency and Entity type errors
+- ⏳ Verify new build passes → Monitoring CI for latest commit (7th round of fixes)
 - ⏸️ All builds green → Cron will spawn sub-agents for feature implementation
 
 ## Notes
@@ -37,7 +37,7 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
   - Next run: ~10 hours from now
   - Rate limit handling: 60s initial wait, 300s on 429, 1 retry
   - Timeout: 3600s (1 hour)
-- Recent commits (rebrand + 13 fixes):
+- Recent commits (rebrand + 14 fixes):
   - Rebranding: minecraft: → poorcraftultra: (629 occurrences)
   - CMake version conflict: enet dependency fixed
   - DayTime field access: Game class fixed
@@ -50,7 +50,8 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
   - Fix hash, AIR_BLOCK, logging, and API errors (3rd attempt): 5 files fixed
   - Fix BlockDefinition isSeeThrough and EntityManager errors (4th attempt): 2 files fixed
   - Fix duplicate class definitions and missing includes (5th attempt): 4 files fixed
-  - NEW (current): Fix missing types and logging macros (6th attempt): 2 files fixed
+  - Fix missing types and logging macros (6th attempt): 2 files fixed
+  - NEW (current): Fix circular dependency and Entity type errors (7th attempt): 2 files fixed
 - Recent features implemented:
   - Fluid Physics System (water/lava flow simulation, scheduled updates, fluid mixing)
   - ChunkManager/LightEngine/AnvilLoader headers (world management infrastructure)
