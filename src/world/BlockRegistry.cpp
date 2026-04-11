@@ -1639,8 +1639,8 @@ void BlockRegistry::registerVanillaBlocks() {
         .material = Material::Wood,
         .hardness = 0.6f,
         .blastResistance = 0.6f,
-        .requiredTool = ToolType::Axe,
         .flammable = true,
+        .requiredTool = ToolType::Axe,
         .sounds = BlockSoundGroup::WOOD
     });
     
@@ -1719,9 +1719,9 @@ void BlockRegistry::registerVanillaBlocks() {
         .hardness = 3.0f,
         .blastResistance = 3.0f,
         .opaque = false,
-        .renderType = RenderType::Cutout,
         .requiredTool = ToolType::Pickaxe,
         .minimumTier = ToolTier::Wood,
+        .renderType = RenderType::Cutout,
         .sounds = BlockSoundGroup::METAL
     });
     
@@ -1736,8 +1736,8 @@ void BlockRegistry::registerVanillaBlocks() {
         .material = Material::Wood,
         .hardness = 1.5f,
         .blastResistance = 1.5f,
-        .requiredTool = ToolType::Axe,
         .flammable = true,
+        .requiredTool = ToolType::Axe,
         .sounds = BlockSoundGroup::WOOD
     });
     
@@ -1832,8 +1832,8 @@ void BlockRegistry::registerVanillaBlocks() {
         .material = Material::Water,
         .hardness = 100.0f,
         .blastResistance = 100.0f,
-        .opaque = false,
         .solid = false,
+        .opaque = false,
         .replaceable = true,
         .renderType = RenderType::Translucent,
         .collisionShape = VoxelShape::empty()
@@ -1941,9 +1941,9 @@ void BlockRegistry::registerVanillaBlocks() {
         .material = Material::Decoration,
         .hardness = 0.0f,
         .blastResistance = 0.0f,
+        .solid = false,
         .opaque = false,
         .renderType = RenderType::Translucent,
-        .solid = false,
         .lightEmission = 6
     });
     

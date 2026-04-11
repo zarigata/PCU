@@ -137,6 +137,8 @@ struct BlockSoundGroup {
     static BlockSoundGroup WOOL;
     static BlockSoundGroup LEAVES;
     static BlockSoundGroup CROP;
+    static BlockSoundGroup LADDER;
+    static BlockSoundGroup SNOW;
 };
 
 // ============================================
