@@ -13,7 +13,7 @@
 namespace VoxelForge {
 
 AnvilLoader::AnvilLoader(const std::string& worldPath) : worldPath_(worldPath) {
-    VF_INFO("AnvilLoader created for world: {}", worldPath);
+    SPDLOG_INFO("AnvilLoader created for world: {}", worldPath);
 }
 
 std::unique_ptr<Chunk> AnvilLoader::loadChunk(const ChunkPos& pos) {
@@ -27,7 +27,7 @@ std::unique_ptr<Chunk> AnvilLoader::loadChunk(const ChunkPos& pos) {
     // Check if file exists
     std::ifstream file(regionFile, std::ios::binary);
     if (!file.is_open()) {
-        VF_DEBUG("Region file not found: {}", regionFile);
+        SPDLOG_DEBUG("Region file not found: {}", regionFile);
         return nullptr;
     }
     
@@ -79,7 +79,7 @@ std::unique_ptr<Chunk> AnvilLoader::loadChunk(const ChunkPos& pos) {
         // Zlib compression
         decompressedData = AnvilCompression::decompressZlib(compressedData);
     } else {
-        VF_ERROR("Unknown compression type: {}", compressionType);
+        SPDLOG_ERROR("Unknown compression type: {}", compressionType);
         return nullptr;
     }
     
@@ -94,7 +94,7 @@ bool AnvilLoader::saveChunk(const Chunk* chunk) {
     if (!chunk) return false;
     
     // TODO: Implement chunk saving
-    VF_WARN("Chunk saving not yet implemented");
+    SPDLOG_WARN("Chunk saving not yet implemented");
     return false;
 }
 

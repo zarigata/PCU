@@ -17,6 +17,10 @@
 #include <memory>
 #include <functional>
 #include <array>
+#include <cstdint>
+
+// Include Engine.hpp for common types used by components
+#include <VoxelForge/Engine.hpp>
 
 namespace VoxelForge {
 
