@@ -207,7 +207,7 @@ private:
         const std::array<uint8_t, 4>& ao,
         const std::array<uint32_t, 4>& light,
         uint32_t color,
-        BlockRenderType renderType
+        RenderType renderType
     );
     
     // Face data (positions, normals, UVs)

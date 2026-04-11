@@ -66,8 +66,8 @@ void FluidSystem::tick(World& world) {
         ++updatesThisTick;
     }
 
-    VF_DEBUG("FluidSystem: Processed {} updates this tick, {} remaining in queue",
-             updatesThisTick, pendingUpdates.size());
+    SPDLOG_DEBUG("FluidSystem: Processed {} updates this tick, {} remaining in queue",
+                updatesThisTick, pendingUpdates.size());
 }
 
 // ============================================
@@ -97,6 +97,10 @@ void FluidSystem::scheduleUpdate(const BlockPos& pos, int delay) {
 
 FluidState FluidSystem::getFluid(World& world, const BlockPos& pos) const {
     BlockState state = world.getBlock(pos);
+
+    if (state.getBlockId() == AIR_BLOCK) {
+        return FluidState();
+    }
 
     FluidState fluidState;
     fluidState.type = getFluidTypeFromBlock(state);
@@ -223,13 +227,15 @@ void FluidSystem::handleFluidMixing(World& world, const BlockPos& pos, FluidType
 
     // Water + Lava = Obsidian
     if (existing.type == FluidType::Water && incoming == FluidType::Lava) {
-        BlockState obsidian = BlockState::fromBlockId(BlockRegistry::get().getBlockId("poorcraftultra:obsidian"));
+        BlockID obsidianId = BlockRegistry::get().getBlockId("poorcraftultra:obsidian");
+        BlockState obsidian(obsidianId);
         world.setBlock(pos, obsidian);
         return;
     }
 
     if (existing.type == FluidType::Lava && incoming == FluidType::Water) {
-        BlockState obsidian = BlockState::fromBlockId(BlockRegistry::get().getBlockId("poorcraftultra:obsidian"));
+        BlockID obsidianId = BlockRegistry::get().getBlockId("poorcraftultra:obsidian");
+        BlockState obsidian(obsidianId);
         world.setBlock(pos, obsidian);
         return;
     }
@@ -240,7 +246,8 @@ void FluidSystem::handleFluidMixing(World& world, const BlockPos& pos, FluidType
         // Check for lava below
         BlockPos below(pos.x, pos.y - 1, pos.z);
         if (isFluidSource(world, below) && getFluid(world, below).type == FluidType::Lava) {
-            BlockState cobblestone = BlockState::fromBlockId(BlockRegistry::get().getBlockId("poorcraftultra:cobblestone"));
+            BlockID cobblestoneId = BlockRegistry::get().getBlockId("poorcraftultra:cobblestone");
+            BlockState cobblestone(cobblestoneId);
             world.setBlock(pos, cobblestone);
         }
     }
@@ -258,11 +265,11 @@ BlockState FluidSystem::getFlowingBlockState(FluidType type, uint8_t level, bool
     } else if (type == FluidType::Lava) {
         blockId = "poorcraftultra:flowing_lava";
     } else {
-        return BlockState::fromBlockId(BlockRegistry::AIR_BLOCK);
+        return BlockState(AIR_BLOCK);
     }
 
     BlockID id = BlockRegistry::get().getBlockId(blockId);
-    BlockState state = BlockState::fromBlockId(id);
+    BlockState state = BlockState(id);
 
     // Set level property if it exists
     if (level > 0) {
@@ -283,11 +290,11 @@ BlockState FluidSystem::getSourceBlockState(FluidType type) const {
     } else if (type == FluidType::Lava) {
         blockId = "poorcraftultra:lava";
     } else {
-        return BlockState::fromBlockId(BlockRegistry::AIR_BLOCK);
+        return BlockState(AIR_BLOCK);
     }
 
     BlockID id = BlockRegistry::get().getBlockId(blockId);
-    return BlockState::fromBlockId(id);
+    return BlockState(id);
 }
 
 // ============================================

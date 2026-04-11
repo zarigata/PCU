@@ -183,12 +183,12 @@ void ChunkMesher::addBlockFaces(
     BlockState blockState,
     World* world) {
     
-    const auto& blockDef = BlockRegistry::get().getBlock(blockDef.getBlockId(blockState));
-    if (!blockDef) return;
+    BlockID blockId = blockState.getBlockId();
+    const auto& blockDef = BlockRegistry::get().getDefinition(blockId);
     
-    glm::ivec3 blockPos(localX + chunk->getPosition().x * CHUNK_WIDTH,
+    glm::ivec3 blockPos(localX + chunk->getPosition().x * VoxelForge::CHUNK_WIDTH,
                         localY,
-                        localZ + chunk->getPosition().z * CHUNK_WIDTH);
+                        localZ + chunk->getPosition().z * VoxelForge::CHUNK_WIDTH);
     
     // Check each face
     for (int face = 0; face < 6; face++) {
@@ -222,10 +222,10 @@ void ChunkMesher::addFace(
     const std::array<uint32_t, 4>& vertexLight,
     World* world) {
     
-    const auto& blockDef = BlockRegistry::get().getBlock(blockDef.getBlockId(blockState));
-    if (!blockDef) return;
+    BlockID blockId = blockState.getBlockId();
+    const auto& blockDef = BlockRegistry::get().getDefinition(blockId);
     
-    RenderType renderType = blockDef->renderType;
+    RenderType renderType = blockDef.renderType;
     
     // Get texture coordinates
     glm::vec4 texCoords = getTextureCoords(blockState, face);
@@ -268,15 +268,13 @@ bool ChunkMesher::shouldRenderFace(
         return true;
     }
     
-    const auto& currentDef = BlockRegistry::get().getBlock(blockDef.getBlockId(currentBlock));
-    const auto& neighborDef = BlockRegistry::get().getBlock(blockDef.getBlockId(neighborBlock));
-    
-    if (!currentDef || !neighborDef) {
-        return true;
-    }
+    BlockID currentId = currentBlock.getBlockId();
+    BlockID neighborId = neighborBlock.getBlockId();
+    const auto& currentDef = BlockRegistry::get().getDefinition(currentId);
+    const auto& neighborDef = BlockRegistry::get().getDefinition(neighborId);
     
     // Never render if same block (for solid blocks)
-    if (currentBlock == neighborBlock && currentDef->renderType == RenderType::Solid) {
+    if (currentId == neighborId && currentDef.renderType == RenderType::Solid) {
         return false;
     }
     

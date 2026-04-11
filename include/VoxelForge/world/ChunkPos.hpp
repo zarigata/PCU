@@ -11,6 +11,15 @@
 
 namespace VoxelForge {
 
+// Chunk constants
+constexpr static int CHUNK_WIDTH = 16;
+constexpr static int CHUNK_DEPTH = 16;
+constexpr static int CHUNK_HEIGHT = 384;
+constexpr static int SECTION_HEIGHT = 16;
+constexpr static int SECTIONS_PER_CHUNK = CHUNK_HEIGHT / SECTION_HEIGHT;
+constexpr static int CHUNK_MIN_Y = -64;
+constexpr static int CHUNK_MAX_Y = CHUNK_MIN_Y + CHUNK_HEIGHT - 1;
+
 // Chunk position (2D: x, z)
 struct ChunkPos {
     int x, z;
@@ -59,10 +68,4 @@ namespace std {
     };
     
     // Hash for glm::ivec3 (BlockPos)
-    template<>
-    struct hash<glm::ivec3> {
-        size_t operator()(const glm::ivec3& v) const {
-            return std::hash<int>()(v.x) ^ (std::hash<int>()(v.y) << 1) ^ (std::hash<int>()(v.z) << 2);
-        }
-    };
-}
+} // namespace VoxelForge
