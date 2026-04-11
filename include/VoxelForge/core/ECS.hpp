@@ -31,7 +31,9 @@ using String = std::string;
 using Vec3 = glm::vec3;
 using Mat4 = glm::mat4;
 
-// UUID struct (defined here to avoid circular dependency)
+// UUID struct (defined here to avoid circular dependency, guarded to prevent redefinition)
+#ifndef VOXELFORGE_UUID_DEFINED
+#define VOXELFORGE_UUID_DEFINED
 struct UUID {
     u64 high = 0;
     u64 low = 0;
@@ -47,8 +49,11 @@ struct UUID {
         return !(*this == other);
     }
 };
+#endif
 
-// AABB (Axis-Aligned Bounding Box)
+// AABB (Axis-Aligned Bounding Box), guarded to prevent redefinition
+#ifndef VOXELFORGE_AABB_DEFINED
+#define VOXELFORGE_AABB_DEFINED
 struct AABB {
     Vec3 min;
     Vec3 max;
@@ -70,6 +75,7 @@ struct AABB {
                min.z <= other.max.z && max.z >= other.min.z;
     }
 };
+#endif
 
 // Forward declaration
 class Entity;
