@@ -211,9 +211,9 @@ add_library(VoxelForge_Engine STATIC
     src/world/DimensionRegistry.cpp
     src/world/FluidSystem.cpp
     src/world/ChunkMesher.cpp
-    # src/world/ChunkManager.cpp  # TODO: missing headers
-    # src/world/LightEngine.cpp  # TODO: missing headers
-    # src/world/AnvilLoader.cpp  # TODO: missing headers
+    src/world/ChunkManager.cpp
+    src/world/LightEngine.cpp
+    src/world/AnvilLoader.cpp
     
     # Entity
     src/entity/EntityManager.cpp
