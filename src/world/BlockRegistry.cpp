@@ -1836,8 +1836,9 @@ void BlockRegistry::registerVanillaBlocks() {
         .opaque = false,
         .replaceable = true,
         .renderType = RenderType::Translucent,
-        .collisionShape = VoxelShape::empty(),
-        .lightOpacity = 3
+        .lightEmission = 0,
+        .lightOpacity = 3,
+        .collisionShape = VoxelShape::empty()
     });
     
     // Water (flowing)
@@ -1851,8 +1852,9 @@ void BlockRegistry::registerVanillaBlocks() {
         .opaque = false,
         .replaceable = true,
         .renderType = RenderType::Translucent,
-        .collisionShape = VoxelShape::empty(),
+        .lightEmission = 0,
         .lightOpacity = 3,
+        .collisionShape = VoxelShape::empty(),
         .properties = {{
             .name = "level",
             .type = BlockProperty::Type::Int,
@@ -1873,9 +1875,9 @@ void BlockRegistry::registerVanillaBlocks() {
         .opaque = false,
         .replaceable = true,
         .renderType = RenderType::Translucent,
-        .collisionShape = VoxelShape::empty(),
         .lightEmission = 15,
-        .lightOpacity = 255
+        .lightOpacity = 255,
+        .collisionShape = VoxelShape::empty()
     });
     
     // Lava (flowing)
@@ -1889,9 +1891,9 @@ void BlockRegistry::registerVanillaBlocks() {
         .opaque = false,
         .replaceable = true,
         .renderType = RenderType::Translucent,
-        .collisionShape = VoxelShape::empty(),
         .lightEmission = 15,
         .lightOpacity = 255,
+        .collisionShape = VoxelShape::empty(),
         .properties = {{
             .name = "level",
             .type = BlockProperty::Type::Int,
