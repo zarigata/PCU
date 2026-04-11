@@ -113,7 +113,9 @@ using f64 = double;
 using String = std::string;
 using StringView = std::string_view;
 
-// UUID type (128-bit)
+// UUID type (128-bit), guarded to prevent redefinition
+#ifndef VOXELFORGE_UUID_DEFINED
+#define VOXELFORGE_UUID_DEFINED
 struct UUID {
     u64 low;
     u64 high;
@@ -124,6 +126,7 @@ struct UUID {
     bool operator==(const UUID& other) const { return low == other.low && high == other.high; }
     bool operator!=(const UUID& other) const { return !(*this == other); }
 };
+#endif
 
 // Common math types
 using Vec2 = glm::vec2;
@@ -165,7 +168,9 @@ struct Rect {
     }
 };
 
-// AABB (Axis-Aligned Bounding Box)
+// AABB (Axis-Aligned Bounding Box), guarded to prevent redefinition
+#ifndef VOXELFORGE_AABB_DEFINED
+#define VOXELFORGE_AABB_DEFINED
 struct AABB {
     Vec3 min;
     Vec3 max;
@@ -186,6 +191,7 @@ struct AABB {
     
     static AABB blockBox(const BlockPos& pos);
 };
+#endif
 
 // Smart pointer aliases
 template<typename T>
