@@ -1858,9 +1858,9 @@ void BlockRegistry::registerVanillaBlocks() {
         .properties = {{
             .name = "level",
             .type = BlockProperty::Type::Int,
+            .defaultValue = 1,
             .minValue = 1,
-            .maxValue = 7,
-            .defaultValue = 1
+            .maxValue = 7
         }}
     });
     
@@ -1897,9 +1897,9 @@ void BlockRegistry::registerVanillaBlocks() {
         .properties = {{
             .name = "level",
             .type = BlockProperty::Type::Int,
+            .defaultValue = 1,
             .minValue = 1,
-            .maxValue = 7,
-            .defaultValue = 1
+            .maxValue = 7
         }}
     });
     
