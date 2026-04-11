@@ -225,7 +225,7 @@ void ChunkMesher::addFace(
     const auto& blockDef = BlockRegistry::get().getBlock(blockDef.getBlockId(blockState));
     if (!blockDef) return;
     
-    BlockRenderType renderType = blockDef->renderType;
+    RenderType renderType = blockDef->renderType;
     
     // Get texture coordinates
     glm::vec4 texCoords = getTextureCoords(blockState, face);
@@ -276,19 +276,19 @@ bool ChunkMesher::shouldRenderFace(
     }
     
     // Never render if same block (for solid blocks)
-    if (currentBlock == neighborBlock && currentDef->renderType == BlockRenderType::Solid) {
+    if (currentBlock == neighborBlock && currentDef->renderType == RenderType::Solid) {
         return false;
     }
     
     // Always render face if current block is transparent and neighbor is solid
-    if (currentDef->renderType != BlockRenderType::Solid && 
-        neighborDef->renderType == BlockRenderType::Solid) {
+    if (currentDef->renderType != RenderType::Solid && 
+        neighborDef->renderType == RenderType::Solid) {
         return true;
     }
     
     // Don't render face between two solid blocks
-    if (currentDef->renderType == BlockRenderType::Solid && 
-        neighborDef->renderType == BlockRenderType::Solid) {
+    if (currentDef->renderType == RenderType::Solid && 
+        neighborDef->renderType == RenderType::Solid) {
         return false;
     }
     
@@ -389,7 +389,7 @@ std::array<uint8_t, 4> ChunkMesher::calculateVertexAO(
             
             if (!neighbor.isAir()) {
                 const auto& def = BlockRegistry::get().getBlock(blockDef.getBlockId(neighbor));
-                if (def && def->renderType == BlockRenderType::Solid) {
+                if (def && def->renderType == RenderType::Solid) {
                     if (i == 0) side1 = true;
                     else if (i == 1) side2 = true;
                     else corner = true;
@@ -465,19 +465,19 @@ void ChunkMesher::addQuad(
     const std::array<uint8_t, 4>& ao,
     const std::array<uint32_t, 4>& light,
     uint32_t color,
-    BlockRenderType renderType) {
+    RenderType renderType) {
     
     // Select the appropriate vertex/index vectors based on render type
     std::vector<ChunkVertex>* vertices;
     std::vector<uint32_t>* indices;
     
     switch (renderType) {
-        case BlockRenderType::Cutout:
-        case BlockRenderType::CutoutMipped:
+        case RenderType::Cutout:
+        case RenderType::CutoutMipped:
             vertices = &mesh.cutoutVertices;
             indices = &mesh.cutoutIndices;
             break;
-        case BlockRenderType::Translucent:
+        case RenderType::Translucent:
             vertices = &mesh.translucentVertices;
             indices = &mesh.translucentIndices;
             break;
