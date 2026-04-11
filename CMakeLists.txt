@@ -106,13 +106,15 @@ FetchContent_MakeAvailable(zstd)
 unset(CMAKE_POLICY_DEFAULT_CMP0048)
 unset(CMAKE_POLICY_DEFAULT_CMP0056)
 
-# ENet
+# ENet - Set minimum CMake version to avoid incompatibility issues
+set(CMAKE_POLICY_VERSION_MINIMUM 3.5 CACHE STRING "" FORCE)
 FetchContent_Declare(
     enet
     GIT_REPOSITORY https://github.com/lsalzman/enet.git
     GIT_TAG        v1.3.17
 )
 FetchContent_MakeAvailable(enet)
+unset(CMAKE_POLICY_VERSION_MINIMUM)
 
 # sol2 (Lua bindings)
 FetchContent_Declare(
