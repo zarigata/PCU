@@ -208,6 +208,7 @@ add_library(VoxelForge_Engine STATIC
     src/world/BlockState.cpp
     src/world/WorldGenerator.cpp
     src/world/BiomeRegistry.cpp
+    src/world/BiomeBlender.cpp
     src/world/DimensionRegistry.cpp
     src/world/FluidSystem.cpp
     src/world/ChunkMesher.cpp
