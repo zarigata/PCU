@@ -69,11 +69,11 @@ const glm::vec2 ChunkMesher::FACE_UVS[4] = {
 // ============================================================================
 
 ChunkMesher::ChunkMesher() {
-    VF_INFO("ChunkMesher created");
+    SPDLOG_INFO("ChunkMesher created");
 }
 
 ChunkMesher::~ChunkMesher() {
-    VF_INFO("ChunkMesher destroyed");
+    SPDLOG_INFO("ChunkMesher destroyed");
 }
 
 void ChunkMesher::resetStats() {
@@ -85,7 +85,7 @@ ChunkMeshResult ChunkMesher::generateMesh(const Chunk* chunk, World* world) {
     result.position = chunk->getPosition();
     
     if (!chunk) {
-        VF_ERROR("Null chunk passed to generateMesh");
+        SPDLOG_ERROR("Null chunk passed to generateMesh");
         return result;
     }
     
@@ -138,7 +138,7 @@ ChunkMeshResult ChunkMesher::generateSectionMesh(const Chunk* chunk, int section
     result.position = chunk->getPosition();
     
     if (!chunk || sectionY < 0 || sectionY >= SECTIONS_PER_CHUNK) {
-        VF_ERROR("Invalid parameters for generateSectionMesh");
+        SPDLOG_ERROR("Invalid parameters for generateSectionMesh");
         return result;
     }
     
@@ -279,19 +279,19 @@ bool ChunkMesher::shouldRenderFace(
     }
     
     // Always render face if current block is transparent and neighbor is solid
-    if (currentDef->renderType != RenderType::Solid && 
-        neighborDef->renderType == RenderType::Solid) {
+    if (currentDef.renderType != RenderType::Solid && 
+        neighborDef.renderType == RenderType::Solid) {
         return true;
     }
     
     // Don't render face between two solid blocks
-    if (currentDef->renderType == RenderType::Solid && 
-        neighborDef->renderType == RenderType::Solid) {
+    if (currentDef.renderType == RenderType::Solid && 
+        neighborDef.renderType == RenderType::Solid) {
         return false;
     }
     
     // Don't render face if neighbor is opaque and not see-through
-    if (!neighborDef->isSeeThrough) {
+    if (!neighborDef.isSeeThrough) {
         return false;
     }
     
@@ -386,8 +386,8 @@ std::array<uint8_t, 4> ChunkMesher::calculateVertexAO(
             BlockState neighbor = getNeighborBlock(chunk, x, y, z, ox, oy, oz, world);
             
             if (!neighbor.isAir()) {
-                const auto& def = BlockRegistry::get().getBlock(blockDef.getBlockId(neighbor));
-                if (def && def->renderType == RenderType::Solid) {
+                const auto& def = BlockRegistry::get().getDefinition(neighbor.getBlockId());
+                if (def.renderType == RenderType::Solid) {
                     if (i == 0) side1 = true;
                     else if (i == 1) side2 = true;
                     else corner = true;
@@ -529,12 +529,12 @@ void ChunkMesher::addQuad(
 // ============================================================================
 
 ChunkMeshManager::ChunkMeshManager() {
-    VF_INFO("ChunkMeshManager created");
+    SPDLOG_INFO("ChunkMeshManager created");
 }
 
 ChunkMeshManager::~ChunkMeshManager() {
     clear();
-    VF_INFO("ChunkMeshManager destroyed");
+    SPDLOG_INFO("ChunkMeshManager destroyed");
 }
 
 void ChunkMeshManager::init(vk::Device device, vk::PhysicalDevice physicalDevice,
@@ -544,7 +544,7 @@ void ChunkMeshManager::init(vk::Device device, vk::PhysicalDevice physicalDevice
     this->queue = queue;
     this->commandPool = commandPool;
     
-    VF_INFO("ChunkMeshManager initialized");
+    SPDLOG_INFO("ChunkMeshManager initialized");
 }
 
 bool ChunkMeshManager::uploadMesh(const ChunkPos& pos, const ChunkMeshData& meshData) {
@@ -634,7 +634,7 @@ bool ChunkMeshManager::uploadMesh(const ChunkPos& pos, const ChunkMeshData& mesh
         return true;
         
     } catch (const std::exception& e) {
-        VF_ERROR("Failed to upload mesh for chunk ({}, {}): {}", 
+        SPDLOG_ERROR("Failed to upload mesh for chunk ({}, {}): {}", 
                   pos.x, pos.z, e.what());
         destroyBuffers(buffers);
         return false;

@@ -194,7 +194,7 @@ bool FluidSystem::canFlowInto(World& world, const BlockPos& pos) const {
     BlockID id = state.getBlockId();
 
     // Can flow into air
-    if (id == BlockRegistry::AIR_BLOCK) {
+    if (id == AIR_BLOCK) {
         return true;
     }
 

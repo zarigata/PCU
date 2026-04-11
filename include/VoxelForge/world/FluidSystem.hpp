@@ -9,6 +9,7 @@
 
 #include <VoxelForge/Engine.hpp>
 #include <VoxelForge/world/Block.hpp>
+#include <VoxelForge/world/ChunkPos.hpp>
 #include <VoxelForge/world/FluidTypes.hpp>
 #include <unordered_map>
 #include <unordered_set>
@@ -89,10 +90,10 @@ private:
         int ticksRemaining;
     };
 
-    // BlockPos hasher — reuses std::hash<glm::ivec3> defined in ChunkPos.hpp
+    // BlockPos hasher
     struct BlockPosHash {
         size_t operator()(const BlockPos& p) const {
-            return std::hash<glm::ivec3>()(p);
+            return std::hash<int>()(p.x) ^ (std::hash<int>()(p.y) << 1) ^ (std::hash<int>()(p.z) << 2);
         }
     };
 
