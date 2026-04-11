@@ -259,8 +259,8 @@ void BlockRegistry::registerVanillaBlocks() {
         .material = Material::Wood,
         .hardness = 2.0f,
         .blastResistance = 3.0f,
-        .requiredTool = ToolType::Axe,
         .flammable = true,
+        .requiredTool = ToolType::Axe,
         .sounds = BlockSoundGroup::WOOD
     });
     
@@ -286,8 +286,8 @@ void BlockRegistry::registerVanillaBlocks() {
         .material = Material::Water,
         .hardness = 100.0f,
         .blastResistance = 100.0f,
-        .opaque = false,
         .solid = false,
+        .opaque = false,
         .replaceable = true,
         .renderType = RenderType::Translucent,
         .collisionShape = VoxelShape::empty()
@@ -300,8 +300,8 @@ void BlockRegistry::registerVanillaBlocks() {
         .material = Material::Lava,
         .hardness = 100.0f,
         .blastResistance = 100.0f,
-        .opaque = false,
         .solid = false,
+        .opaque = false,
         .replaceable = true,
         .renderType = RenderType::Translucent,
         .lightEmission = 15,
@@ -383,10 +383,10 @@ void BlockRegistry::registerVanillaBlocks() {
         .material = Material::Wood,
         .hardness = 2.5f,
         .blastResistance = 2.5f,
-        .requiredTool = ToolType::Axe,
         .flammable = true,
-        .sounds = BlockSoundGroup::WOOD,
-        .hasBlockEntity = false
+        .hasBlockEntity = false,
+        .requiredTool = ToolType::Axe,
+        .sounds = BlockSoundGroup::WOOD
     });
     
     // Furnace
@@ -396,8 +396,8 @@ void BlockRegistry::registerVanillaBlocks() {
         .material = Material::Stone,
         .hardness = 3.5f,
         .blastResistance = 3.5f,
-        .requiredTool = ToolType::Pickaxe,
         .hasBlockEntity = true,
+        .requiredTool = ToolType::Pickaxe,
         .sounds = BlockSoundGroup::STONE
     });
     
@@ -421,8 +421,8 @@ void BlockRegistry::registerVanillaBlocks() {
         .material = Material::Decoration,
         .hardness = 0.0f,
         .blastResistance = 0.0f,
-        .opaque = false,
         .solid = false,
+        .opaque = false,
         .renderType = RenderType::Cutout,
         .lightEmission = 14,
         .collisionShape = VoxelShape::empty()
@@ -677,8 +677,8 @@ void BlockRegistry::registerVanillaBlocks() {
         .blastResistance = 3.0f,
         .requiredTool = ToolType::Pickaxe,
         .minimumTier = ToolTier::Iron,
-        .sounds = BlockSoundGroup::STONE,
-        .lightEmission = 7
+        .lightEmission = 7,
+        .sounds = BlockSoundGroup::STONE
     });
     
     // Deepslate Redstone Ore
@@ -690,8 +690,8 @@ void BlockRegistry::registerVanillaBlocks() {
         .blastResistance = 3.0f,
         .requiredTool = ToolType::Pickaxe,
         .minimumTier = ToolTier::Iron,
-        .sounds = BlockSoundGroup::STONE,
-        .lightEmission = 7
+        .lightEmission = 7,
+        .sounds = BlockSoundGroup::STONE
     });
     
     // Lapis Ore
@@ -815,8 +815,8 @@ void BlockRegistry::registerVanillaBlocks() {
         .blastResistance = 6.0f,
         .requiredTool = ToolType::Pickaxe,
         .minimumTier = ToolTier::Wood,
-        .sounds = BlockSoundGroup::METAL,
-        .lightEmission = 15
+        .lightEmission = 15,
+        .sounds = BlockSoundGroup::METAL
     });
     
     // ============================================
@@ -830,8 +830,8 @@ void BlockRegistry::registerVanillaBlocks() {
         .material = Material::Wood,
         .hardness = 2.0f,
         .blastResistance = 3.0f,
-        .requiredTool = ToolType::Axe,
         .flammable = true,
+        .requiredTool = ToolType::Axe,
         .sounds = BlockSoundGroup::WOOD
     });
     
@@ -842,8 +842,8 @@ void BlockRegistry::registerVanillaBlocks() {
         .material = Material::Wood,
         .hardness = 2.0f,
         .blastResistance = 3.0f,
-        .requiredTool = ToolType::Axe,
         .flammable = true,
+        .requiredTool = ToolType::Axe,
         .sounds = BlockSoundGroup::WOOD
     });
     
@@ -854,8 +854,8 @@ void BlockRegistry::registerVanillaBlocks() {
         .material = Material::Wood,
         .hardness = 2.0f,
         .blastResistance = 3.0f,
-        .requiredTool = ToolType::Axe,
         .flammable = true,
+        .requiredTool = ToolType::Axe,
         .sounds = BlockSoundGroup::WOOD
     });
     
@@ -866,8 +866,8 @@ void BlockRegistry::registerVanillaBlocks() {
         .material = Material::Wood,
         .hardness = 2.0f,
         .blastResistance = 3.0f,
-        .requiredTool = ToolType::Axe,
         .flammable = true,
+        .requiredTool = ToolType::Axe,
         .sounds = BlockSoundGroup::WOOD
     });
     
@@ -878,8 +878,8 @@ void BlockRegistry::registerVanillaBlocks() {
         .material = Material::Wood,
         .hardness = 2.0f,
         .blastResistance = 3.0f,
-        .requiredTool = ToolType::Axe,
         .flammable = true,
+        .requiredTool = ToolType::Axe,
         .sounds = BlockSoundGroup::WOOD
     });
     
@@ -890,8 +890,8 @@ void BlockRegistry::registerVanillaBlocks() {
         .material = Material::Wood,
         .hardness = 2.0f,
         .blastResistance = 3.0f,
-        .requiredTool = ToolType::Axe,
         .flammable = true,
+        .requiredTool = ToolType::Axe,
         .sounds = BlockSoundGroup::WOOD
     });
     
@@ -902,8 +902,8 @@ void BlockRegistry::registerVanillaBlocks() {
         .material = Material::Wood,
         .hardness = 2.0f,
         .blastResistance = 3.0f,
-        .requiredTool = ToolType::Axe,
         .flammable = true,
+        .requiredTool = ToolType::Axe,
         .sounds = BlockSoundGroup::WOOD
     });
     
@@ -914,8 +914,8 @@ void BlockRegistry::registerVanillaBlocks() {
         .material = Material::Wood,
         .hardness = 2.0f,
         .blastResistance = 3.0f,
-        .requiredTool = ToolType::Axe,
         .flammable = true,
+        .requiredTool = ToolType::Axe,
         .sounds = BlockSoundGroup::WOOD
     });
     
@@ -926,8 +926,8 @@ void BlockRegistry::registerVanillaBlocks() {
         .material = Material::NetherWood,
         .hardness = 2.0f,
         .blastResistance = 3.0f,
-        .requiredTool = ToolType::Axe,
         .flammable = false,
+        .requiredTool = ToolType::Axe,
         .sounds = BlockSoundGroup::WOOD
     });
     
@@ -938,8 +938,8 @@ void BlockRegistry::registerVanillaBlocks() {
         .material = Material::NetherWood,
         .hardness = 2.0f,
         .blastResistance = 3.0f,
-        .requiredTool = ToolType::Axe,
         .flammable = false,
+        .requiredTool = ToolType::Axe,
         .sounds = BlockSoundGroup::WOOD
     });
     
@@ -954,10 +954,10 @@ void BlockRegistry::registerVanillaBlocks() {
         .material = Material::Leaves,
         .hardness = 0.2f,
         .blastResistance = 0.2f,
+        .flammable = true,
         .opaque = false,
         .renderType = RenderType::CutoutMipped,
-        .sounds = BlockSoundGroup::GRASS,
-        .flammable = true
+        .sounds = BlockSoundGroup::GRASS
     });
     
     // Spruce Leaves
@@ -967,10 +967,10 @@ void BlockRegistry::registerVanillaBlocks() {
         .material = Material::Leaves,
         .hardness = 0.2f,
         .blastResistance = 0.2f,
+        .flammable = true,
         .opaque = false,
         .renderType = RenderType::CutoutMipped,
-        .sounds = BlockSoundGroup::GRASS,
-        .flammable = true
+        .sounds = BlockSoundGroup::GRASS
     });
     
     // Birch Leaves
@@ -980,10 +980,10 @@ void BlockRegistry::registerVanillaBlocks() {
         .material = Material::Leaves,
         .hardness = 0.2f,
         .blastResistance = 0.2f,
+        .flammable = true,
         .opaque = false,
         .renderType = RenderType::CutoutMipped,
-        .sounds = BlockSoundGroup::GRASS,
-        .flammable = true
+        .sounds = BlockSoundGroup::GRASS
     });
     
     // Jungle Leaves
@@ -993,10 +993,10 @@ void BlockRegistry::registerVanillaBlocks() {
         .material = Material::Leaves,
         .hardness = 0.2f,
         .blastResistance = 0.2f,
+        .flammable = true,
         .opaque = false,
         .renderType = RenderType::CutoutMipped,
-        .sounds = BlockSoundGroup::GRASS,
-        .flammable = true
+        .sounds = BlockSoundGroup::GRASS
     });
     
     // Acacia Leaves
@@ -1006,10 +1006,10 @@ void BlockRegistry::registerVanillaBlocks() {
         .material = Material::Leaves,
         .hardness = 0.2f,
         .blastResistance = 0.2f,
+        .flammable = true,
         .opaque = false,
         .renderType = RenderType::CutoutMipped,
-        .sounds = BlockSoundGroup::GRASS,
-        .flammable = true
+        .sounds = BlockSoundGroup::GRASS
     });
     
     // Dark Oak Leaves
@@ -1019,10 +1019,10 @@ void BlockRegistry::registerVanillaBlocks() {
         .material = Material::Leaves,
         .hardness = 0.2f,
         .blastResistance = 0.2f,
+        .flammable = true,
         .opaque = false,
         .renderType = RenderType::CutoutMipped,
-        .sounds = BlockSoundGroup::GRASS,
-        .flammable = true
+        .sounds = BlockSoundGroup::GRASS
     });
     
     // Mangrove Leaves
@@ -1032,10 +1032,10 @@ void BlockRegistry::registerVanillaBlocks() {
         .material = Material::Leaves,
         .hardness = 0.2f,
         .blastResistance = 0.2f,
+        .flammable = true,
         .opaque = false,
         .renderType = RenderType::CutoutMipped,
-        .sounds = BlockSoundGroup::GRASS,
-        .flammable = true
+        .sounds = BlockSoundGroup::GRASS
     });
     
     // Cherry Leaves
@@ -1045,10 +1045,10 @@ void BlockRegistry::registerVanillaBlocks() {
         .material = Material::Leaves,
         .hardness = 0.2f,
         .blastResistance = 0.2f,
+        .flammable = true,
         .opaque = false,
         .renderType = RenderType::CutoutMipped,
-        .sounds = BlockSoundGroup::GRASS,
-        .flammable = true
+        .sounds = BlockSoundGroup::GRASS
     });
     
     // ============================================
@@ -1231,8 +1231,8 @@ void BlockRegistry::registerVanillaBlocks() {
         .blastResistance = 0.3f,
         .opaque = false,
         .renderType = RenderType::Translucent,
-        .sounds = BlockSoundGroup::GLASS,
-        .lightEmission = 15
+        .lightEmission = 15,
+        .sounds = BlockSoundGroup::GLASS
     });
     
     // ============================================
@@ -1272,8 +1272,8 @@ void BlockRegistry::registerVanillaBlocks() {
         .blastResistance = 1200.0f,
         .requiredTool = ToolType::Pickaxe,
         .minimumTier = ToolTier::Diamond,
-        .sounds = BlockSoundGroup::STONE,
-        .lightEmission = 10
+        .lightEmission = 10,
+        .sounds = BlockSoundGroup::STONE
     });
     
     // End Portal Frame
@@ -1297,9 +1297,9 @@ void BlockRegistry::registerVanillaBlocks() {
         .material = Material::Wool,
         .hardness = 0.8f,
         .blastResistance = 0.8f,
+        .flammable = true,
         .requiredTool = ToolType::Shears,
-        .sounds = BlockSoundGroup::WOOL,
-        .flammable = true
+        .sounds = BlockSoundGroup::WOOL
     });
     
     // Orange Wool
@@ -1309,9 +1309,9 @@ void BlockRegistry::registerVanillaBlocks() {
         .material = Material::Wool,
         .hardness = 0.8f,
         .blastResistance = 0.8f,
+        .flammable = true,
         .requiredTool = ToolType::Shears,
-        .sounds = BlockSoundGroup::WOOL,
-        .flammable = true
+        .sounds = BlockSoundGroup::WOOL
     });
     
     // Magenta Wool
@@ -1321,9 +1321,9 @@ void BlockRegistry::registerVanillaBlocks() {
         .material = Material::Wool,
         .hardness = 0.8f,
         .blastResistance = 0.8f,
+        .flammable = true,
         .requiredTool = ToolType::Shears,
-        .sounds = BlockSoundGroup::WOOL,
-        .flammable = true
+        .sounds = BlockSoundGroup::WOOL
     });
     
     // Light Blue Wool
@@ -1333,9 +1333,9 @@ void BlockRegistry::registerVanillaBlocks() {
         .material = Material::Wool,
         .hardness = 0.8f,
         .blastResistance = 0.8f,
+        .flammable = true,
         .requiredTool = ToolType::Shears,
-        .sounds = BlockSoundGroup::WOOL,
-        .flammable = true
+        .sounds = BlockSoundGroup::WOOL
     });
     
     // Yellow Wool
@@ -1345,9 +1345,9 @@ void BlockRegistry::registerVanillaBlocks() {
         .material = Material::Wool,
         .hardness = 0.8f,
         .blastResistance = 0.8f,
+        .flammable = true,
         .requiredTool = ToolType::Shears,
-        .sounds = BlockSoundGroup::WOOL,
-        .flammable = true
+        .sounds = BlockSoundGroup::WOOL
     });
     
     // Lime Wool
@@ -1357,9 +1357,9 @@ void BlockRegistry::registerVanillaBlocks() {
         .material = Material::Wool,
         .hardness = 0.8f,
         .blastResistance = 0.8f,
+        .flammable = true,
         .requiredTool = ToolType::Shears,
-        .sounds = BlockSoundGroup::WOOL,
-        .flammable = true
+        .sounds = BlockSoundGroup::WOOL
     });
     
     // Pink Wool
@@ -1369,9 +1369,9 @@ void BlockRegistry::registerVanillaBlocks() {
         .material = Material::Wool,
         .hardness = 0.8f,
         .blastResistance = 0.8f,
+        .flammable = true,
         .requiredTool = ToolType::Shears,
-        .sounds = BlockSoundGroup::WOOL,
-        .flammable = true
+        .sounds = BlockSoundGroup::WOOL
     });
     
     // Gray Wool
@@ -1381,9 +1381,9 @@ void BlockRegistry::registerVanillaBlocks() {
         .material = Material::Wool,
         .hardness = 0.8f,
         .blastResistance = 0.8f,
+        .flammable = true,
         .requiredTool = ToolType::Shears,
-        .sounds = BlockSoundGroup::WOOL,
-        .flammable = true
+        .sounds = BlockSoundGroup::WOOL
     });
     
     // Light Gray Wool
@@ -1393,9 +1393,9 @@ void BlockRegistry::registerVanillaBlocks() {
         .material = Material::Wool,
         .hardness = 0.8f,
         .blastResistance = 0.8f,
+        .flammable = true,
         .requiredTool = ToolType::Shears,
-        .sounds = BlockSoundGroup::WOOL,
-        .flammable = true
+        .sounds = BlockSoundGroup::WOOL
     });
     
     // Cyan Wool
@@ -1405,9 +1405,9 @@ void BlockRegistry::registerVanillaBlocks() {
         .material = Material::Wool,
         .hardness = 0.8f,
         .blastResistance = 0.8f,
+        .flammable = true,
         .requiredTool = ToolType::Shears,
-        .sounds = BlockSoundGroup::WOOL,
-        .flammable = true
+        .sounds = BlockSoundGroup::WOOL
     });
     
     // Purple Wool
@@ -1417,9 +1417,9 @@ void BlockRegistry::registerVanillaBlocks() {
         .material = Material::Wool,
         .hardness = 0.8f,
         .blastResistance = 0.8f,
+        .flammable = true,
         .requiredTool = ToolType::Shears,
-        .sounds = BlockSoundGroup::WOOL,
-        .flammable = true
+        .sounds = BlockSoundGroup::WOOL
     });
     
     // Blue Wool
@@ -1429,9 +1429,9 @@ void BlockRegistry::registerVanillaBlocks() {
         .material = Material::Wool,
         .hardness = 0.8f,
         .blastResistance = 0.8f,
+        .flammable = true,
         .requiredTool = ToolType::Shears,
-        .sounds = BlockSoundGroup::WOOL,
-        .flammable = true
+        .sounds = BlockSoundGroup::WOOL
     });
     
     // Brown Wool
@@ -1441,9 +1441,9 @@ void BlockRegistry::registerVanillaBlocks() {
         .material = Material::Wool,
         .hardness = 0.8f,
         .blastResistance = 0.8f,
+        .flammable = true,
         .requiredTool = ToolType::Shears,
-        .sounds = BlockSoundGroup::WOOL,
-        .flammable = true
+        .sounds = BlockSoundGroup::WOOL
     });
     
     // Green Wool
@@ -1453,9 +1453,9 @@ void BlockRegistry::registerVanillaBlocks() {
         .material = Material::Wool,
         .hardness = 0.8f,
         .blastResistance = 0.8f,
+        .flammable = true,
         .requiredTool = ToolType::Shears,
-        .sounds = BlockSoundGroup::WOOL,
-        .flammable = true
+        .sounds = BlockSoundGroup::WOOL
     });
     
     // Red Wool
@@ -1465,9 +1465,9 @@ void BlockRegistry::registerVanillaBlocks() {
         .material = Material::Wool,
         .hardness = 0.8f,
         .blastResistance = 0.8f,
+        .flammable = true,
         .requiredTool = ToolType::Shears,
-        .sounds = BlockSoundGroup::WOOL,
-        .flammable = true
+        .sounds = BlockSoundGroup::WOOL
     });
     
     // Black Wool
@@ -1477,9 +1477,9 @@ void BlockRegistry::registerVanillaBlocks() {
         .material = Material::Wool,
         .hardness = 0.8f,
         .blastResistance = 0.8f,
+        .flammable = true,
         .requiredTool = ToolType::Shears,
-        .sounds = BlockSoundGroup::WOOL,
-        .flammable = true
+        .sounds = BlockSoundGroup::WOOL
     });
     
     // ============================================
@@ -1494,10 +1494,10 @@ void BlockRegistry::registerVanillaBlocks() {
         .hardness = 3.5f,
         .blastResistance = 3.5f,
         .opaque = false,
-        .renderType = RenderType::Cutout,
         .requiredTool = ToolType::Pickaxe,
-        .sounds = BlockSoundGroup::METAL,
-        .lightEmission = 15
+        .renderType = RenderType::Cutout,
+        .lightEmission = 15,
+        .sounds = BlockSoundGroup::METAL
     });
     
     // Soul Lantern
@@ -1508,10 +1508,10 @@ void BlockRegistry::registerVanillaBlocks() {
         .hardness = 3.5f,
         .blastResistance = 3.5f,
         .opaque = false,
-        .renderType = RenderType::Cutout,
         .requiredTool = ToolType::Pickaxe,
-        .sounds = BlockSoundGroup::METAL,
-        .lightEmission = 10
+        .renderType = RenderType::Cutout,
+        .lightEmission = 10,
+        .sounds = BlockSoundGroup::METAL
     });
     
     // Campfire
@@ -1523,8 +1523,8 @@ void BlockRegistry::registerVanillaBlocks() {
         .blastResistance = 2.0f,
         .opaque = false,
         .renderType = RenderType::Cutout,
-        .sounds = BlockSoundGroup::WOOD,
-        .lightEmission = 15
+        .lightEmission = 15,
+        .sounds = BlockSoundGroup::WOOD
     });
     
     // Sea Lantern
@@ -1536,8 +1536,8 @@ void BlockRegistry::registerVanillaBlocks() {
         .blastResistance = 0.3f,
         .opaque = false,
         .renderType = RenderType::Translucent,
-        .sounds = BlockSoundGroup::GLASS,
-        .lightEmission = 15
+        .lightEmission = 15,
+        .sounds = BlockSoundGroup::GLASS
     });
     
     // Jack o'Lantern
@@ -1547,8 +1547,8 @@ void BlockRegistry::registerVanillaBlocks() {
         .material = Material::Vegetable,
         .hardness = 1.0f,
         .blastResistance = 1.0f,
-        .sounds = BlockSoundGroup::WOOD,
-        .lightEmission = 15
+        .lightEmission = 15,
+        .sounds = BlockSoundGroup::WOOD
     });
     
     // Shroomlight
@@ -1560,8 +1560,8 @@ void BlockRegistry::registerVanillaBlocks() {
         .blastResistance = 1.0f,
         .opaque = false,
         .renderType = RenderType::Translucent,
-        .sounds = BlockSoundGroup::WOOD,
-        .lightEmission = 15
+        .lightEmission = 15,
+        .sounds = BlockSoundGroup::WOOD
     });
     
     // ============================================
@@ -1589,8 +1589,8 @@ void BlockRegistry::registerVanillaBlocks() {
         .blastResistance = 1200.0f,
         .requiredTool = ToolType::Pickaxe,
         .minimumTier = ToolTier::Wood,
-        .sounds = BlockSoundGroup::STONE,
-        .lightEmission = 7
+        .lightEmission = 7,
+        .sounds = BlockSoundGroup::STONE
     });
     
     // Brewing Stand
@@ -1602,7 +1602,7 @@ void BlockRegistry::registerVanillaBlocks() {
         .blastResistance = 0.5f,
         .opaque = false,
         .renderType = RenderType::Cutout,
-        .lightEmission = 1
+        .lightEmission = 1,
         .sounds = BlockSoundGroup::METAL
     });
     
@@ -1614,8 +1614,8 @@ void BlockRegistry::registerVanillaBlocks() {
         .hardness = 2.0f,
         .blastResistance = 2.0f,
         .opaque = false,
-        .renderType = RenderType::Cutout,
         .requiredTool = ToolType::Pickaxe,
+        .renderType = RenderType::Cutout,
         .sounds = BlockSoundGroup::METAL
     });
     
@@ -1627,8 +1627,8 @@ void BlockRegistry::registerVanillaBlocks() {
         .hardness = 5.0f,
         .blastResistance = 5.0f,
         .opaque = false,
-        .renderType = RenderType::Cutout,
         .requiredTool = ToolType::Pickaxe,
+        .renderType = RenderType::Cutout,
         .sounds = BlockSoundGroup::METAL
     });
     
