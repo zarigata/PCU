@@ -52,8 +52,8 @@ void LivingComponent::tickEffects() {
 
 namespace EntityFactory {
 
-Entity createPlayer(ECSWorld& world, const Vec3& position) {
-    Entity e = world.createEntity();
+EntityID createPlayer(ECSWorld& world, const Vec3& position) {
+    EntityID e = world.createEntity();
     
     // Base entity data
     auto& base = world.addComponent<EntityBaseComponent>(e);
@@ -85,8 +85,8 @@ Entity createPlayer(ECSWorld& world, const Vec3& position) {
     return e;
 }
 
-Entity createItem(ECSWorld& world, const Vec3& position, const ItemStack& stack) {
-    Entity e = world.createEntity();
+EntityID createItem(ECSWorld& world, const Vec3& position, const ItemStack& stack) {
+    EntityID e = world.createEntity();
     
     auto& base = world.addComponent<EntityBaseComponent>(e);
     base.uuid = UUID::generate();
@@ -110,8 +110,8 @@ Entity createItem(ECSWorld& world, const Vec3& position, const ItemStack& stack)
     return e;
 }
 
-Entity createZombie(ECSWorld& world, const Vec3& position) {
-    Entity e = world.createEntity();
+EntityID createZombie(ECSWorld& world, const Vec3& position) {
+    EntityID e = world.createEntity();
     
     auto& base = world.addComponent<EntityBaseComponent>(e);
     base.uuid = UUID::generate();
@@ -138,8 +138,8 @@ Entity createZombie(ECSWorld& world, const Vec3& position) {
     return e;
 }
 
-Entity createSkeleton(ECSWorld& world, const Vec3& position) {
-    Entity e = world.createEntity();
+EntityID createSkeleton(ECSWorld& world, const Vec3& position) {
+    EntityID e = world.createEntity();
     
     auto& base = world.addComponent<EntityBaseComponent>(e);
     base.uuid = UUID::generate();
@@ -166,8 +166,8 @@ Entity createSkeleton(ECSWorld& world, const Vec3& position) {
     return e;
 }
 
-Entity createCreeper(ECSWorld& world, const Vec3& position) {
-    Entity e = world.createEntity();
+EntityID createCreeper(ECSWorld& world, const Vec3& position) {
+    EntityID e = world.createEntity();
     
     auto& base = world.addComponent<EntityBaseComponent>(e);
     base.uuid = UUID::generate();
@@ -194,8 +194,8 @@ Entity createCreeper(ECSWorld& world, const Vec3& position) {
     return e;
 }
 
-Entity createCow(ECSWorld& world, const Vec3& position) {
-    Entity e = world.createEntity();
+EntityID createCow(ECSWorld& world, const Vec3& position) {
+    EntityID e = world.createEntity();
     
     auto& base = world.addComponent<EntityBaseComponent>(e);
     base.uuid = UUID::generate();
@@ -223,8 +223,8 @@ Entity createCow(ECSWorld& world, const Vec3& position) {
     return e;
 }
 
-Entity createPig(ECSWorld& world, const Vec3& position) {
-    Entity e = world.createEntity();
+EntityID createPig(ECSWorld& world, const Vec3& position) {
+    EntityID e = world.createEntity();
     
     auto& base = world.addComponent<EntityBaseComponent>(e);
     base.uuid = UUID::generate();
@@ -252,8 +252,8 @@ Entity createPig(ECSWorld& world, const Vec3& position) {
     return e;
 }
 
-Entity createSheep(ECSWorld& world, const Vec3& position) {
-    Entity e = world.createEntity();
+EntityID createSheep(ECSWorld& world, const Vec3& position) {
+    EntityID e = world.createEntity();
     
     auto& base = world.addComponent<EntityBaseComponent>(e);
     base.uuid = UUID::generate();
@@ -281,8 +281,8 @@ Entity createSheep(ECSWorld& world, const Vec3& position) {
     return e;
 }
 
-Entity createChicken(ECSWorld& world, const Vec3& position) {
-    Entity e = world.createEntity();
+EntityID createChicken(ECSWorld& world, const Vec3& position) {
+    EntityID e = world.createEntity();
     
     auto& base = world.addComponent<EntityBaseComponent>(e);
     base.uuid = UUID::generate();
@@ -310,8 +310,8 @@ Entity createChicken(ECSWorld& world, const Vec3& position) {
     return e;
 }
 
-Entity createArrow(ECSWorld& world, const Vec3& position, const Vec3& velocity, Entity owner) {
-    Entity e = world.createEntity();
+EntityID createArrow(ECSWorld& world, const Vec3& position, const Vec3& velocity, Entity owner) {
+    EntityID e = world.createEntity();
     
     auto& base = world.addComponent<EntityBaseComponent>(e);
     base.uuid = UUID::generate();
@@ -338,8 +338,8 @@ Entity createArrow(ECSWorld& world, const Vec3& position, const Vec3& velocity, 
     return e;
 }
 
-Entity createSnowball(ECSWorld& world, const Vec3& position, const Vec3& velocity, Entity owner) {
-    Entity e = world.createEntity();
+EntityID createSnowball(ECSWorld& world, const Vec3& position, const Vec3& velocity, Entity owner) {
+    EntityID e = world.createEntity();
     
     auto& base = world.addComponent<EntityBaseComponent>(e);
     base.uuid = UUID::generate();

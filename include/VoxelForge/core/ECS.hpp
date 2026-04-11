@@ -18,11 +18,58 @@
 #include <functional>
 #include <array>
 #include <cstdint>
-
-// Include Engine.hpp for common types used by components
-#include <VoxelForge/Engine.hpp>
+#include <string>
+#include <glm/glm.hpp>
 
 namespace VoxelForge {
+
+// Type aliases to avoid circular dependency with Engine.hpp
+using f32 = float;
+using u32 = uint32_t;
+using u64 = uint64_t;
+using String = std::string;
+using Vec3 = glm::vec3;
+using Mat4 = glm::mat4;
+
+// UUID struct (defined here to avoid circular dependency)
+struct UUID {
+    u64 high = 0;
+    u64 low = 0;
+    
+    UUID() = default;
+    UUID(u64 h, u64 l) : high(h), low(l) {}
+    
+    bool operator==(const UUID& other) const {
+        return high == other.high && low == other.low;
+    }
+    
+    bool operator!=(const UUID& other) const {
+        return !(*this == other);
+    }
+};
+
+// AABB (Axis-Aligned Bounding Box)
+struct AABB {
+    Vec3 min;
+    Vec3 max;
+    
+    AABB() = default;
+    AABB(const Vec3& min, const Vec3& max) : min(min), max(max) {}
+    AABB(f32 minX, f32 minY, f32 minZ, f32 maxX, f32 maxY, f32 maxZ)
+        : min(minX, minY, minZ), max(maxX, maxY, maxZ) {}
+    
+    bool contains(const Vec3& point) const {
+        return point.x >= min.x && point.x <= max.x &&
+               point.y >= min.y && point.y <= max.y &&
+               point.z >= min.z && point.z <= max.z;
+    }
+    
+    bool intersects(const AABB& other) const {
+        return min.x <= other.max.x && max.x >= other.min.x &&
+               min.y <= other.max.y && max.y >= other.min.y &&
+               min.z <= other.max.z && max.z >= other.min.z;
+    }
+};
 
 // Forward declaration
 class Entity;
