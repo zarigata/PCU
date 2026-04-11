@@ -8,6 +8,7 @@
 #include <VoxelForge/core/Input.hpp>
 #include <VoxelForge/core/Timer.hpp>
 #include <VoxelForge/world/Block.hpp>
+#include <VoxelForge/world/World.hpp>
 
 namespace VoxelForge {
 
@@ -190,6 +191,16 @@ bool Game::isDay() const {
 
 bool Game::isNight() const {
     return !isDay();
+}
+
+float Game::getDayTime() const {
+    if (!world) return 0.0f;
+    return world->getDayTime();
+}
+
+void Game::setDayTime(float time) {
+    if (!world) return;
+    world->setDayTime(time);
 }
 
     props.windowWidth = 1280;
