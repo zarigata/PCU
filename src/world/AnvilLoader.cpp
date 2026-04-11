@@ -74,17 +74,17 @@ std::unique_ptr<Chunk> AnvilLoader::loadChunk(const ChunkPos& pos) {
     std::vector<uint8_t> decompressedData;
     if (compressionType == 1) {
         // GZIP compression
-        decompressedData = Compression::decompressGzip(compressedData);
+        decompressedData = AnvilCompression::decompressGzip(compressedData);
     } else if (compressionType == 2) {
         // Zlib compression
-        decompressedData = Compression::decompressZlib(compressedData);
+        decompressedData = AnvilCompression::decompressZlib(compressedData);
     } else {
         VF_ERROR("Unknown compression type: {}", compressionType);
         return nullptr;
     }
     
     // Parse NBT
-    NBTCompound nbt = NBTCompound::parse(decompressedData.data(), decompressedData.size());
+    AnvilNBTCompound nbt = AnvilNBTCompound::parse(decompressedData.data(), decompressedData.size());
     
     // Create chunk from NBT
     return parseChunkNBT(nbt, pos);
@@ -98,7 +98,7 @@ bool AnvilLoader::saveChunk(const Chunk* chunk) {
     return false;
 }
 
-std::unique_ptr<Chunk> AnvilLoader::parseChunkNBT(const NBTCompound& nbt, const ChunkPos& pos) {
+std::unique_ptr<Chunk> AnvilLoader::parseChunkNBT(const AnvilNBTCompound& nbt, const ChunkPos& pos) {
     auto chunk = std::make_unique<Chunk>(pos);
     
     // Parse level data
@@ -131,7 +131,7 @@ std::unique_ptr<Chunk> AnvilLoader::parseChunkNBT(const NBTCompound& nbt, const 
     return chunk;
 }
 
-void AnvilLoader::parseSectionNBT(Chunk* chunk, const NBTCompound& sectionNbt) {
+void AnvilLoader::parseSectionNBT(Chunk* chunk, const AnvilNBTCompound& sectionNbt) {
     int sectionY = sectionNbt.getByte("Y");
     
     if (sectionY < 0 || sectionY >= SECTIONS_PER_CHUNK) return;

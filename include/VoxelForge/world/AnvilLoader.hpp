@@ -15,16 +15,16 @@
 namespace VoxelForge {
 
 /**
- * @brief NBT compound tag (simplified)
+ * @brief NBT compound tag (simplified for Anvil format)
  */
-class NBTCompound {
+class AnvilNBTCompound {
 public:
-    NBTCompound() = default;
-    static NBTCompound parse(const uint8_t* data, size_t size);
+    AnvilNBTCompound() = default;
+    static AnvilNBTCompound parse(const uint8_t* data, size_t size);
 
     bool has(const std::string& name) const;
-    const NBTCompound& getCompound(const std::string& name) const;
-    std::vector<NBTCompound> getList(const std::string& name) const;
+    const AnvilNBTCompound& getCompound(const std::string& name) const;
+    std::vector<AnvilNBTCompound> getList(const std::string& name) const;
     int8_t getByte(const std::string& name) const;
     int32_t getInt(const std::string& name) const;
     int64_t getLong(const std::string& name) const;
@@ -45,9 +45,9 @@ private:
 };
 
 /**
- * @brief Compression utilities
+ * @brief Compression utilities (simplified for Anvil format)
  */
-class Compression {
+class AnvilCompression {
 public:
     static std::vector<uint8_t> decompressGzip(const std::vector<uint8_t>& data);
     static std::vector<uint8_t> decompressZlib(const std::vector<uint8_t>& data);
@@ -80,10 +80,10 @@ private:
     std::string worldPath_;
 
     // Parse NBT into chunk data
-    std::unique_ptr<Chunk> parseChunkNBT(const NBTCompound& nbt, const ChunkPos& pos);
+    std::unique_ptr<Chunk> parseChunkNBT(const AnvilNBTCompound& nbt, const ChunkPos& pos);
 
     // Parse section NBT
-    void parseSectionNBT(Chunk* chunk, const NBTCompound& sectionNbt);
+    void parseSectionNBT(Chunk* chunk, const AnvilNBTCompound& sectionNbt);
 };
 
 } // namespace VoxelForge
