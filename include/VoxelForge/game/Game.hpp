@@ -57,8 +57,8 @@ public:
     void setGameMode(GameMode mode) { gameMode = mode; }
 
     // Day/Night cycle management
-    float getDayTime() const { return settings.dayTime; }
-    void setDayTime(float time) { settings.dayTime = time; }
+    float getDayTime() const { return world ? world->getDayTime() : 0.0f; }
+    void setDayTime(float time) { if (world) world->setDayTime(time); }
     
     bool isDay() const;  // Returns true during day phase
     bool isNight() const;  // Returns true during night phase

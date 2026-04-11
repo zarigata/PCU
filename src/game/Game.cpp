@@ -131,10 +131,13 @@ void Game::updateWorld(float deltaTime) {
 }
 
 float Game::getDayProgress() const {
+    if (!world) return 0.0f;
+    
     // Calculate progress through current day (0.0 = dawn, 1.0 = full day)
     // Based on SkyRenderer's time of day: Dawn=0-6000, Day=6000-12000, Dusk=12000-18000, Night=18000-24000
     // Normalize to 0.0-1.0 range
-    float normalizedTime = std::fmod(settings.dayTime, 24000.0f) / 24000.0f;
+    float dayTime = world->getDayTime();
+    float normalizedTime = std::fmod(dayTime, 24000.0f) / 24000.0f;
     
     // Map phases to progress:
     // 0.0 - 0.25: Dawn
@@ -154,30 +157,35 @@ float Game::getDayProgress() const {
 }
 
 void Game::advanceDayNightCycle() {
+    if (!world) return;
+    
     // Advance to next day/night phase by adding one cycle duration
-    settings.dayTime += settings.dayNightCycleDuration;
+    float dayTime = world->getDayTime() + settings.dayNightCycleDuration;
+    
     // Normalize to keep within 0-24000 range
-    while (settings.dayTime >= 24000.0f) {
-        settings.dayTime -= 24000.0f;
+    while (dayTime >= 24000.0f) {
+        dayTime -= 24000.0f;
     }
+    
+    world->setDayTime(dayTime);
+    
     // Cycle: Day -> Night -> Day...
-    VF_INFO("Day/Night cycle advanced: new time = {}", settings.dayTime);
+    VF_INFO("Day/Night cycle advanced: new time = {}", dayTime);
 }
 
 void Game::resetDayNightCycle() {
+    if (!world) return;
+    
     // Reset to dawn (start of day)
-    settings.dayTime = 0.0f;
+    world->setDayTime(0.0f);
     VF_INFO("Day/Night cycle reset to dawn");
 }
 
 bool Game::isDay() const {
-    // Dawn = 0-6000 ticks, Day = 6000-18000 ticks
-    // Night = 18000-24000 ticks
-    float time = settings.dayTime;
-    if (time >= 0 && time < 18000) {
-        return true;
-    }
-    return false;
+    if (!world) return true; // Default to day if no world
+    
+    // Use world's isDay() method
+    return world->isDay();
 }
 
 bool Game::isNight() const {
