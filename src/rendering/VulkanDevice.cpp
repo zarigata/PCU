@@ -22,7 +22,7 @@ void VulkanDevice::init(vk::Instance instance, vk::SurfaceKHR surface) {
     pickPhysicalDevice();
     createLogicalDevice();
     
-    Logger::info("VulkanDevice initialized: {}", properties.deviceName);
+    VF_INFO("VulkanDevice initialized: {}", properties.deviceName);
 }
 
 void VulkanDevice::cleanup() {
@@ -88,7 +88,7 @@ void VulkanDevice::pickPhysicalDevice() {
     properties = physicalDevice.getProperties();
     memoryProperties = physicalDevice.getMemoryProperties();
     
-    Logger::info("Selected GPU: {}", properties.deviceName);
+    VF_INFO("Selected GPU: {}", properties.deviceName);
 }
 
 void VulkanDevice::createLogicalDevice() {
@@ -160,7 +160,7 @@ void VulkanDevice::createLogicalDevice() {
     descriptorIndexing.runtimeDescriptorArray = VK_TRUE;
     
     if (properties.apiVersion >= VK_API_VERSION_1_2) {
-        descriptorIndexing.pNext = createInfo.pNext;
+        descriptorIndexing.pNext = const_cast<void*>(createInfo.pNext);
         createInfo.pNext = &descriptorIndexing;
     }
     
@@ -188,7 +188,7 @@ void VulkanDevice::createLogicalDevice() {
     
     enabledFeatures = features;
     
-    Logger::debug("Logical device created with {} queue families", 
+    VF_DEBUG("Logical device created with {} queue families", 
                   queueIndices.uniqueFamilies().size());
 }
 

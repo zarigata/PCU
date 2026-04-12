@@ -3,7 +3,7 @@
  * @brief Vulkan swapchain management implementation
  */
 
-#include "VulkanSwapchain.hpp"
+#include <VoxelForge/rendering/VulkanSwapchain.hpp>
 #include <VoxelForge/rendering/VulkanDevice.hpp>
 #include <VoxelForge/core/Logger.hpp>
 #include <algorithm>

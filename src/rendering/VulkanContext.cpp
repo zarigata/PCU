@@ -144,6 +144,30 @@ void VulkanContext::setupDebugMessenger() {
     }
 }
 
+static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
+    VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+    VkDebugUtilsMessageTypeFlagsEXT messageType,
+    const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
+    void* pUserData) {
+    switch (messageSeverity) {
+        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
+            VF_TRACE("Vulkan Validation: {}", pCallbackData->pMessage);
+            break;
+        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
+            VF_INFO("Vulkan Validation: {}", pCallbackData->pMessage);
+            break;
+        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
+            VF_WARN("Vulkan Validation: {}", pCallbackData->pMessage);
+            break;
+        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
+            VF_ERROR("Vulkan Validation: {}", pCallbackData->pMessage);
+            break;
+        default:
+            VF_INFO("Vulkan Validation: {}", pCallbackData->pMessage);
+    }
+    return VK_FALSE;
+}
+
 void VulkanContext::populateDebugMessengerCreateInfo(vk::DebugUtilsMessengerCreateInfoEXT& createInfo) {
     createInfo.sType = vk::StructureType::eDebugUtilsMessengerCreateInfoEXT;
     createInfo.messageSeverity = 
@@ -154,28 +178,7 @@ void VulkanContext::populateDebugMessengerCreateInfo(vk::DebugUtilsMessengerCrea
         vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral |
         vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation |
         vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance;
-    createInfo.pfnUserCallback = [](VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-                                     VkDebugUtilsMessageTypeFlagsEXT messageType,
-                                     const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
-                                     void* pUserData) -> VKAPI_ATTR VkBool32 {
-        switch (messageSeverity) {
-            case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
-                VF_TRACE("Vulkan Validation: {}", pCallbackData->pMessage);
-                break;
-            case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
-                VF_INFO("Vulkan Validation: {}", pCallbackData->pMessage);
-                break;
-            case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
-                VF_WARN("Vulkan Validation: {}", pCallbackData->pMessage);
-                break;
-            case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
-                VF_ERROR("Vulkan Validation: {}", pCallbackData->pMessage);
-                break;
-            default:
-                VF_INFO("Vulkan Validation: {}", pCallbackData->pMessage);
-        }
-        return VK_FALSE;
-    };
+    createInfo.pfnUserCallback = debugCallback;
     createInfo.pUserData = nullptr;
 }
 
