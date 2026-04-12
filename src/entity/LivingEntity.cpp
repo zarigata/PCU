@@ -4,6 +4,7 @@
  */
 
 #include <VoxelForge/entity/Entity.hpp>
+#include <VoxelForge/entity/Player.hpp>
 #include <VoxelForge/core/Logger.hpp>
 
 namespace VoxelForge {

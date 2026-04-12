@@ -8,6 +8,7 @@
 #include <string>
 
 #include <VoxelForge/game/Item.hpp>
+#include <VoxelForge/world/Block.hpp>
 #include <array>
 #include <functional>
 #include <optional>
@@ -132,6 +133,35 @@ public:
     // Armor stats
     int getTotalArmor() const;
     float getTotalArmorToughness() const;
+
+    // Tool check
+    bool hasTool(ToolType toolType) const {
+        // Check selected (hotbar) slot first, then all slots
+        const ItemStack& selected = getSelectedStack();
+        if (toolMatches(selected, toolType)) return true;
+        for (SlotIndex i = HOTBAR_START; i <= MAIN_END; ++i) {
+            if (toolMatches(getSlot(i), toolType)) return true;
+        }
+        return false;
+    }
+
+private:
+    static bool toolMatches(const ItemStack& stack, ToolType toolType) {
+        if (stack.isEmpty()) return false;
+        const ItemDefinition* def = ItemRegistry::get().getDefinition(stack.getItem());
+        if (!def || !def->toolProperties.has_value()) return false;
+        auto toolPropType = def->toolProperties->type;
+        // Map ToolProperties::Type to ToolType
+        switch (toolPropType) {
+            case ToolProperties::Type::Pickaxe: return toolType == ToolType::Pickaxe;
+            case ToolProperties::Type::Axe:      return toolType == ToolType::Axe;
+            case ToolProperties::Type::Shovel:   return toolType == ToolType::Shovel;
+            case ToolProperties::Type::Hoe:      return toolType == ToolType::Hoe;
+            case ToolProperties::Type::Sword:    return toolType == ToolType::Sword;
+            case ToolProperties::Type::Shears:   return toolType == ToolType::Shears;
+            default: return false;
+        }
+    }
     
 private:
     SlotIndex selectedSlot = 0;

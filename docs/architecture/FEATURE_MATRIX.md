@@ -541,16 +541,16 @@
 
 | Feature | Status | Priority | Notes |
 |---------|--------|----------|-------|
-| Attack cooldown | 📋 | Critical | 1.9+ combat |
+| Attack cooldown | 🔄 | Critical | 1.9+ combat |
 | Sweep attacks | 📋 | Medium | Sword AoE |
-| Critical hits | 📋 | High | Jump attacks |
+| Critical hits | 🔄 | High | Jump attacks |
 | Knockback | 📋 | High | Pushback |
 | Blocking | 📋 | High | Shield mechanics |
 | Parrying | 📋 | Low | Perfect blocks |
-| Armor reduction | 📋 | Critical | Damage mitigation |
+| Armor reduction | 🔄 | Critical | Damage mitigation |
 | Enchantment effects | 📋 | High | Combat enchants |
 | Damage types | 📋 | High | Multiple types |
-| Invulnerability frames | 📋 | High | Post-damage |
+| Invulnerability frames | 🔄 | High | Post-damage |
 
 ### 5.2 Mining & Gathering
 
