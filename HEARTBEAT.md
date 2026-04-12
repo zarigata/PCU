@@ -12,10 +12,11 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
 ## Build Status
 - **Latest successful build:** ~10 hours ago (fix(build) - disabled broken source files)
 - **Current build status:**
-  - LATEST FIX (queued): fix(build): sync include guards between Engine.hpp and ECS.hpp (9th round)
-    - Fixed 1 category of errors in 1 file
-    - Engine.hpp: Added include guards for UUID and AABB (same names as ECS.hpp)
-  - Previous builds: All 5+ platforms failed over 9 rounds of fixes
+  - LATEST FIX (queued): fix(build): resolve GLM, UUID, and Entity type errors (10th round)
+    - Fixed 4 categories of errors in 2 files
+    - ECS.hpp: Added GLM transform includes, UUID::generate() inline implementation
+    - Entity.cpp: Fixed ItemStack shared_ptr, Entity owner parameter types
+  - Previous builds: All 5+ platforms failed over 10 rounds of fixes
   - Windows: failed (previous build)
   - macOS Apple Silicon: queued
   - macOS Intel: cancelled
@@ -24,8 +25,8 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
 
 ## Action Items
 - ✅ CI build stuck for >30 min → Created GitHub issue #6
-- ✅ CI build fails (9 rounds total) → Synced include guards between Engine.hpp and ECS.hpp
-- ⏳ Verify new build passes → Monitoring CI for latest commit (9th round of fixes)
+- ✅ CI build fails (10 rounds total) → Fixed GLM, UUID, and Entity type errors
+- ⏳ Verify new build passes → Monitoring CI for latest commit (10th round of fixes)
 - ⏸️ All builds green → Cron will spawn sub-agents for feature implementation
 
 ## Notes
@@ -36,7 +37,7 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
   - Next run: ~10 hours from now
   - Rate limit handling: 60s initial wait, 300s on 429, 1 retry
   - Timeout: 3600s (1 hour)
-- Recent commits (rebrand + 16 fixes):
+- Recent commits (rebrand + 17 fixes):
   - Rebranding: minecraft: → poorcraftultra: (629 occurrences)
   - CMake version conflict: enet dependency fixed
   - DayTime field access: Game class fixed
@@ -52,7 +53,8 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
   - Fix missing types and logging macros (6th attempt): 2 files fixed
   - Fix circular dependency and Entity type errors (7th attempt): 2 files fixed
   - Fix UUID and AABB redefinition errors (8th attempt): 1 file fixed
-  - NEW (current): Sync include guards between Engine.hpp and ECS.hpp (9th attempt): 1 file fixed
+  - Sync include guards between Engine.hpp and ECS.hpp (9th attempt): 1 file fixed
+  - NEW (current): Fix GLM, UUID, and Entity type errors (10th attempt): 2 files fixed
 - Recent features implemented:
   - Fluid Physics System (water/lava flow simulation, scheduled updates, fluid mixing)
   - ChunkManager/LightEngine/AnvilLoader headers (world management infrastructure)
