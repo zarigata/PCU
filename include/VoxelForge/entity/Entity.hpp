@@ -14,6 +14,7 @@ namespace VoxelForge {
 
 // Forward declarations
 struct ItemStack;
+struct InventoryComponent;
 
 // EntityID types
 enum class EntityType : uint8_t {
@@ -203,9 +204,20 @@ public:
 
 class ProjectileSystem {
 public:
+    ProjectileSystem();
     void update(ECSWorld& world, float deltaTime);
     void onHitBlock(ECSWorld& world, EntityID entity, ProjectileComponent& projectile, const BlockPos& pos);
     void onHitEntity(ECSWorld& world, EntityID projectileEntity, ProjectileComponent& projectile, EntityID target, LivingComponent& targetLiving);
+};
+
+class ItemEntitySystem {
+public:
+    ItemEntitySystem();
+    void update(ECSWorld& world, float deltaTime);
+    bool canPickup(const ItemEntityComponent& item, EntityID player);
+    void onPickup(ECSWorld& world, EntityID itemEntity, ItemEntityComponent& item, EntityID player);
+    int addToInventory(InventoryComponent& inventory, ItemStack& stack);
+    void mergeItems(ECSWorld& world, EntityID entity1, ItemEntityComponent& item1, EntityID entity2, ItemEntityComponent& item2);
 };
 
 // EntityID creation helpers

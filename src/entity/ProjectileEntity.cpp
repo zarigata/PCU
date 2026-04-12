@@ -52,7 +52,7 @@ void ProjectileSystem::onHitEntity(ECSWorld& world, EntityID projectileEntity, P
     // Apply damage
     targetLiving.health -= projectile.damage;
     
-    VF_DEBUG("Projectile {} hit entity {} for {} damage", 
+    VF_INFO("Projectile {} hit entity {} for {} damage", 
               projectileEntity, target, projectile.damage);
     
     // Handle piercing
