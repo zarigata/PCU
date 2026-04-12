@@ -226,7 +226,7 @@ void SyncManager::init(vk::Device device, uint32_t frameCount) {
         sync.init(device);
     }
     
-    Logger::debug("SyncManager initialized with {} frames", frameCount);
+    VF_TRACE("SyncManager initialized with {} frames", frameCount);
 }
 
 void SyncManager::cleanup() {
@@ -269,12 +269,14 @@ vk::SubmitInfo SyncManager::getSubmitInfo(
     
     vk::SubmitInfo submitInfo{};
     submitInfo.waitSemaphoreCount = 1;
-    submitInfo.pWaitSemaphores = &sync.imageAvailable.get();
+    vk::Semaphore waitSem = sync.imageAvailable.get();
+    submitInfo.pWaitSemaphores = &waitSem;
     submitInfo.pWaitDstStageMask = &waitStage;
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = &cmd;
     submitInfo.signalSemaphoreCount = 1;
-    submitInfo.pSignalSemaphores = &sync.renderFinished.get();
+    vk::Semaphore signalSem = sync.renderFinished.get();
+    submitInfo.pSignalSemaphores = &signalSem;
     
     return submitInfo;
 }
@@ -284,7 +286,8 @@ vk::PresentInfoKHR SyncManager::getPresentInfo(vk::SwapchainKHR swapchain, uint3
     
     vk::PresentInfoKHR presentInfo{};
     presentInfo.waitSemaphoreCount = 1;
-    presentInfo.pWaitSemaphores = &sync.renderFinished.get();
+    vk::Semaphore waitSem = sync.renderFinished.get();
+    presentInfo.pWaitSemaphores = &waitSem;
     presentInfo.swapchainCount = 1;
     presentInfo.pSwapchains = &swapchain;
     presentInfo.pImageIndices = &imageIndex;

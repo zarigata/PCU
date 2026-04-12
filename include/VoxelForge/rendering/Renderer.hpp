@@ -101,6 +101,10 @@ private:
     void createFramebuffers();
     void createCommandBuffers();
     void createSyncObjects();
+    void recreateSwapChain();
+    vk::SurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<vk::SurfaceFormatKHR>& availableFormats);
+    vk::PresentModeKHR chooseSwapPresentMode(const std::vector<vk::PresentModeKHR>& availablePresentModes);
+    vk::Extent2D chooseSwapExtent(const vk::SurfaceCapabilitiesKHR& capabilities);
     
     void renderChunks(World* world, Camera* camera);
     void renderEntities(World* world, Camera* camera);
@@ -118,6 +122,12 @@ private:
     std::vector<vk::Framebuffer> framebuffers;
     vk::Format swapchainFormat;
     vk::Extent2D swapchainExtent;
+    uint32_t currentImageIndex = 0;
+    
+    // Depth buffer
+    vk::Image depthImage;
+    vk::DeviceMemory depthImageMemory;
+    vk::ImageView depthImageView;
     
     // Render pass
     vk::RenderPass renderPass;

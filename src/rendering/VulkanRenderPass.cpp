@@ -350,7 +350,7 @@ void VulkanRenderPass::init(vk::Device device, vk::RenderPass renderPass) {
 void VulkanRenderPass::init(vk::Device device, const VulkanRenderPassBuilder& builder) {
     this->device = device;
     renderPass = builder.build(device);
-    attachmentCount = static_cast<uint32_t>(builder.attachments.size());
+    attachmentCount = builder.getAttachmentCount();
 }
 
 void VulkanRenderPass::cleanup() {

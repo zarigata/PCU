@@ -55,7 +55,7 @@ Renderer::~Renderer() {
 }
 
 void Renderer::init(GLFWwindow* window) {
-    PROFILE_FUNCTION();
+    VF_PROFILE_FUNCTION();
     
     VF_INFO("Initializing renderer...");
     
@@ -139,7 +139,7 @@ void Renderer::shutdown() {
 }
 
 void Renderer::createSwapChain() {
-    PROFILE_FUNCTION();
+    VF_PROFILE_FUNCTION();
     
     auto support = context->querySwapChainSupport();
     
@@ -234,7 +234,7 @@ void Renderer::createSwapChain() {
 }
 
 void Renderer::createRenderPass() {
-    PROFILE_FUNCTION();
+    VF_PROFILE_FUNCTION();
     
     // Color attachment
     vk::AttachmentDescription colorAttachment{};
@@ -313,7 +313,7 @@ void Renderer::createRenderPass() {
 }
 
 void Renderer::createFramebuffers() {
-    PROFILE_FUNCTION();
+    VF_PROFILE_FUNCTION();
     
     framebuffers.resize(swapchainImageViews.size());
     
@@ -343,7 +343,7 @@ void Renderer::createFramebuffers() {
 }
 
 void Renderer::createCommandBuffers() {
-    PROFILE_FUNCTION();
+    VF_PROFILE_FUNCTION();
     
     // Create command pool
     auto indices = context->getQueueFamilies();
@@ -378,7 +378,7 @@ void Renderer::createCommandBuffers() {
 }
 
 void Renderer::createSyncObjects() {
-    PROFILE_FUNCTION();
+    VF_PROFILE_FUNCTION();
     
     imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
     renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
@@ -405,7 +405,7 @@ void Renderer::createSyncObjects() {
 }
 
 void Renderer::beginFrame() {
-    PROFILE_FUNCTION();
+    VF_PROFILE_FUNCTION();
     
     // Wait for previous frame
     auto result = context->getDevice().waitForFences(
@@ -466,7 +466,7 @@ void Renderer::beginFrame() {
 }
 
 void Renderer::endFrame() {
-    PROFILE_FUNCTION();
+    VF_PROFILE_FUNCTION();
     
     // End render pass
     commandBuffers[currentImageIndex].endRenderPass();
@@ -499,6 +499,7 @@ void Renderer::endFrame() {
     }
     
     // Present
+    vk::Result result;
     vk::PresentInfoKHR presentInfo{};
     presentInfo.sType = vk::StructureType::ePresentInfoKHR;
     presentInfo.waitSemaphoreCount = 1;
@@ -521,7 +522,7 @@ void Renderer::endFrame() {
 }
 
 void Renderer::render(World* world, Camera* camera) {
-    PROFILE_FUNCTION();
+    VF_PROFILE_FUNCTION();
     
     if (!world || !camera) {
         VF_WARN("Render called with null world or camera");
@@ -545,7 +546,7 @@ void Renderer::render(World* world, Camera* camera) {
 }
 
 void Renderer::renderChunks(World* world, Camera* camera) {
-    PROFILE_FUNCTION();
+    VF_PROFILE_FUNCTION();
     
     // TODO: Implement chunk rendering
     // For now, just update stats
@@ -554,27 +555,27 @@ void Renderer::renderChunks(World* world, Camera* camera) {
 }
 
 void Renderer::renderEntities(World* world, Camera* camera) {
-    PROFILE_FUNCTION();
+    VF_PROFILE_FUNCTION();
     
     // TODO: Implement entity rendering
     stats.entityDrawCalls = 0;
 }
 
 void Renderer::renderParticles(World* world, Camera* camera) {
-    PROFILE_FUNCTION();
+    VF_PROFILE_FUNCTION();
     
     // TODO: Implement particle rendering
     stats.particlesDrawCalls = 0;
 }
 
 void Renderer::renderUI() {
-    PROFILE_FUNCTION();
+    VF_PROFILE_FUNCTION();
     
     // TODO: Implement UI rendering
 }
 
 void Renderer::renderPostProcess() {
-    PROFILE_FUNCTION();
+    VF_PROFILE_FUNCTION();
     
     // TODO: Implement post-processing (bloom, TAA, FXAA)
 }
@@ -593,7 +594,7 @@ void Renderer::onResize(int newWidth, int newHeight) {
 }
 
 void Renderer::recreateSwapChain() {
-    PROFILE_FUNCTION();
+    VF_PROFILE_FUNCTION();
     
     // Wait if minimized
     while (width == 0 || height == 0) {
@@ -621,7 +622,7 @@ void Renderer::recreateSwapChain() {
 }
 
 void Renderer::takeScreenshot(const std::string& path) {
-    PROFILE_FUNCTION();
+    VF_PROFILE_FUNCTION();
     
     VF_INFO("Taking screenshot: {}", path);
     
@@ -635,7 +636,7 @@ void Renderer::takeScreenshot(const std::string& path) {
 }
 
 void Renderer::reloadShaders() {
-    PROFILE_FUNCTION();
+    VF_PROFILE_FUNCTION();
     
     VF_INFO("Reloading shaders...");
     
