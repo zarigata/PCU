@@ -75,7 +75,7 @@ int ItemEntitySystem::addToInventory(PlayerInventory& inventory, ItemStack& stac
         ItemStack& slot = inventory.getSlot(i);
         if (!slot.isEmpty() && slot.getItem() == stack.getItem() && slot.getCount() < 64) {
             int space = 64 - slot.getCount();
-            int toAdd = std::min(space, stack.getCount());
+            int toAdd = std::min(space, static_cast<int>(stack.getCount()));
             slot.add(toAdd);
             stack.remove(toAdd);
             
@@ -101,7 +101,7 @@ void ItemEntitySystem::mergeItems(ECSWorld& world, EntityID entity1, ItemEntityC
     // Merge item2 into item1 if same type
     if (item1.stack->getItem() == item2.stack->getItem()) {
         int space = 64 - item1.stack->getCount();
-        int toMerge = std::min(space, item2.stack->getCount());
+        int toMerge = std::min(space, static_cast<int>(item2.stack->getCount()));
         item1.stack->add(toMerge);
         item2.stack->remove(toMerge);
         
