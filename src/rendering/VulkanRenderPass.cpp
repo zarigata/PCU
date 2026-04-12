@@ -213,7 +213,7 @@ VulkanRenderPassBuilder& VulkanRenderPassBuilder::forUI(vk::Format colorFormat) 
     return *this;
 }
 
-vk::RenderPass VulkanRenderPassBuilder::build(vk::Device device) {
+vk::RenderPass VulkanRenderPassBuilder::build(vk::Device device) const {
     // Convert attachments
     std::vector<vk::AttachmentDescription> vkAttachments;
     for (const auto& att : attachments) {
