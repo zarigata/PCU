@@ -7,8 +7,9 @@
 
 #include <vulkan/vulkan.hpp>
 #include <VoxelForge/rendering/VulkanBuffer.hpp>
-#include <VoxelForge/rendering/VulkanPipeline.hpp>
-#include <VoxelForge/rendering/VulkanDescriptor.hpp>
+// TODO: VulkanPipeline.hpp and VulkanDescriptor.hpp need to be implemented
+// #include <VoxelForge/rendering/VulkanPipeline.hpp>
+// #include <VoxelForge/rendering/VulkanDescriptor.hpp>
 #include <VoxelForge/rendering/Camera.hpp>
 #include <glm/glm.hpp>
 #include <memory>
@@ -17,7 +18,10 @@
 
 namespace VoxelForge {
 
+// Forward declarations for incomplete rendering classes
 class VulkanDevice;
+// class VulkanPipeline; // TODO: Implement VulkanPipeline
+// class VulkanDescriptorSetLayout; // TODO: Implement VulkanDescriptor
 class VulkanCommandBuffer;
 class World;
 class Chunk;
@@ -141,7 +145,7 @@ private:
     // Pipeline
     vk::Pipeline pipeline;
     vk::PipelineLayout pipelineLayout;
-    std::unique_ptr<VulkanDescriptorSetLayout> descriptorLayout;
+    // std::unique_ptr<VulkanDescriptorSetLayout> descriptorLayout; // TODO: Implement VulkanDescriptor
     std::vector<vk::DescriptorSet> descriptorSets;
     
     // Uniform buffers

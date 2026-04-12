@@ -71,47 +71,16 @@ void ChunkRenderer::cleanup() {
         pipelineLayout = nullptr;
     }
     
-    descriptorLayout.reset();
+    // descriptorLayout.reset(); // TODO: Implement VulkanDescriptor
     stagingBuffer.reset();
     device = nullptr;
 }
 
 void ChunkRenderer::createDescriptorSets() {
-    // Create descriptor set layout
-    VulkanDescriptorSetLayoutBuilder builder;
-    builder.addBinding(0, vk::DescriptorType::eUniformBuffer, 
-                       vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment, 1);
-    builder.addBinding(1, vk::DescriptorType::eCombinedImageSampler,
-                       vk::ShaderStageFlagBits::eFragment, 1);
-    
-    descriptorLayout = std::make_unique<VulkanDescriptorSetLayout>();
-    descriptorLayout->init(device->getDevice(), builder);
-    
-    // Create descriptor pool
-    vk::DescriptorPoolSize poolSizes[] = {
-        {vk::DescriptorType::eUniformBuffer, frameCount},
-        {vk::DescriptorType::eCombinedImageSampler, frameCount}
-    };
-    
-    vk::DescriptorPoolCreateInfo poolInfo{};
-    poolInfo.poolSizeCount = 2;
-    poolInfo.pPoolSizes = poolSizes;
-    poolInfo.maxSets = frameCount;
-    
-    auto pool = device->getDevice().createDescriptorPool(poolInfo);
-    
-    // Allocate descriptor sets
-    vk::DescriptorSetAllocateInfo allocInfo{};
-    allocInfo.descriptorPool = pool;
-    allocInfo.descriptorSetCount = 1;
-    allocInfo.pSetLayouts = &descriptorLayout->getLayout();
-    
+    // TODO: Implement VulkanDescriptorSetLayout and VulkanDescriptorPool
+    VF_WARN("createDescriptorSets: Not implemented - VulkanDescriptor classes missing");
+    // Stub implementation to allow compilation
     descriptorSets.resize(frameCount);
-    for (uint32_t i = 0; i < frameCount; i++) {
-        descriptorSets[i] = device->getDevice().allocateDescriptorSets(allocInfo)[0];
-    }
-    
-    device->getDevice().destroyDescriptorPool(pool);
 }
 
 void ChunkRenderer::createUniformBuffers() {
@@ -128,11 +97,12 @@ void ChunkRenderer::createUniformBuffers() {
 }
 
 void ChunkRenderer::createPipeline() {
-    // Create pipeline layout
+    // TODO: Implement VulkanPipelineBuilder and VulkanPipeline
+    VF_WARN("createPipeline: Not implemented - VulkanPipeline classes missing");
+    
+    // Create basic pipeline layout (without descriptor sets for now)
     vk::PipelineLayoutCreateInfo layoutInfo{};
-    layoutInfo.setLayoutCount = 1;
-    auto layout = descriptorLayout->getLayout();
-    layoutInfo.pSetLayouts = &layout;
+    layoutInfo.setLayoutCount = 0;
     
     // Push constants
     vk::PushConstantRange pushRange{};
@@ -144,31 +114,6 @@ void ChunkRenderer::createPipeline() {
     layoutInfo.pPushConstantRanges = &pushRange;
     
     pipelineLayout = device->getDevice().createPipelineLayout(layoutInfo);
-    
-    // Create pipeline using builder
-    VulkanPipelineBuilder builder(device);
-    
-    builder.setVertexInput(
-        {ChunkVertex::getBindingDescription()},
-        ChunkVertex::getAttributeDescriptions()
-    );
-    
-    builder.addShaderStage(vk::ShaderStageFlagBits::eVertex, "chunk.vert");
-    builder.addShaderStage(vk::ShaderStageFlagBits::eFragment, "chunk.frag");
-    
-    builder.setInputAssembly(vk::PrimitiveTopology::eTriangleList);
-    builder.setViewport(extent.width, extent.height);
-    builder.setRasterizer(vk::PolygonMode::eFill, vk::CullModeFlagBits::eBack);
-    builder.setMultisampling(vk::SampleCountFlagBits::e1);
-    builder.setDepthStencil(true, true, vk::CompareOp::eLess);
-    builder.addColorBlendAttachment();
-    
-    builder.setLayout(pipelineLayout);
-    
-    // TODO: Set render pass
-    // builder.setRenderPass(renderPass);
-    
-    // pipeline = builder.build();
 }
 
 void ChunkRenderer::beginFrame(vk::CommandBuffer cmd, Camera* camera) {
