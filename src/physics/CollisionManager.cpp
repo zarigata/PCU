@@ -3,8 +3,8 @@
  * @brief Collision detection and management implementation
  */
 
-#include "CollisionManager.hpp"
-#include "PhysicsSystem.hpp"
+#include <VoxelForge/physics/CollisionManager.hpp>
+#include <VoxelForge/physics/PhysicsSystem.hpp>
 #include <VoxelForge/core/Logger.hpp>
 #include <algorithm>
 #include <cmath>

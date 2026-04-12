@@ -3,7 +3,7 @@
  * @brief FMOD-based audio system implementation
  */
 
-#include "AudioSystem.hpp"
+#include <VoxelForge/audio/AudioSystem.hpp>
 #include <VoxelForge/core/Logger.hpp>
 
 // FMOD includes

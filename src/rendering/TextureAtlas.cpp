@@ -3,7 +3,7 @@
  * @brief Texture atlas implementation
  */
 
-#include "TextureAtlas.hpp"
+#include <VoxelForge/rendering/TextureAtlas.hpp>
 #include <VoxelForge/rendering/VulkanDevice.hpp>
 #include <VoxelForge/core/Logger.hpp>
 #include <algorithm>

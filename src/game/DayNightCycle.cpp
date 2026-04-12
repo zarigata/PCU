@@ -1,5 +1,5 @@
-#include "VoxelForge/game/DayNightCycle.hpp"
-#include "VoxelForge/core/Logger.hpp"
+#include <VoxelForge/game/DayNightCycle.hpp>
+#include <VoxelForge/core/Logger.hpp>
 #include <cmath>
 #include <sstream>
 #include <iomanip>

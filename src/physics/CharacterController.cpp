@@ -3,8 +3,8 @@
  * @brief Character controller implementation
  */
 
-#include "CharacterController.hpp"
-#include "PhysicsSystem.hpp"
+#include <VoxelForge/physics/CharacterController.hpp>
+#include <VoxelForge/physics/PhysicsSystem.hpp>
 #include <VoxelForge/core/Logger.hpp>
 
 #include <PxPhysicsAPI.h>

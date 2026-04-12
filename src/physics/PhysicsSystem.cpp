@@ -3,8 +3,8 @@
  * @brief PhysX-based physics system implementation
  */
 
-#include "PhysicsSystem.hpp"
-#include "CharacterController.hpp"
+#include <VoxelForge/physics/PhysicsSystem.hpp>
+#include <VoxelForge/physics/CharacterController.hpp>
 #include <VoxelForge/world/Chunk.hpp>
 #include <VoxelForge/core/Logger.hpp>
 

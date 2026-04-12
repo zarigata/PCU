@@ -3,7 +3,7 @@
  * @brief Lua bindings implementation
  */
 
-#include "LuaBindings.hpp"
+#include <VoxelForge/scripting/LuaBindings.hpp>
 #include <VoxelForge/core/Logger.hpp>
 #include <cmath>
 

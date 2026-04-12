@@ -3,7 +3,7 @@
  * @brief Shader loading and management implementation
  */
 
-#include "ShaderManager.hpp"
+#include <VoxelForge/rendering/ShaderManager.hpp>
 #include <VoxelForge/rendering/VulkanDevice.hpp>
 #include <VoxelForge/core/Logger.hpp>
 #include <fstream>

@@ -3,8 +3,8 @@
  * @brief LuaJIT-based scripting engine implementation
  */
 
-#include "LuaEngine.hpp"
-#include "LuaBindings.hpp"
+#include <VoxelForge/scripting/LuaEngine.hpp>
+#include <VoxelForge/scripting/LuaBindings.hpp>
 #include <VoxelForge/core/Logger.hpp>
 #include <sstream>
 #include <chrono>

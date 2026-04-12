@@ -3,7 +3,7 @@
  * @brief ENet-based networking implementation
  */
 
-#include "NetworkManager.hpp"
+#include <VoxelForge/networking/NetworkManager.hpp>
 #include <VoxelForge/core/Logger.hpp>
 #include <cstring>
 #include <algorithm>

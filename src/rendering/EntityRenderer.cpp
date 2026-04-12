@@ -3,7 +3,7 @@
  * @brief Entity rendering system implementation
  */
 
-#include "EntityRenderer.hpp"
+#include <VoxelForge/rendering/EntityRenderer.hpp>
 #include <VoxelForge/rendering/VulkanDevice.hpp>
 #include <VoxelForge/entity/EntityManager.hpp>
 #include <VoxelForge/entity/Entity.hpp>

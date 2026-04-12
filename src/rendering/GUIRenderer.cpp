@@ -3,7 +3,7 @@
  * @brief Immediate mode GUI rendering implementation
  */
 
-#include "GUIRenderer.hpp"
+#include <VoxelForge/rendering/GUIRenderer.hpp>
 #include <VoxelForge/rendering/VulkanDevice.hpp>
 #include <VoxelForge/core/Logger.hpp>
 #include <algorithm>

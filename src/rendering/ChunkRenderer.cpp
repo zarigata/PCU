@@ -3,7 +3,7 @@
  * @brief Chunk rendering system implementation
  */
 
-#include "ChunkRenderer.hpp"
+#include <VoxelForge/rendering/ChunkRenderer.hpp>
 #include <VoxelForge/rendering/VulkanDevice.hpp>
 #include <VoxelForge/rendering/TextureAtlas.hpp>
 #include <VoxelForge/world/World.hpp>

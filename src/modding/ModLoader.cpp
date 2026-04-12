@@ -3,7 +3,7 @@
  * @brief Mod loading and management implementation
  */
 
-#include "ModLoader.hpp"
+#include <VoxelForge/modding/ModLoader.hpp>
 #include <VoxelForge/scripting/LuaEngine.hpp>
 #include <VoxelForge/core/Logger.hpp>
 #include <fstream>
