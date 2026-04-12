@@ -4,6 +4,7 @@
  */
 
 #include <VoxelForge/entity/Entity.hpp>
+#include <VoxelForge/game/Item.hpp>
 #include <VoxelForge/core/Logger.hpp>
 
 namespace VoxelForge {
@@ -64,8 +65,8 @@ void LivingComponent::tickEffects() {
 
 namespace EntityFactory {
 
-Entity createPlayer(ECSWorld& world, const Vec3& position) {
-    Entity entity = world.createEntity();
+EntityID createPlayer(ECSWorld& world, const Vec3& position) {
+    EntityID entity = world.createEntity();
     
     // Add base component
     auto& base = world.addComponent<EntityBaseComponent>(entity);
@@ -86,12 +87,12 @@ Entity createPlayer(ECSWorld& world, const Vec3& position) {
     collision.height = 1.8f;
     collision.eyeHeight = 1.62f;
     
-    VF_DEBUG("Created player entity {}", entity);
+    LOG_DEBUG("Created player entity {}", entity);
     return entity;
 }
 
-Entity createItem(ECSWorld& world, const Vec3& position, const ItemStack& stack) {
-    Entity entity = world.createEntity();
+EntityID createItem(ECSWorld& world, const Vec3& position, const ItemStack& stack) {
+    EntityID entity = world.createEntity();
     
     auto& base = world.addComponent<EntityBaseComponent>(entity);
     base.type = EntityType::Item;
@@ -110,8 +111,8 @@ Entity createItem(ECSWorld& world, const Vec3& position, const ItemStack& stack)
     return entity;
 }
 
-Entity createZombie(ECSWorld& world, const Vec3& position) {
-    Entity entity = world.createEntity();
+EntityID createZombie(ECSWorld& world, const Vec3& position) {
+    EntityID entity = world.createEntity();
     
     auto& base = world.addComponent<EntityBaseComponent>(entity);
     base.type = EntityType::Monster;
@@ -131,12 +132,12 @@ Entity createZombie(ECSWorld& world, const Vec3& position) {
     collision.height = 1.95f;
     collision.eyeHeight = 1.74f;
     
-    VF_DEBUG("Created zombie entity {}", entity);
+    LOG_DEBUG("Created zombie entity {}", entity);
     return entity;
 }
 
-Entity createSkeleton(ECSWorld& world, const Vec3& position) {
-    Entity entity = world.createEntity();
+EntityID createSkeleton(ECSWorld& world, const Vec3& position) {
+    EntityID entity = world.createEntity();
     
     auto& base = world.addComponent<EntityBaseComponent>(entity);
     base.type = EntityType::Monster;
@@ -157,8 +158,8 @@ Entity createSkeleton(ECSWorld& world, const Vec3& position) {
     return entity;
 }
 
-Entity createCreeper(ECSWorld& world, const Vec3& position) {
-    Entity entity = world.createEntity();
+EntityID createCreeper(ECSWorld& world, const Vec3& position) {
+    EntityID entity = world.createEntity();
     
     auto& base = world.addComponent<EntityBaseComponent>(entity);
     base.type = EntityType::Monster;
@@ -179,8 +180,8 @@ Entity createCreeper(ECSWorld& world, const Vec3& position) {
     return entity;
 }
 
-Entity createCow(ECSWorld& world, const Vec3& position) {
-    Entity entity = world.createEntity();
+EntityID createCow(ECSWorld& world, const Vec3& position) {
+    EntityID entity = world.createEntity();
     
     auto& base = world.addComponent<EntityBaseComponent>(entity);
     base.type = EntityType::Animal;
@@ -207,8 +208,8 @@ Entity createCow(ECSWorld& world, const Vec3& position) {
     return entity;
 }
 
-Entity createPig(ECSWorld& world, const Vec3& position) {
-    Entity entity = world.createEntity();
+EntityID createPig(ECSWorld& world, const Vec3& position) {
+    EntityID entity = world.createEntity();
     
     auto& base = world.addComponent<EntityBaseComponent>(entity);
     base.type = EntityType::Animal;
@@ -230,8 +231,8 @@ Entity createPig(ECSWorld& world, const Vec3& position) {
     return entity;
 }
 
-Entity createSheep(ECSWorld& world, const Vec3& position) {
-    Entity entity = world.createEntity();
+EntityID createSheep(ECSWorld& world, const Vec3& position) {
+    EntityID entity = world.createEntity();
     
     auto& base = world.addComponent<EntityBaseComponent>(entity);
     base.type = EntityType::Animal;
@@ -253,8 +254,8 @@ Entity createSheep(ECSWorld& world, const Vec3& position) {
     return entity;
 }
 
-Entity createChicken(ECSWorld& world, const Vec3& position) {
-    Entity entity = world.createEntity();
+EntityID createChicken(ECSWorld& world, const Vec3& position) {
+    EntityID entity = world.createEntity();
     
     auto& base = world.addComponent<EntityBaseComponent>(entity);
     base.type = EntityType::Animal;
@@ -276,8 +277,8 @@ Entity createChicken(ECSWorld& world, const Vec3& position) {
     return entity;
 }
 
-Entity createArrow(ECSWorld& world, const Vec3& position, const Vec3& velocity, Entity owner) {
-    Entity entity = world.createEntity();
+EntityID createArrow(ECSWorld& world, const Vec3& position, const Vec3& velocity, EntityID owner) {
+    EntityID entity = world.createEntity();
     
     auto& base = world.addComponent<EntityBaseComponent>(entity);
     base.type = EntityType::Projectile;
@@ -294,8 +295,8 @@ Entity createArrow(ECSWorld& world, const Vec3& position, const Vec3& velocity, 
     return entity;
 }
 
-Entity createSnowball(ECSWorld& world, const Vec3& position, const Vec3& velocity, Entity owner) {
-    Entity entity = world.createEntity();
+EntityID createSnowball(ECSWorld& world, const Vec3& position, const Vec3& velocity, EntityID owner) {
+    EntityID entity = world.createEntity();
     
     auto& base = world.addComponent<EntityBaseComponent>(entity);
     base.type = EntityType::Projectile;
