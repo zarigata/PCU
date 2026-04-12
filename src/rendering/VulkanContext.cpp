@@ -160,7 +160,7 @@ void VulkanContext::populateDebugMessengerCreateInfo(vk::DebugUtilsMessengerCrea
                                      void* pUserData) -> VKAPI_ATTR VkBool32 {
         switch (messageSeverity) {
             case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
-                LOG_TRACE("Vulkan Validation: {}", pCallbackData->pMessage);
+                VF_TRACE("Vulkan Validation: {}", pCallbackData->pMessage);
                 break;
             case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
                 VF_INFO("Vulkan Validation: {}", pCallbackData->pMessage);
@@ -172,7 +172,7 @@ void VulkanContext::populateDebugMessengerCreateInfo(vk::DebugUtilsMessengerCrea
                 VF_ERROR("Vulkan Validation: {}", pCallbackData->pMessage);
                 break;
             default:
-                VF_DEBUG("Vulkan Validation: {}", pCallbackData->pMessage);
+                VF_INFO("Vulkan Validation: {}", pCallbackData->pMessage);
         }
         return VK_FALSE;
     };
@@ -224,7 +224,7 @@ void VulkanContext::pickPhysicalDevice() {
             if (features.geometryShader) score += 100;
             if (features.tessellationShader) score += 100;
             
-            VF_DEBUG("  Device '{}' scored {}", properties.deviceName, score);
+            VF_INFO("  Device '{}' scored {}", properties.deviceName, score);
             
             if (score > bestScore) {
                 bestScore = score;

@@ -3,7 +3,7 @@
  * @brief Vulkan physical and logical device management implementation
  */
 
-#include "VulkanDevice.hpp"
+#include <VoxelForge/rendering/VulkanDevice.hpp>
 #include <VoxelForge/core/Logger.hpp>
 #include <algorithm>
 
