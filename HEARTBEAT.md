@@ -10,7 +10,7 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
 4. **Feature implementation**: Work through FEATURE_MATRIX.md high-priority features
 
 ## Build Status
-- **Latest build:** ⏳ FIX PUSHED (2026-04-12 11:40 UTC)
+- **Latest build:** ⏳ FIX PUSHED (2026-04-12 12:55 UTC)
   - Combat commit: `82e744a` feat(combat): implement 1.9+ attack cooldown system - FAILED
   - Fix 1: `d75a290` fix(build): correct Entity type and includes in EntityBase.cpp - FAILED
   - Fix 2: `30551d2` fix(build): correct ECS API usage and types in entity systems - FAILED
@@ -20,8 +20,9 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
   - Fix 6: `9cf26d2` fix(build): fix ItemEntity and ProjectileEntity API usage - FAILED
   - Fix 7: `8c037f7` fix(build): fix PlayerInventory API access in ItemEntity - FAILED
   - Fix 8: `6f0948f` fix(build): fix std::min type mismatch in ItemEntity - FAILED
-  - Fix 9: `5c77e64` fix(build): fix Vulkan logging and include paths
-  - Fixed 11 files total: Entity.hpp, Entity.cpp, EntityBase.cpp, LivingEntity.cpp, MobBase.cpp, ProjectileEntity.cpp, ItemEntity.cpp, VulkanDevice.cpp, VulkanContext.cpp
+  - Fix 9: `5c77e64` fix(build): fix Vulkan logging and include paths - FAILED
+  - Fix 10: `39d5cf4` fix(build): fix VulkanSwapchain include and Vulkan logging/callback
+  - Fixed 14 files total: Entity.hpp, Entity.cpp, EntityBase.cpp, LivingEntity.cpp, MobBase.cpp, ProjectileEntity.cpp, ItemEntity.cpp, VulkanDevice.cpp, VulkanContext.cpp, VulkanSwapchain.cpp
   - Monitoring CI for latest fix
 - **Website:** Live and working
 - **GitHub Issue:** #6 created for stuck Day/Night build
@@ -29,7 +30,7 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
 ## Action Items
 - ✅ CI build stuck for >30 min → Created GitHub issue #6
 - ✅ CI build fails (10 rounds total) → Fixed GLM, UUID, and Entity type errors
-- ⏳ Combat system + rendering build failed → 9 rounds of fixes pushed
+- ⏳ Combat system + rendering build failed → 10 rounds of fixes pushed
   - Round 1: Entity type and includes (EntityBase.cpp)
   - Round 2: ECS API usage and types (4 files)
   - Round 3: System class declarations and ProjectileEntity fixes (3 files)
@@ -39,14 +40,16 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
   - Round 7: Fixed PlayerInventory API access (mainInventory doesn't exist)
   - Round 8: Fixed std::min type mismatch (ItemCount → int)
   - Round 9: Fixed Vulkan logging (LOG_TRACE/VF_DEBUG) and include path
+  - Round 10: Fixed VulkanSwapchain include, Logger usage, lambda callback
 - ⏳ Verify new build passes → Monitoring CI for latest fix
 
 ## Notes
 - ⏸️ Cron `pcu-improve`: ENABLED for continuous improvement
   - Schedule: Every 12 hours (0 */12 * * *)
   - Mode: Isolated sessions (spawns sub-agents)
-  - Last run: 2026-04-12 00:01 UTC — Implemented 1.9+ attack cooldown combat system
-  - Next run: ~6 hours from now (12:00 UTC)
+  - Last run: 2026-04-12 12:01 UTC — Implemented World Border system
+  - Previous run: 2026-04-12 00:01 UTC — Implemented 1.9+ attack cooldown combat system
+  - Next run: ~12 hours from now (00:01 UTC)
   - Rate limit handling: 60s initial wait, 300s on 429, 1 retry
   - Timeout: 3600s (1 hour)
 - Recent commits (rebrand + 17 fixes):
@@ -76,6 +79,8 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
   - fix(build): fix PlayerInventory API access in ItemEntity (7th round)
   - fix(build): fix std::min type mismatch in ItemEntity (8th round)
   - fix(build): fix Vulkan logging and include paths (9th round)
+  - fix(build): fix VulkanSwapchain include and Vulkan logging/callback (10th round)
+  - feat(world): implement World Border system
 - Recent features implemented:
   - Fluid Physics System (water/lava flow simulation, scheduled updates, fluid mixing)
   - ChunkManager/LightEngine/AnvilLoader headers (world management infrastructure)
@@ -92,7 +97,7 @@ From FEATURE_MATRIX.md - High priority:
 - ✅ World saving/loading (AnvilLoader added)
 - ✅ Biomes 50+ types (expanded to 50 biomes)
 - ✅ Biome blending (BiomeBlender implemented)
+- ✅ World borders (WorldBorder class implemented)
 - 📋 Caves (generateCaves() exists, needs verification)
 - 📋 Rivers (needs implementation)
-- 📋 World borders (needs implementation)
 - 📋 Nether dimensions (needs implementation)
