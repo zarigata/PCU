@@ -41,24 +41,6 @@ void ProjectileSystem::update(ECSWorld& world, float deltaTime) {
         // - Handle piercing
     }
 }
-        
-        // Update in-ground time
-        if (projectile.inGround) {
-            projectile.inGroundTime++;
-            
-            // Despawn after 1 minute in ground
-            if (projectile.inGroundTime > 1200) {
-                base.isAlive = false;
-            }
-            continue;
-        }
-        
-        // TODO: Physics update
-        // - Apply gravity
-        // - Check collision
-        // - Handle piercing
-    }
-}
 
 void ProjectileSystem::onHitBlock(ECSWorld& world, EntityID entity, ProjectileComponent& projectile, const BlockPos& pos) {
     projectile.inGround = true;
