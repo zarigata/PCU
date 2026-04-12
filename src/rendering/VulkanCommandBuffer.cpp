@@ -3,7 +3,7 @@
  * @brief Vulkan command buffer and pool management implementation
  */
 
-#include "VulkanCommandBuffer.hpp"
+#include <VoxelForge/rendering/VulkanCommandBuffer.hpp>
 #include <VoxelForge/rendering/VulkanDevice.hpp>
 #include <VoxelForge/core/Logger.hpp>
 

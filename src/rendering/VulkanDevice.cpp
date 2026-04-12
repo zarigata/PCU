@@ -188,7 +188,7 @@ void VulkanDevice::createLogicalDevice() {
     
     enabledFeatures = features;
     
-    VF_DEBUG("Logical device created with {} queue families", 
+    VF_TRACE("Logical device created with {} queue families", 
                   queueIndices.uniqueFamilies().size());
 }
 
