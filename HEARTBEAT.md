@@ -10,7 +10,7 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
 4. **Feature implementation**: Work through FEATURE_MATRIX.md high-priority features
 
 ## Build Status
-- **Latest build:** ⏳ FIX PUSHED (2026-04-12 18:41 UTC)
+- **Latest build:** ⏳ FIX PUSHED (2026-04-12 19:15 UTC)
   - Combat commit: `82e744a` feat(combat): implement 1.9+ attack cooldown system - FAILED
   - Fix 1: `d75a290` fix(build): correct Entity type and includes in EntityBase.cpp - FAILED
   - Fix 2: `30551d2` fix(build): correct ECS API usage and types in entity systems - FAILED
@@ -29,9 +29,10 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
   - Fix 15: `1a4d162` fix(build): fix VulkanSync, Renderer, and VulkanRenderPass - FAILED
   - Fix 16: `8ffa424` fix(build): mark VulkanRenderPassBuilder::build as const - FAILED
   - Fix 17: `f02046e` fix(build): correct debug callback type in VulkanContext - FAILED
-  - Fix 18: `340abd6` fix(build): add const qualifier to VulkanRenderPassBuilder::build implementation
-  - Fix 19: `d0f199f` fix(build): fix all include paths to use VoxelForge namespace
-  - Fixed 39 files total: Entity.hpp, Entity.cpp, EntityBase.cpp, LivingEntity.cpp, MobBase.cpp, ProjectileEntity.cpp, ItemEntity.cpp, VulkanDevice.cpp, VulkanContext.cpp, VulkanSwapchain.cpp, VulkanCommandBuffer.cpp, VulkanBuffer.cpp, VulkanRenderPass.hpp, VulkanRenderPass.cpp, VulkanFramebuffer.cpp, VulkanSync.cpp, Renderer.hpp, Renderer.cpp, ChunkRenderer.cpp, EntityRenderer.cpp, GUIRenderer.cpp, ShaderManager.cpp, TextureAtlas.cpp, AudioSystem.cpp, DayNightCycle.cpp, ModLoader.cpp, NetworkManager.cpp, CharacterController.cpp, CollisionManager.cpp, PhysicsSystem.cpp, LuaBindings.cpp, LuaEngine.cpp
+  - Fix 18: `340abd6` fix(build): add const qualifier to VulkanRenderPassBuilder::build implementation - FAILED
+  - Fix 19: `d0f199f` fix(build): fix all include paths to use VoxelForge namespace - FAILED
+  - Fix 20: `2ee9704` fix(build): stub missing VulkanPipeline and VulkanDescriptor classes
+  - Fixed 41 files total across 20 rounds
   - Monitoring CI for latest fix
 - **Website:** Live and working
 - **GitHub Issue:** #6 created for stuck Day/Night build
@@ -39,7 +40,7 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
 ## Action Items
 - ✅ CI build stuck for >30 min → Created GitHub issue #6
 - ✅ CI build fails (10 rounds total) → Fixed GLM, UUID, and Entity type errors
-- ⏳ Combat system + rendering build failed → 19 rounds of fixes pushed
+- ⏳ Combat system + rendering build failed → 20 rounds of fixes pushed
   - Round 1: Entity type and includes (EntityBase.cpp)
   - Round 2: ECS API usage and types (4 files)
   - Round 3: System class declarations and ProjectileEntity fixes (3 files)
@@ -59,6 +60,7 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
   - Round 17: Fixed PFN_DebugUtilsMessengerCallbackEXT type name
   - Round 18: Fixed VulkanRenderPassBuilder::build const qualifier (implementation)
   - Round 19: Fixed all include paths to use VoxelForge namespace (14 files)
+  - Round 20: Stubbed missing VulkanPipeline and VulkanDescriptor classes (ChunkRenderer)
 - ⏳ Verify new build passes → Monitoring CI for latest fix
 
 ## Notes
@@ -107,6 +109,7 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
   - fix(build): correct debug callback type in VulkanContext (17th round)
   - fix(build): add const qualifier to VulkanRenderPassBuilder::build implementation (18th round)
   - fix(build): fix all include paths to use VoxelForge namespace (19th round)
+  - fix(build): stub missing VulkanPipeline and VulkanDescriptor classes (20th round)
   - feat(world): implement World Border system
 - Recent features implemented:
   - Fluid Physics System (water/lava flow simulation, scheduled updates, fluid mixing)
