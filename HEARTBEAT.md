@@ -10,12 +10,13 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
 4. **Feature implementation**: Work through FEATURE_MATRIX.md high-priority features
 
 ## Build Status
-- **Latest build:** ⏳ FIX PUSHED (2026-04-12 08:06 UTC)
+- **Latest build:** ⏳ FIX PUSHED (2026-04-12 08:39 UTC)
   - Combat commit: `82e744a` feat(combat): implement 1.9+ attack cooldown system - FAILED
   - Fix 1: `d75a290` fix(build): correct Entity type and includes in EntityBase.cpp - FAILED
   - Fix 2: `30551d2` fix(build): correct ECS API usage and types in entity systems - FAILED
   - Fix 3: `71ce40d` fix(build): add missing system class declarations and fix ProjectileEntity - FAILED
-  - Fix 4: `03f3c68` fix(build): remove duplicate code in ProjectileEntity update
+  - Fix 4: `03f3c68` fix(build): remove duplicate code in ProjectileEntity update - FAILED
+  - Fix 5: `3e451a4` fix(build): add ItemEntitySystem declaration and fix ProjectileEntity
   - Fixed 7 files total: Entity.hpp, Entity.cpp, EntityBase.cpp, LivingEntity.cpp, MobBase.cpp, ProjectileEntity.cpp
   - Monitoring CI for latest fix
 - **Website:** Live and working
@@ -24,11 +25,12 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
 ## Action Items
 - ✅ CI build stuck for >30 min → Created GitHub issue #6
 - ✅ CI build fails (10 rounds total) → Fixed GLM, UUID, and Entity type errors
-- ⏳ Combat system build failed → 4 rounds of fixes pushed
+- ⏳ Combat system build failed → 5 rounds of fixes pushed
   - Round 1: Entity type and includes (EntityBase.cpp)
   - Round 2: ECS API usage and types (4 files)
   - Round 3: System class declarations and ProjectileEntity fixes (3 files)
   - Round 4: Removed duplicate code in ProjectileEntity update
+  - Round 5: Added ItemEntitySystem declaration and fixed ProjectileEntity logging
 - ⏳ Verify new build passes → Monitoring CI for latest fix
 
 ## Notes
@@ -61,6 +63,7 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
   - feat(combat): 1.9+ attack cooldown system (Player.hpp, Player.cpp, Inventory.hpp, LivingEntity.cpp)
   - fix(build): correct Entity type and includes in EntityBase.cpp (combat system fix)
   - fix(build): add missing system class declarations and fix ProjectileEntity (3rd round)
+  - fix(build): add ItemEntitySystem declaration and fix ProjectileEntity (5th round)
 - Recent features implemented:
   - Fluid Physics System (water/lava flow simulation, scheduled updates, fluid mixing)
   - ChunkManager/LightEngine/AnvilLoader headers (world management infrastructure)
