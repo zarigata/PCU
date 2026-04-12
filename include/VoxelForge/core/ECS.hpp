@@ -19,7 +19,10 @@
 #include <array>
 #include <cstdint>
 #include <string>
+#include <random>
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 namespace VoxelForge {
 
@@ -41,6 +44,8 @@ struct UUID {
     UUID() = default;
     UUID(u64 h, u64 l) : high(h), low(l) {}
     
+    static UUID generate();
+    
     bool operator==(const UUID& other) const {
         return high == other.high && low == other.low;
     }
@@ -49,6 +54,24 @@ struct UUID {
         return !(*this == other);
     }
 };
+
+// UUID generation and conversion implementations
+inline UUID UUID::generate() {
+    static std::random_device rd;
+    static std::mt19937_64 gen(rd());
+    static std::uniform_int_distribution<u64> dis;
+    
+    UUID uuid;
+    uuid.low = dis(gen);
+    uuid.high = dis(gen);
+    
+    // Set version 4 (random)
+    uuid.high = (uuid.high & 0xFFFFFFFFFFFF0FFFULL) | 0x0000000000004000ULL;
+    // Set variant
+    uuid.low = (uuid.low & 0x3FFFFFFFFFFFFFFFULL) | 0x8000000000000000ULL;
+    
+    return uuid;
+}
 #endif
 
 // AABB (Axis-Aligned Bounding Box), guarded to prevent redefinition

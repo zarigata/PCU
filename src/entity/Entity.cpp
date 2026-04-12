@@ -104,7 +104,7 @@ EntityID createItem(ECSWorld& world, const Vec3& position, const ItemStack& stac
     collision.height = 0.25f;
     
     auto& itemComp = world.addComponent<ItemEntityComponent>(e);
-    itemComp.stack = stack;
+    itemComp.stack = std::make_shared<ItemStack>(stack);
     itemComp.pickupDelay = 10;
     
     return e;
@@ -310,7 +310,7 @@ EntityID createChicken(ECSWorld& world, const Vec3& position) {
     return e;
 }
 
-EntityID createArrow(ECSWorld& world, const Vec3& position, const Vec3& velocity, Entity owner) {
+EntityID createArrow(ECSWorld& world, const Vec3& position, const Vec3& velocity, EntityID owner) {
     EntityID e = world.createEntity();
     
     auto& base = world.addComponent<EntityBaseComponent>(e);
@@ -338,7 +338,7 @@ EntityID createArrow(ECSWorld& world, const Vec3& position, const Vec3& velocity
     return e;
 }
 
-EntityID createSnowball(ECSWorld& world, const Vec3& position, const Vec3& velocity, Entity owner) {
+EntityID createSnowball(ECSWorld& world, const Vec3& position, const Vec3& velocity, EntityID owner) {
     EntityID e = world.createEntity();
     
     auto& base = world.addComponent<EntityBaseComponent>(e);
