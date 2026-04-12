@@ -67,11 +67,12 @@ void LivingEntitySystem::onDeath(ECSWorld& world, EntityID entity, LivingCompone
     // TODO: Trigger death events
 }
 
-float LivingEntitySystem::calculateDamage(LivingComponent& living, float baseDamage, DamageType type) {
+float LivingEntitySystem::calculateDamage(LivingComponent& living, float baseDamage, int type) {
+    DamageType dmgType = static_cast<DamageType>(type);
     float damage = baseDamage;
     
     // Apply armor reduction for physical damage
-    if (type == DamageType::Physical) {
+    if (dmgType == DamageType::Physical) {
         float armorReduction = living.armor * 0.04f; // 4% per armor point
         damage *= (1.0f - armorReduction);
     }
@@ -102,7 +103,7 @@ void LivingEntitySystem::heal(LivingComponent& living, float amount) {
     }
 }
 
-void LivingEntitySystem::damage(ECSWorld& world, EntityID entity, LivingComponent& living, float amount, DamageType type) {
+void LivingEntitySystem::damage(ECSWorld& world, EntityID entity, LivingComponent& living, float amount, int type) {
     float actualDamage = calculateDamage(living, amount, type);
     living.health -= actualDamage;
     

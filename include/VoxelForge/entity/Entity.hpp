@@ -167,6 +167,47 @@ struct ItemEntityComponent {
     float hoverStart = 0.0f;
 };
 
+// ============================================
+// Entity Systems
+// ============================================
+
+class LivingEntitySystem {
+public:
+    LivingEntitySystem();
+    
+    void update(ECSWorld& world, float deltaTime);
+    void applyEffectModifiers(LivingComponent& living, float deltaTime);
+    void onDeath(ECSWorld& world, EntityID entity, LivingComponent& living, EntityBaseComponent& base);
+    float calculateDamage(LivingComponent& living, float baseDamage, int type); // DamageType enum from Player.hpp
+    void heal(LivingComponent& living, float amount);
+    void damage(ECSWorld& world, EntityID entity, LivingComponent& living, float amount, int type); // DamageType enum from Player.hpp
+};
+
+class MobAISystem {
+public:
+    MobAISystem();
+    
+    void update(ECSWorld& world, float deltaTime);
+    
+    // AI state updates
+    void updateIdle(AIComponent& ai, MovementComponent& movement, float deltaTime);
+    void updateWander(AIComponent& ai, MovementComponent& movement, float deltaTime);
+    void updateFollow(AIComponent& ai, MovementComponent& movement, float deltaTime);
+    void updateFlee(AIComponent& ai, MovementComponent& movement, float deltaTime);
+    void updateAttack(AIComponent& ai, MovementComponent& movement, float deltaTime);
+    void updateEat(AIComponent& ai, MovementComponent& movement, float deltaTime);
+    void updateSleep(AIComponent& ai, MovementComponent& movement, float deltaTime);
+    void updateBreed(AIComponent& ai, MovementComponent& movement, float deltaTime);
+    void updateWork(AIComponent& ai, MovementComponent& movement, float deltaTime);
+};
+
+class ProjectileSystem {
+public:
+    void update(ECSWorld& world, float deltaTime);
+    void onHitBlock(ECSWorld& world, EntityID entity, ProjectileComponent& projectile, const BlockPos& pos);
+    void onHitEntity(ECSWorld& world, EntityID projectileEntity, ProjectileComponent& projectile, EntityID target, LivingComponent& targetLiving);
+};
+
 // EntityID creation helpers
 namespace EntityFactory {
     EntityID createPlayer(ECSWorld& world, const Vec3& position);
@@ -180,6 +221,34 @@ namespace EntityFactory {
     EntityID createChicken(ECSWorld& world, const Vec3& position);
     EntityID createArrow(ECSWorld& world, const Vec3& position, const Vec3& velocity, EntityID owner);
     EntityID createSnowball(ECSWorld& world, const Vec3& position, const Vec3& velocity, EntityID owner);
+}
+
+// Mob factory helpers
+namespace MobFactory {
+    EntityID createZombie(ECSWorld& world, const Vec3& position);
+    EntityID createSkeleton(ECSWorld& world, const Vec3& position);
+    EntityID createCreeper(ECSWorld& world, const Vec3& position);
+    EntityID createSpider(ECSWorld& world, const Vec3& position);
+    EntityID createEnderman(ECSWorld& world, const Vec3& position);
+    EntityID createBlaze(ECSWorld& world, const Vec3& position);
+    EntityID createSlime(ECSWorld& world, const Vec3& position, int size);
+}
+
+// Projectile factory helpers
+namespace ProjectileFactory {
+    EntityID createArrow(ECSWorld& world, const Vec3& position, const Vec3& velocity, EntityID owner);
+    EntityID createSpectralArrow(ECSWorld& world, const Vec3& position, const Vec3& velocity, EntityID owner);
+    EntityID createSnowball(ECSWorld& world, const Vec3& position, const Vec3& velocity, EntityID owner);
+    EntityID createEgg(ECSWorld& world, const Vec3& position, const Vec3& velocity, EntityID owner);
+    EntityID createEnderPearl(ECSWorld& world, const Vec3& position, const Vec3& velocity, EntityID owner);
+    EntityID createFireball(ECSWorld& world, const Vec3& position, const Vec3& velocity, EntityID owner);
+    EntityID createSmallFireball(ECSWorld& world, const Vec3& position, const Vec3& velocity, EntityID owner);
+    EntityID createDragonFireball(ECSWorld& world, const Vec3& position, const Vec3& velocity, EntityID owner);
+    EntityID createWitherSkull(ECSWorld& world, const Vec3& position, const Vec3& velocity, EntityID owner);
+    EntityID createShulkerBullet(ECSWorld& world, const Vec3& position, EntityID owner, EntityID target);
+    EntityID createFishingBobber(ECSWorld& world, const Vec3& position, EntityID owner);
+    EntityID createLlamaSpit(ECSWorld& world, const Vec3& position, const Vec3& velocity, EntityID owner);
+    EntityID createTrident(ECSWorld& world, const Vec3& position, const Vec3& velocity, EntityID owner);
 }
 
 } // namespace VoxelForge
