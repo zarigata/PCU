@@ -140,7 +140,7 @@ Buffer VulkanBuffer::createBuffer(
         buffer.map(device);
     }
     
-    VF_DEBUG("Created buffer: size={}, usage={}", size, static_cast<uint32_t>(usage));
+    VF_TRACE("Created buffer: size={}, usage={}", size, static_cast<uint32_t>(usage));
     return buffer;
 }
 
@@ -335,7 +335,7 @@ Buffer VulkanBuffer::createVertexBuffer(
     // Clean up staging buffer
     destroyBuffer(device, stagingBuffer);
     
-    VF_DEBUG("Created vertex buffer: size={}", size);
+    VF_TRACE("Created vertex buffer: size={}", size);
     return vertexBuffer;
 }
 
@@ -371,7 +371,7 @@ Buffer VulkanBuffer::createIndexBuffer(
     // Clean up staging buffer
     destroyBuffer(device, stagingBuffer);
     
-    VF_DEBUG("Created index buffer: size={}, indexType={}", size, static_cast<uint32_t>(indexType));
+    VF_TRACE("Created index buffer: size={}, indexType={}", size, static_cast<uint32_t>(indexType));
     return indexBuffer;
 }
 
@@ -410,7 +410,7 @@ VulkanRingBuffer::VulkanRingBuffer(
         vk::MemoryPropertyFlagBits::eHostCoherent
     );
     
-    VF_DEBUG("Created ring buffer: size={}", size);
+    VF_TRACE("Created ring buffer: size={}", size);
 }
 
 VulkanRingBuffer::~VulkanRingBuffer() {
@@ -447,7 +447,7 @@ VulkanBufferPool::VulkanBufferPool(
     , physicalDevice(physicalDevice)
     , chunkSize(chunkSize) {
     
-    VF_DEBUG("Created buffer pool: chunkSize={}", chunkSize);
+    VF_TRACE("Created buffer pool: chunkSize={}", chunkSize);
 }
 
 VulkanBufferPool::~VulkanBufferPool() {
@@ -481,7 +481,7 @@ VulkanBufferPool::Chunk& VulkanBufferPool::getOrCreateChunk() {
     newChunk.used = 0;
     
     chunks.push_back(std::move(newChunk));
-    VF_DEBUG("Created new buffer pool chunk: total chunks={}", chunks.size());
+    VF_TRACE("Created new buffer pool chunk: total chunks={}", chunks.size());
     
     return chunks.back();
 }

@@ -54,7 +54,7 @@ void VulkanCommandPool::init(VulkanDevice* device, Type type, bool transient, bo
         throw std::runtime_error("Failed to create command pool: " + std::string(e.what()));
     }
     
-    Logger::debug("Command pool created for queue family {}", queueFamilyIndex);
+    VF_TRACE("Command pool created for queue family {}", queueFamilyIndex);
 }
 
 void VulkanCommandPool::cleanup() {
@@ -411,7 +411,7 @@ void CommandBufferManager::init(VulkanDevice* device, uint32_t frameCount) {
         buffer.init(device->getDevice(), pool->getPool(), true);
     }
     
-    Logger::debug("CommandBufferManager initialized with {} buffers", frameCount);
+    VF_TRACE("CommandBufferManager initialized with {} buffers", frameCount);
 }
 
 void CommandBufferManager::cleanup() {
