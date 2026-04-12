@@ -345,6 +345,21 @@ World::RaycastResult World::raycast(const glm::vec3& origin, const glm::vec3& di
 }
 
 // ============================================
+// Tick
+// ============================================
+
+void World::tick() {
+    gameTime++;
+    dayTime += 1.0f;
+    if (dayTime >= 24000.0f) {
+        dayTime -= 24000.0f;
+    }
+    
+    // Advance world border animation (50ms per tick)
+    worldBorder_.tick(50);
+}
+
+// ============================================
 // Helper Methods
 // ============================================
 

@@ -7,6 +7,7 @@
 
 #include <VoxelForge/world/ChunkPos.hpp>
 #include <VoxelForge/world/Block.hpp>
+#include <VoxelForge/world/WorldBorder.hpp>
 #include <VoxelForge/utils/Noise.hpp>
 #include <unordered_map>
 #include <memory>
@@ -81,6 +82,10 @@ public:
     int64_t getSeed() const { return settings.seed; }
     const WorldSettings& getSettings() const { return settings; }
     
+    // World border
+    WorldBorder& getWorldBorder() { return worldBorder_; }
+    const WorldBorder& getWorldBorder() const { return worldBorder_; }
+    
     // Tick
     void tick();
     
@@ -111,6 +116,9 @@ private:
     // Time
     int64_t gameTime = 0;
     float dayTime = 0.0f;
+    
+    // World border
+    WorldBorder worldBorder_;
     
     // Noise generators
     std::unique_ptr<PerlinNoise> terrainNoise;

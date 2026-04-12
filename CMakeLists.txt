@@ -203,6 +203,7 @@ add_library(VoxelForge_Engine STATIC
     
     # World
     src/world/World.cpp
+    src/world/WorldBorder.cpp
     src/world/Chunk.cpp
     src/world/ChunkSection.cpp
     src/world/BlockRegistry.cpp

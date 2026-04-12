@@ -4,6 +4,7 @@
  */
 
 #include <VoxelForge/game/CommandManager.hpp>
+#include <VoxelForge/world/World.hpp>
 #include <VoxelForge/core/Logger.hpp>
 #include <sstream>
 #include <algorithm>
@@ -316,6 +317,7 @@ void CommandManager::registerVanillaCommands() {
     registerCommand(Commands::createSayCommand());
     registerCommand(Commands::createDifficultyCommand());
     registerCommand(Commands::createSeedCommand());
+    registerCommand(Commands::createWorldBorderCommand());
     
     VF_INFO("Registered {} commands", commands.size());
 }
@@ -608,7 +610,146 @@ std::unique_ptr<Command> createWhitelistCommand() { return std::make_unique<Comm
 std::unique_ptr<Command> createTellCommand() { return std::make_unique<Command>(); }
 std::unique_ptr<Command> createTitleCommand() { return std::make_unique<Command>(); }
 std::unique_ptr<Command> createScoreboardCommand() { return std::make_unique<Command>(); }
-std::unique_ptr<Command> createWorldBorderCommand() { return std::make_unique<Command>(); }
+std::unique_ptr<Command> createWorldBorderCommand() {
+    auto cmd = std::make_unique<Command>();
+    cmd->name = "worldborder";
+    cmd->description = "Manages the world border";
+    cmd->usage = "worldborder <set|center|damage|warning|get|add> ...";
+    cmd->aliases = {"wb"};
+    cmd->requiredPermission = 2;
+    cmd->execute = [](CommandContext& ctx, const std::vector<std::string>& args) -> CommandResult {
+        if (args.empty()) {
+            return {false, "Usage: worldborder <set|center|damage|warning|get|add> ...", 0};
+        }
+
+        if (!ctx.world) {
+            return {false, "No world context available", 0};
+        }
+
+        auto& border = ctx.world->getWorldBorder();
+        const auto& sub = args[0];
+
+        if (sub == "set") {
+            if (args.size() < 2) {
+                return {false, "Usage: worldborder set <size> [timeSeconds]", 0};
+            }
+            try {
+                double size = std::stod(args[1]);
+                if (args.size() >= 3) {
+                    int64_t seconds = std::stoll(args[2]);
+                    border.interpolateSize(size, seconds * 1000);
+                    ctx.sendSuccess("World border transitioning to " + args[1] + " over " + args[2] + "s");
+                } else {
+                    border.setSize(size);
+                    ctx.sendSuccess("World border set to " + args[1]);
+                }
+                return {true, "", 1};
+            } catch (...) {
+                return {false, "Invalid size value", 0};
+            }
+        }
+
+        if (sub == "center") {
+            if (args.size() < 3) {
+                return {false, "Usage: worldborder center <x> <z>", 0};
+            }
+            try {
+                double x = std::stod(args[1]);
+                double z = std::stod(args[2]);
+                border.setCenter(x, z);
+                ctx.sendSuccess("World border center set to " + args[1] + ", " + args[2]);
+                return {true, "", 1};
+            } catch (...) {
+                return {false, "Invalid center coordinates", 0};
+            }
+        }
+
+        if (sub == "add") {
+            if (args.size() < 2) {
+                return {false, "Usage: worldborder add <amount> [timeSeconds]", 0};
+            }
+            try {
+                double amount = std::stod(args[1]);
+                double target = border.getSize() + amount;
+                if (args.size() >= 3) {
+                    int64_t seconds = std::stoll(args[2]);
+                    border.interpolateSize(target, seconds * 1000);
+                    ctx.sendSuccess("World border growing by " + args[1] + " over " + args[2] + "s");
+                } else {
+                    border.setSize(target);
+                    ctx.sendSuccess("World border grown by " + args[1]);
+                }
+                return {true, "", 1};
+            } catch (...) {
+                return {false, "Invalid amount", 0};
+            }
+        }
+
+        if (sub == "damage") {
+            if (args.size() < 2) {
+                return {false, "Usage: worldborder damage <perBlock|buffer> <value>", 0};
+            }
+            if (args[1] == "perBlock" && args.size() >= 3) {
+                try {
+                    float dps = std::stof(args[2]);
+                    border.setDamagePerSecond(dps);
+                    ctx.sendSuccess("World border damage set to " + args[2] + " per second");
+                    return {true, "", 1};
+                } catch (...) {
+                    return {false, "Invalid damage value", 0};
+                }
+            }
+            if (args[1] == "buffer" && args.size() >= 3) {
+                try {
+                    int blocks = std::stoi(args[2]);
+                    border.setSafeZoneBlocks(blocks);
+                    ctx.sendSuccess("World border safe zone set to " + args[2] + " blocks");
+                    return {true, "", 1};
+                } catch (...) {
+                    return {false, "Invalid buffer value", 0};
+                }
+            }
+            return {false, "Usage: worldborder damage <perBlock|buffer> <value>", 0};
+        }
+
+        if (sub == "warning") {
+            if (args.size() < 2) {
+                return {false, "Usage: worldborder warning <distance|time> <value>", 0};
+            }
+            if (args[1] == "distance" && args.size() >= 3) {
+                try {
+                    int blocks = std::stoi(args[2]);
+                    border.setWarningDistance(blocks);
+                    ctx.sendSuccess("World border warning distance set to " + args[2] + " blocks");
+                    return {true, "", 1};
+                } catch (...) {
+                    return {false, "Invalid distance", 0};
+                }
+            }
+            if (args[1] == "time" && args.size() >= 3) {
+                try {
+                    int seconds = std::stoi(args[2]);
+                    border.setWarningTimeSeconds(seconds);
+                    ctx.sendSuccess("World border warning time set to " + args[2] + "s");
+                    return {true, "", 1};
+                } catch (...) {
+                    return {false, "Invalid time", 0};
+                }
+            }
+            return {false, "Usage: worldborder warning <distance|time> <value>", 0};
+        }
+
+        if (sub == "get") {
+            ctx.sendSuccess("World border: size=" + std::to_string(border.getSize()) +
+                " center=(" + std::to_string(border.getCenterX()) + "," + std::to_string(border.getCenterZ()) + ")" +
+                " damage=" + std::to_string(border.getDamagePerSecond()) + "/s");
+            return {true, "", 1};
+        }
+
+        return {false, "Unknown subcommand. Use: set|center|add|damage|warning|get", 0};
+    };
+    return cmd;
+}
 std::unique_ptr<Command> createLocateCommand() { return std::make_unique<Command>(); }
 std::unique_ptr<Command> createSpreadPlayersCommand() { return std::make_unique<Command>(); }
 std::unique_ptr<Command> createParticleCommand() { return std::make_unique<Command>(); }
