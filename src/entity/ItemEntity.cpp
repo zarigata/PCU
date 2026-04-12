@@ -56,7 +56,7 @@ bool ItemEntitySystem::canPickup(const ItemEntityComponent& item, EntityID playe
 void ItemEntitySystem::onPickup(ECSWorld& world, EntityID itemEntity, ItemEntityComponent& item, 
                                  EntityID player, PlayerComponent& playerComp) {
     // Try to add item to inventory
-    int remaining = addToInventory(playerComp.inventory.mainInventory, *item.stack);
+    int remaining = addToInventory(playerComp.inventory, *item.stack);
     
     if (remaining <= 0) {
         // All items picked up
@@ -71,7 +71,8 @@ void ItemEntitySystem::onPickup(ECSWorld& world, EntityID itemEntity, ItemEntity
 
 int ItemEntitySystem::addToInventory(PlayerInventory& inventory, ItemStack& stack) {
     // First, try to merge with existing stacks
-    for (auto& slot : inventory.slots) {
+    for (size_t i = 0; i < inventory.getSize(); i++) {
+        ItemStack& slot = inventory.getSlot(i);
         if (!slot.isEmpty() && slot.getItem() == stack.getItem() && slot.getCount() < 64) {
             int space = 64 - slot.getCount();
             int toAdd = std::min(space, stack.getCount());
@@ -85,9 +86,9 @@ int ItemEntitySystem::addToInventory(PlayerInventory& inventory, ItemStack& stac
     }
     
     // Then, try to find empty slot
-    for (auto& slot : inventory.slots) {
-        if (slot.isEmpty()) {
-            slot = stack;
+    for (size_t i = 0; i < inventory.getSize(); i++) {
+        if (inventory.getSlot(i).isEmpty()) {
+            inventory.setSlot(i, stack);
             return 0;
         }
     }
