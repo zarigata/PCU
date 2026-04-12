@@ -87,7 +87,7 @@ EntityID createPlayer(ECSWorld& world, const Vec3& position) {
     collision.height = 1.8f;
     collision.eyeHeight = 1.62f;
     
-    LOG_DEBUG("Created player entity {}", entity);
+    VF_INFO("Created player entity {}", entity);
     return entity;
 }
 
@@ -99,7 +99,7 @@ EntityID createItem(ECSWorld& world, const Vec3& position, const ItemStack& stac
     base.isAlive = true;
     
     auto& item = world.addComponent<ItemEntityComponent>(entity);
-    item.stack = stack;
+    item.stack = std::make_shared<ItemStack>(stack);
     item.pickupDelay = 10; // Half second before can be picked up
     item.lifespan = 6000;
     
@@ -132,7 +132,7 @@ EntityID createZombie(ECSWorld& world, const Vec3& position) {
     collision.height = 1.95f;
     collision.eyeHeight = 1.74f;
     
-    LOG_DEBUG("Created zombie entity {}", entity);
+    VF_INFO("Created zombie entity {}", entity);
     return entity;
 }
 

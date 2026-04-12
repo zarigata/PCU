@@ -17,46 +17,47 @@ MobAISystem::MobAISystem() {
 void MobAISystem::update(ECSWorld& world, float deltaTime) {
     auto view = world.view<AIComponent, MovementComponent, EntityBaseComponent>();
     
-    for (auto entity : view) {
-        auto& ai = view.get<AIComponent>(entity);
-        auto& movement = view.get<MovementComponent>(entity);
-        auto& base = view.get<EntityBaseComponent>(entity);
+    for (EntityID entity : view) {
+        auto* ai = world.getComponent<AIComponent>(entity);
+        auto* movement = world.getComponent<MovementComponent>(entity);
+        auto* base = world.getComponent<EntityBaseComponent>(entity);
         
-        if (!base.isAlive) continue;
+        if (!ai || !movement || !base) continue;
+        if (!base->isAlive) continue;
         
         // Update AI state timer
-        if (ai.stateTimer > 0) {
-            ai.stateTimer -= static_cast<int>(deltaTime * 20.0f);
+        if (ai->stateTimer > 0) {
+            ai->stateTimer -= static_cast<int>(deltaTime * 20.0f);
         }
         
         // Execute current AI state
-        switch (ai.currentState) {
+        switch (ai->currentState) {
             case AIComponent::State::Idle:
-                updateIdle(ai, movement, deltaTime);
+                updateIdle(*ai, *movement, deltaTime);
                 break;
             case AIComponent::State::Wander:
-                updateWander(ai, movement, deltaTime);
+                updateWander(*ai, *movement, deltaTime);
                 break;
             case AIComponent::State::Follow:
-                updateFollow(ai, movement, deltaTime);
+                updateFollow(*ai, *movement, deltaTime);
                 break;
             case AIComponent::State::Flee:
-                updateFlee(ai, movement, deltaTime);
+                updateFlee(*ai, *movement, deltaTime);
                 break;
             case AIComponent::State::Attack:
-                updateAttack(ai, movement, deltaTime);
+                updateAttack(*ai, *movement, deltaTime);
                 break;
             case AIComponent::State::Eat:
-                updateEat(ai, movement, deltaTime);
+                updateEat(*ai, *movement, deltaTime);
                 break;
             case AIComponent::State::Sleep:
-                updateSleep(ai, movement, deltaTime);
+                updateSleep(*ai, *movement, deltaTime);
                 break;
             case AIComponent::State::Breed:
-                updateBreed(ai, movement, deltaTime);
+                updateBreed(*ai, *movement, deltaTime);
                 break;
             case AIComponent::State::Work:
-                updateWork(ai, movement, deltaTime);
+                updateWork(*ai, *movement, deltaTime);
                 break;
         }
     }
@@ -139,20 +140,20 @@ void MobAISystem::updateWork(AIComponent& ai, MovementComponent& movement, float
 
 namespace MobFactory {
 
-Entity createZombie(ECSWorld& world, const Vec3& position) {
+EntityID createZombie(ECSWorld& world, const Vec3& position) {
     return EntityFactory::createZombie(world, position);
 }
 
-Entity createSkeleton(ECSWorld& world, const Vec3& position) {
+EntityID createSkeleton(ECSWorld& world, const Vec3& position) {
     return EntityFactory::createSkeleton(world, position);
 }
 
-Entity createCreeper(ECSWorld& world, const Vec3& position) {
+EntityID createCreeper(ECSWorld& world, const Vec3& position) {
     return EntityFactory::createCreeper(world, position);
 }
 
-Entity createSpider(ECSWorld& world, const Vec3& position) {
-    Entity entity = world.createEntity();
+EntityID createSpider(ECSWorld& world, const Vec3& position) {
+    EntityID entity = world.createEntity();
     
     auto& base = world.addComponent<EntityBaseComponent>(entity);
     base.type = EntityType::Monster;
@@ -173,8 +174,8 @@ Entity createSpider(ECSWorld& world, const Vec3& position) {
     return entity;
 }
 
-Entity createEnderman(ECSWorld& world, const Vec3& position) {
-    Entity entity = world.createEntity();
+EntityID createEnderman(ECSWorld& world, const Vec3& position) {
+    EntityID entity = world.createEntity();
     
     auto& base = world.addComponent<EntityBaseComponent>(entity);
     base.type = EntityType::Monster;
@@ -195,8 +196,8 @@ Entity createEnderman(ECSWorld& world, const Vec3& position) {
     return entity;
 }
 
-Entity createBlaze(ECSWorld& world, const Vec3& position) {
-    Entity entity = world.createEntity();
+EntityID createBlaze(ECSWorld& world, const Vec3& position) {
+    EntityID entity = world.createEntity();
     
     auto& base = world.addComponent<EntityBaseComponent>(entity);
     base.type = EntityType::Monster;
@@ -218,8 +219,8 @@ Entity createBlaze(ECSWorld& world, const Vec3& position) {
     return entity;
 }
 
-Entity createSlime(ECSWorld& world, const Vec3& position, int size) {
-    Entity entity = world.createEntity();
+EntityID createSlime(ECSWorld& world, const Vec3& position, int size) {
+    EntityID entity = world.createEntity();
     
     auto& base = world.addComponent<EntityBaseComponent>(entity);
     base.type = EntityType::Monster;
