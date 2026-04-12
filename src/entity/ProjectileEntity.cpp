@@ -60,7 +60,7 @@ void ProjectileSystem::onHitEntity(ECSWorld& world, EntityID projectileEntity, P
         projectile.pierceLevel--;
     } else {
         // Destroy projectile
-        world.getComponent<EntityBaseComponent>(projectileEntity).isAlive = false;
+        world.getComponent<EntityBaseComponent>(projectileEntity)->isAlive = false;
     }
 }
 

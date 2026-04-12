@@ -15,6 +15,8 @@ namespace VoxelForge {
 // Forward declarations
 struct ItemStack;
 struct InventoryComponent;
+struct PlayerComponent;
+class PlayerInventory;
 
 // EntityID types
 enum class EntityType : uint8_t {
@@ -215,8 +217,8 @@ public:
     ItemEntitySystem();
     void update(ECSWorld& world, float deltaTime);
     bool canPickup(const ItemEntityComponent& item, EntityID player);
-    void onPickup(ECSWorld& world, EntityID itemEntity, ItemEntityComponent& item, EntityID player);
-    int addToInventory(InventoryComponent& inventory, ItemStack& stack);
+    void onPickup(ECSWorld& world, EntityID itemEntity, ItemEntityComponent& item, EntityID player, PlayerComponent& playerComp);
+    int addToInventory(PlayerInventory& inventory, ItemStack& stack);
     void mergeItems(ECSWorld& world, EntityID entity1, ItemEntityComponent& item1, EntityID entity2, ItemEntityComponent& item2);
 };
 
