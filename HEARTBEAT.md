@@ -10,14 +10,15 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
 4. **Feature implementation**: Work through FEATURE_MATRIX.md high-priority features
 
 ## Build Status
-- **Latest build:** ⏳ FIX PUSHED (2026-04-12 09:14 UTC)
+- **Latest build:** ⏳ FIX PUSHED (2026-04-12 09:57 UTC)
   - Combat commit: `82e744a` feat(combat): implement 1.9+ attack cooldown system - FAILED
   - Fix 1: `d75a290` fix(build): correct Entity type and includes in EntityBase.cpp - FAILED
   - Fix 2: `30551d2` fix(build): correct ECS API usage and types in entity systems - FAILED
   - Fix 3: `71ce40d` fix(build): add missing system class declarations and fix ProjectileEntity - FAILED
   - Fix 4: `03f3c68` fix(build): remove duplicate code in ProjectileEntity update - FAILED
   - Fix 5: `3e451a4` fix(build): add ItemEntitySystem declaration and fix ProjectileEntity - FAILED
-  - Fix 6: `9cf26d2` fix(build): fix ItemEntity and ProjectileEntity API usage
+  - Fix 6: `9cf26d2` fix(build): fix ItemEntity and ProjectileEntity API usage - FAILED
+  - Fix 7: `8c037f7` fix(build): fix PlayerInventory API access in ItemEntity
   - Fixed 9 files total: Entity.hpp, Entity.cpp, EntityBase.cpp, LivingEntity.cpp, MobBase.cpp, ProjectileEntity.cpp, ItemEntity.cpp
   - Monitoring CI for latest fix
 - **Website:** Live and working
@@ -26,13 +27,14 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
 ## Action Items
 - ✅ CI build stuck for >30 min → Created GitHub issue #6
 - ✅ CI build fails (10 rounds total) → Fixed GLM, UUID, and Entity type errors
-- ⏳ Combat system build failed → 6 rounds of fixes pushed
+- ⏳ Combat system build failed → 7 rounds of fixes pushed
   - Round 1: Entity type and includes (EntityBase.cpp)
   - Round 2: ECS API usage and types (4 files)
   - Round 3: System class declarations and ProjectileEntity fixes (3 files)
   - Round 4: Removed duplicate code in ProjectileEntity update
   - Round 5: Added ItemEntitySystem declaration and fixed ProjectileEntity logging
   - Round 6: Complete ItemEntity rewrite and ProjectileEntity pointer fix
+  - Round 7: Fixed PlayerInventory API access (mainInventory doesn't exist)
 - ⏳ Verify new build passes → Monitoring CI for latest fix
 
 ## Notes
@@ -67,6 +69,7 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
   - fix(build): add missing system class declarations and fix ProjectileEntity (3rd round)
   - fix(build): add ItemEntitySystem declaration and fix ProjectileEntity (5th round)
   - fix(build): fix ItemEntity and ProjectileEntity API usage (6th round)
+  - fix(build): fix PlayerInventory API access in ItemEntity (7th round)
 - Recent features implemented:
   - Fluid Physics System (water/lava flow simulation, scheduled updates, fluid mixing)
   - ChunkManager/LightEngine/AnvilLoader headers (world management infrastructure)
