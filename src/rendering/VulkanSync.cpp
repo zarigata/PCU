@@ -3,7 +3,7 @@
  * @brief Vulkan synchronization primitives implementation
  */
 
-#include "VulkanSync.hpp"
+#include <VoxelForge/rendering/VulkanSync.hpp>
 #include <VoxelForge/rendering/VulkanDevice.hpp>
 #include <VoxelForge/core/Logger.hpp>
 

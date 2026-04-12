@@ -3,7 +3,7 @@
  * @brief Vulkan framebuffer management implementation
  */
 
-#include "VulkanFramebuffer.hpp"
+#include <VoxelForge/rendering/VulkanFramebuffer.hpp>
 #include <VoxelForge/rendering/VulkanDevice.hpp>
 #include <VoxelForge/rendering/VulkanImage.hpp>
 #include <VoxelForge/core/Logger.hpp>

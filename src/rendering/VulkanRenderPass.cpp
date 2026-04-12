@@ -3,7 +3,7 @@
  * @brief Vulkan render pass management implementation
  */
 
-#include "VulkanRenderPass.hpp"
+#include <VoxelForge/rendering/VulkanRenderPass.hpp>
 #include <VoxelForge/core/Logger.hpp>
 
 namespace VoxelForge {
