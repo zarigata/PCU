@@ -10,7 +10,7 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
 4. **Feature implementation**: Work through FEATURE_MATRIX.md high-priority features
 
 ## Build Status
-- **Latest build:** ⏳ FIX PUSHED (2026-04-12 12:55 UTC)
+- **Latest build:** ⏳ FIX PUSHED (2026-04-12 13:33 UTC)
   - Combat commit: `82e744a` feat(combat): implement 1.9+ attack cooldown system - FAILED
   - Fix 1: `d75a290` fix(build): correct Entity type and includes in EntityBase.cpp - FAILED
   - Fix 2: `30551d2` fix(build): correct ECS API usage and types in entity systems - FAILED
@@ -21,8 +21,9 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
   - Fix 7: `8c037f7` fix(build): fix PlayerInventory API access in ItemEntity - FAILED
   - Fix 8: `6f0948f` fix(build): fix std::min type mismatch in ItemEntity - FAILED
   - Fix 9: `5c77e64` fix(build): fix Vulkan logging and include paths - FAILED
-  - Fix 10: `39d5cf4` fix(build): fix VulkanSwapchain include and Vulkan logging/callback
-  - Fixed 14 files total: Entity.hpp, Entity.cpp, EntityBase.cpp, LivingEntity.cpp, MobBase.cpp, ProjectileEntity.cpp, ItemEntity.cpp, VulkanDevice.cpp, VulkanContext.cpp, VulkanSwapchain.cpp
+  - Fix 10: `39d5cf4` fix(build): fix VulkanSwapchain include and Vulkan logging/callback - FAILED
+  - Fix 11: `6aa5a47` fix(build): fix Vulkan logging macros and include paths
+  - Fixed 15 files total: Entity.hpp, Entity.cpp, EntityBase.cpp, LivingEntity.cpp, MobBase.cpp, ProjectileEntity.cpp, ItemEntity.cpp, VulkanDevice.cpp, VulkanContext.cpp, VulkanSwapchain.cpp, VulkanCommandBuffer.cpp
   - Monitoring CI for latest fix
 - **Website:** Live and working
 - **GitHub Issue:** #6 created for stuck Day/Night build
@@ -30,7 +31,7 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
 ## Action Items
 - ✅ CI build stuck for >30 min → Created GitHub issue #6
 - ✅ CI build fails (10 rounds total) → Fixed GLM, UUID, and Entity type errors
-- ⏳ Combat system + rendering build failed → 10 rounds of fixes pushed
+- ⏳ Combat system + rendering build failed → 11 rounds of fixes pushed
   - Round 1: Entity type and includes (EntityBase.cpp)
   - Round 2: ECS API usage and types (4 files)
   - Round 3: System class declarations and ProjectileEntity fixes (3 files)
@@ -41,6 +42,7 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
   - Round 8: Fixed std::min type mismatch (ItemCount → int)
   - Round 9: Fixed Vulkan logging (LOG_TRACE/VF_DEBUG) and include path
   - Round 10: Fixed VulkanSwapchain include, Logger usage, lambda callback
+  - Round 11: Fixed VulkanCommandBuffer include, VF_DEBUG → VF_TRACE, broken ternary
 - ⏳ Verify new build passes → Monitoring CI for latest fix
 
 ## Notes
@@ -80,6 +82,7 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
   - fix(build): fix std::min type mismatch in ItemEntity (8th round)
   - fix(build): fix Vulkan logging and include paths (9th round)
   - fix(build): fix VulkanSwapchain include and Vulkan logging/callback (10th round)
+  - fix(build): fix Vulkan logging macros and include paths (11th round)
   - feat(world): implement World Border system
 - Recent features implemented:
   - Fluid Physics System (water/lava flow simulation, scheduled updates, fluid mixing)
