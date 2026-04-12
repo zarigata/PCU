@@ -159,7 +159,7 @@ VulkanCommandBuffer::VulkanCommandBuffer(VulkanCommandBuffer&& other) noexcept
 }
 
 VulkanCommandBuffer& VulkanCommandBuffer::operator=(VulkanCommandBuffer&& other) noexcept {
-    if (this != &other) {
+    if (static_cast<const void*>(this) != static_cast<const void*>(&other)) {
         cleanup();
         device = other.device;
         pool = other.pool;
