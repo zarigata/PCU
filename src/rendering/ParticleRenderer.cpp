@@ -93,7 +93,7 @@ uint32_t ParticleRenderer::createSystem(const ParticleEmitter& emitter) {
     
     systems[id] = system;
     
-    VF_DEBUG("Created particle system {} with {} max particles", id, emitter.maxParticles);
+    VF_TRACE("Created particle system {} with {} max particles", id, emitter.maxParticles);
     return id;
 }
 

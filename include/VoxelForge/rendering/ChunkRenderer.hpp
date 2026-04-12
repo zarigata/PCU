@@ -98,6 +98,13 @@ struct ChunkRenderStats {
     uint32_t trianglesRendered = 0;
 };
 
+// Hash function for glm::ivec3
+struct IVec3Hash {
+    size_t operator()(const glm::ivec3& v) const {
+        return std::hash<int>()(v.x) ^ (std::hash<int>()(v.y) << 1) ^ (std::hash<int>()(v.z) << 2);
+    }
+};
+
 class ChunkRenderer {
 public:
     ChunkRenderer();
@@ -167,13 +174,6 @@ private:
     
     // Staging buffer for uploads
     std::unique_ptr<VulkanRingBuffer> stagingBuffer;
-};
-
-// Hash function for glm::ivec3
-struct IVec3Hash {
-    size_t operator()(const glm::ivec3& v) const {
-        return std::hash<int>()(v.x) ^ (std::hash<int>()(v.y) << 1) ^ (std::hash<int>()(v.z) << 2);
-    }
 };
 
 } // namespace VoxelForge

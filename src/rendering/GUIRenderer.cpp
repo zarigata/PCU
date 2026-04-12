@@ -67,7 +67,7 @@ void GUIRenderer::init(VulkanDevice* device) {
     // Create default font (built-in)
     defaultFont = loadFont("default", 16, "");
     
-    Logger::info("GUIRenderer initialized");
+    VF_INFO("GUIRenderer initialized");
 }
 
 void GUIRenderer::cleanup() {
@@ -227,7 +227,7 @@ void GUIRenderer::render(vk::CommandBuffer cmd) {
     // Update vertex buffer
     size_t vertexSize = ctx.vertices.size() * sizeof(GUIVertex);
     if (vertexSize > vertexBuffer.size) {
-        Logger::warn("GUI vertex buffer overflow, truncating");
+        VF_WARN("GUI vertex buffer overflow, truncating");
         vertexSize = vertexBuffer.size;
     }
     memcpy(vertexBuffer.mapped, ctx.vertices.data(), vertexSize);
@@ -235,7 +235,7 @@ void GUIRenderer::render(vk::CommandBuffer cmd) {
     // Update index buffer
     size_t indexSize = ctx.indices.size() * sizeof(uint16_t);
     if (indexSize > indexBuffer.size) {
-        Logger::warn("GUI index buffer overflow, truncating");
+        VF_WARN("GUI index buffer overflow, truncating");
         indexSize = indexBuffer.size;
     }
     memcpy(indexBuffer.mapped, ctx.indices.data(), indexSize);

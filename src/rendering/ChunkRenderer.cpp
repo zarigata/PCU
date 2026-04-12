@@ -35,7 +35,7 @@ void ChunkRenderer::init(VulkanDevice* device) {
         16 * 1024 * 1024  // 16 MB staging
     );
     
-    Logger::info("ChunkRenderer initialized");
+    VF_INFO("ChunkRenderer initialized");
 }
 
 void ChunkRenderer::cleanup() {
