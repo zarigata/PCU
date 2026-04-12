@@ -153,7 +153,7 @@ private:
     void* uniformBufferMapped = nullptr;
     
     // Chunk meshes
-    std::unordered_map<glm::ivec3, ChunkMeshGPU, glm::ivec3Hash> chunkMeshes;
+    std::unordered_map<glm::ivec3, ChunkMeshGPU, IVec3Hash> chunkMeshes;
     std::vector<std::pair<ChunkMesh*, glm::ivec3>> pendingUploads;
     
     // Settings and stats
@@ -170,12 +170,10 @@ private:
 };
 
 // Hash function for glm::ivec3
-namespace glm {
-    struct ivec3Hash {
-        size_t operator()(const glm::ivec3& v) const {
-            return std::hash<int>()(v.x) ^ (std::hash<int>()(v.y) << 1) ^ (std::hash<int>()(v.z) << 2);
-        }
-    };
-}
+struct IVec3Hash {
+    size_t operator()(const glm::ivec3& v) const {
+        return std::hash<int>()(v.x) ^ (std::hash<int>()(v.y) << 1) ^ (std::hash<int>()(v.z) << 2);
+    }
+};
 
 } // namespace VoxelForge

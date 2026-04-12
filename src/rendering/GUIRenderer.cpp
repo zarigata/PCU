@@ -9,9 +9,10 @@
 #include <algorithm>
 #include <cmath>
 
-// STB for font loading
-#define STB_TRUETYPE_IMPLEMENTATION
-#include <stb_truetype.h>
+// TODO: STB headers need to be added to repository
+// // STB for font loading
+// #define STB_TRUETYPE_IMPLEMENTATION
+// #include <stb_truetype.h>
 
 namespace VoxelForge {
 
