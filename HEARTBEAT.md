@@ -10,7 +10,7 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
 4. **Feature implementation**: Work through FEATURE_MATRIX.md high-priority features
 
 ## Build Status
-- **Latest build:** ⏳ FIX PUSHED (2026-04-12 20:26 UTC)
+- **Latest build:** ⏳ FIX PUSHED (2026-04-12 23:35 UTC)
   - Combat commit: `82e744a` feat(combat): implement 1.9+ attack cooldown system - FAILED
   - Fix 1: `d75a290` fix(build): correct Entity type and includes in EntityBase.cpp - FAILED
   - Fix 2: `30551d2` fix(build): correct ECS API usage and types in entity systems - FAILED
@@ -33,8 +33,10 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
   - Fix 19: `d0f199f` fix(build): fix all include paths to use VoxelForge namespace - FAILED
   - Fix 20: `2ee9704` fix(build): stub missing VulkanPipeline and VulkanDescriptor classes - FAILED
   - Fix 21: `e761ed9` fix(build): add VulkanImage.hpp header file - FAILED
-  - Fix 22: `88c3e33` fix(build): fix glm namespace collision and STB header
-  - Fixed 43 files + 1 new header created across 22 rounds
+  - Fix 22: `88c3e33` fix(build): fix glm namespace collision and STB header - FAILED
+  - Fix 23: `909b036` fix(build): fix Logger macros and hash struct declaration
+  - Fixed 46 files + 1 new header created across 23 rounds
+  - Remaining issues: Camera API, VulkanPipelineBuilder, redefinitions, incomplete types
   - Monitoring CI for latest fix
 - **Website:** Live and working
 - **GitHub Issue:** #6 created for stuck Day/Night build
@@ -42,7 +44,7 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
 ## Action Items
 - ✅ CI build stuck for >30 min → Created GitHub issue #6
 - ✅ CI build fails (10 rounds total) → Fixed GLM, UUID, and Entity type errors
-- ⏳ Combat system + rendering build failed → 22 rounds of fixes pushed
+- ⏳ Combat system + rendering build failed → 23 rounds of fixes pushed
   - Round 1: Entity type and includes (EntityBase.cpp)
   - Round 2: ECS API usage and types (4 files)
   - Round 3: System class declarations and ProjectileEntity fixes (3 files)
@@ -65,6 +67,7 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
   - Round 20: Stubbed missing VulkanPipeline and VulkanDescriptor classes (ChunkRenderer)
   - Round 21: Created missing VulkanImage.hpp header file
   - Round 22: Fixed glm namespace collision (ChunkRenderer) and STB header (GUIRenderer)
+  - Round 23: Fixed Logger macros and hash struct declaration order
 - ⏳ Verify new build passes → Monitoring CI for latest fix
 
 ## Notes
@@ -116,6 +119,7 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
   - fix(build): stub missing VulkanPipeline and VulkanDescriptor classes (20th round)
   - fix(build): add VulkanImage.hpp header file (21st round)
   - fix(build): fix glm namespace collision and STB header (22nd round)
+  - fix(build): fix Logger macros and hash struct declaration (23rd round)
   - feat(world): implement World Border system
 - Recent features implemented:
   - Fluid Physics System (water/lava flow simulation, scheduled updates, fluid mixing)
