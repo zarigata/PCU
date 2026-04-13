@@ -10,7 +10,7 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
 4. **Feature implementation**: Work through FEATURE_MATRIX.md high-priority features
 
 ## Build Status
-- **Latest build:** ⏳ FIX PUSHED (2026-04-13 01:17 UTC)
+- **Latest build:** ⏳ FIX PUSHED (2026-04-13 01:50 UTC)
   - Combat commit: `82e744a` feat(combat): implement 1.9+ attack cooldown system - FAILED
   - Fix 1: `d75a290` fix(build): correct Entity type and includes in EntityBase.cpp - FAILED
   - Fix 2: `30551d2` fix(build): correct ECS API usage and types in entity systems - FAILED
@@ -36,8 +36,9 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
   - Fix 22: `88c3e33` fix(build): fix glm namespace collision and STB header - FAILED
   - Fix 23: `909b036` fix(build): fix Logger macros and hash struct declaration - FAILED
   - Fix 24: `6abf6e9` fix(build): fix rendering API mismatches and redefinitions - FAILED
-  - Fix 25: `af270be` fix(build): move ChunkVertex to Chunk.hpp to fix incomplete type errors
-  - Fixed 54 files + 1 new header created across 25 rounds
+  - Fix 25: `af270be` fix(build): move ChunkVertex to Chunk.hpp to fix incomplete type errors - FAILED
+  - Fix 26: `be4f554` fix(build): fix ChunkVertex field names to match ChunkMesher.cpp usage
+  - Fixed 56 files + 1 new header created across 26 rounds
   - Monitoring CI for latest fix
 - **Website:** Live and working
 - **GitHub Issue:** #6 created for stuck Day/Night build
@@ -71,6 +72,7 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
   - Round 23: Fixed Logger macros and hash struct declaration order
   - Round 24: Fixed rendering API mismatches and duplicate ChunkVertex struct
   - Round 25: Moved ChunkVertex to Chunk.hpp to fix incomplete type errors
+  - Round 26: Fixed ChunkVertex field names (glm vectors → individual floats)
 - ⏳ Verify new build passes → Monitoring CI for latest fix
 
 ## Notes
@@ -125,6 +127,7 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
   - fix(build): fix Logger macros and hash struct declaration (23rd round)
   - fix(build): fix rendering API mismatches and redefinitions (24th round)
   - fix(build): move ChunkVertex to Chunk.hpp to fix incomplete type errors (25th round)
+  - fix(build): fix ChunkVertex field names to match ChunkMesher.cpp usage (26th round)
   - feat(world): implement World Border system
 - Recent features implemented:
   - Fluid Physics System (water/lava flow simulation, scheduled updates, fluid mixing)
