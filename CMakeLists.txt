@@ -288,7 +288,8 @@ add_library(VoxelForge_Engine STATIC
     src/game/CommandManager.cpp
     src/game/AchievementSystem.cpp
     src/game/Statistics.cpp
-    
+    src/game/MiningSystem.cpp
+
     # Utils
     src/utils/Noise.cpp
     src/utils/NBT.cpp
