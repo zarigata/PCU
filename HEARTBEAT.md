@@ -10,7 +10,7 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
 4. **Feature implementation**: Work through FEATURE_MATRIX.md high-priority features
 
 ## Build Status
-- **Latest build:** ⏳ FIX PUSHED (2026-04-13 05:28 UTC)
+- **Latest build:** ⏳ FIX PUSHED (2026-04-13 06:15 UTC)
   - Combat commit: `82e744a` feat(combat): implement 1.9+ attack cooldown system - FAILED
   - Fix 1: `d75a290` fix(build): correct Entity type and includes in EntityBase.cpp - FAILED
   - Fix 2: `30551d2` fix(build): correct ECS API usage and types in entity systems - FAILED
@@ -45,8 +45,9 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
   - Fix 31: `61d4d4b` fix(build): fix Camera access, VulkanBuffer API, and PostSettings - FAILED
   - Fix 32: `6a89b04` fix(build): fix PostProcessor and SkyRenderer type errors - FAILED
   - Fix 33: `f8adfd6` fix(build): stub PhysX physics, fix PostProcessor/ShadowRenderer types - FAILED
-  - Fix 34: `d3f0ae5` fix(build): rewrite PhysX physics stubs with proper syntax
-  - Fixed 82 files + 1 new header created across 34 rounds
+  - Fix 34: `d3f0ae5` fix(build): rewrite PhysX physics stubs with proper syntax - FAILED
+  - Fix 35: `81dd7a3` fix(build): fix CharacterController and CollisionManager template issues
+  - Fixed 85 files + 1 new header created across 35 rounds
   - Monitoring CI for latest fix
 - **Website:** Live and working
 - **GitHub Issue:** #6 created for stuck Day/Night build
@@ -88,7 +89,8 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
   - Round 31: Fixed Camera access, VulkanBuffer API, PostSettings redeclaration
   - Round 32: Fixed PostProcessor/SkyRenderer: Image namespace, missing members
   - Round 33: Stubbed PhysX physics, fixed PostProcessor vk::Image type, fixed ShadowRenderer Image/VulkanDevice - FAILED
-  - Round 34: Rewrote PhysX physics stubs (PhysicsSystem.cpp, CharacterController.cpp) with proper syntax
+  - Round 34: Rewrote PhysX physics stubs (PhysicsSystem.cpp, CharacterController.cpp) with proper syntax - FAILED
+  - Round 35: Fixed CharacterController class name, CollisionManager template syntax, Logger macro
 - ⏳ Verify new build passes → Monitoring CI for latest fix
 
 ## Notes
@@ -152,6 +154,7 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
   - fix(build): fix PostProcessor and SkyRenderer type errors (32nd round)
   - fix(build): stub PhysX physics, fix PostProcessor/ShadowRenderer types (33rd round)
   - fix(build): rewrite PhysX physics stubs with proper syntax (34th round)
+  - fix(build): fix CharacterController and CollisionManager template issues (35th round)
   - feat(world): implement World Border system
 - Recent features implemented:
   - Fluid Physics System (water/lava flow simulation, scheduled updates, fluid mixing)
