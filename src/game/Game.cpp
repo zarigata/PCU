@@ -48,9 +48,6 @@ void Game::onUpdate(float deltaTime) {
         return;
     }
     
-    // Update day/night cycle time
-    settings.dayTime += deltaTime;
-    
     // Check for day/night cycle advancement (every 20 minutes = 12000 ticks)
     float cycleProgress = getDayProgress();
     if (cycleProgress >= 1.0f) {
@@ -201,12 +198,6 @@ float Game::getDayTime() const {
 void Game::setDayTime(float time) {
     if (!world) return;
     world->setDayTime(time);
-}
-
-    props.windowWidth = 1280;
-    props.windowHeight = 720;
-    props.vsync = true;
-    return new Game(props);
 }
 
 } // namespace VoxelForge

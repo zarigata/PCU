@@ -16,8 +16,6 @@ namespace VoxelForge {
 ModContext::ModContext(const std::string& modId, ModLoader* loader)
     : modId(modId), loader(loader) {}
 
-ModContext::~ModContext() = default;
-
 std::string ModContext::getResourcePath(const std::string& relativePath) const {
     VF_TRACE("ModContext::getResourcePath not implemented");
     (void)relativePath;
