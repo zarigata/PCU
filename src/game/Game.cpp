@@ -201,3 +201,8 @@ void Game::setDayTime(float time) {
 }
 
 } // namespace VoxelForge
+
+// Application factory
+VoxelForge::Application* VoxelForge::createApplication() {
+    return new VoxelForge::Game();
+}
