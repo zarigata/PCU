@@ -10,7 +10,7 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
 4. **Feature implementation**: Work through FEATURE_MATRIX.md high-priority features
 
 ## Build Status
-- **Latest build:** ⏳ FIX PUSHED (2026-04-13 13:22 UTC)
+- **Latest build:** ⏳ FIX PUSHED (2026-04-13 13:35 UTC)
   - Combat commit: `82e744a` feat(combat): implement 1.9+ attack cooldown system - FAILED
   - Fix 1: `d75a290` fix(build): correct Entity type and includes in EntityBase.cpp - FAILED
   - Fix 2: `30551d2` fix(build): correct ECS API usage and types in entity systems - FAILED
@@ -55,8 +55,9 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
   - Fix 41: `872c8a6` fix(build): add Handshaking state and fix log message - FAILED
   - Fix 42: `ea5dc0d` fix(build): fix Connection enum conflict, LuaEngine stub - FAILED
   - Fix 43: `ed14940` fix(build): fix remaining ConnectionState references in NetworkManager - FAILED
-  - Fix 44: `e9c4c0f` fix(build): fix ConnectionState references in Server and Client
-  - Fixed 100 files + 1 new header created across 44 rounds
+  - Fix 44: `e9c4c0f` fix(build): fix ConnectionState references in Server and Client - FAILED
+  - Fix 45: `11b2fb3` fix(build): fix ConnectionState references and duplicate nextClientId
+  - Fixed 102 files + 1 new header created across 45 rounds
   - Monitoring CI for latest fix
 - **Website:** Live and working
 - **GitHub Issue:** #6 created for stuck Day/Night build
@@ -108,7 +109,8 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
   - Round 41: Add Handshaking to ConnectionState enum, fix NetworkManager pointer formatting - FAILED
   - Round 42: Fix Connection enum conflict (ConnectionState→NetworkState), stub LuaEngine - FAILED
   - Round 43: Fix remaining ConnectionState references in getter methods - FAILED
-  - Round 44: Fix ConnectionState references in Server.cpp and Client.cpp
+  - Round 44: Fix ConnectionState references in Server.cpp and Client.cpp - FAILED
+  - Round 45: Fix ConnectionState references in Packet.cpp, remove duplicate nextClientId
 - ⏳ Verify new build passes → Monitoring CI for latest fix
 
 ## Notes
@@ -182,6 +184,7 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
   - fix(build): fix Connection enum conflict, LuaEngine stub (42nd round)
   - fix(build): fix remaining ConnectionState references in NetworkManager (43rd round)
   - fix(build): fix ConnectionState references in Server and Client (44th round)
+  - fix(build): fix ConnectionState references and duplicate nextClientId (45th round)
   - feat(world): implement World Border system
 - Recent features implemented:
   - Fluid Physics System (water/lava flow simulation, scheduled updates, fluid mixing)
