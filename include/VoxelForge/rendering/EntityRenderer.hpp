@@ -22,9 +22,20 @@ class EntityManager;
 class Entity;
 
 // TODO: Implement VulkanPipelineBuilder
-// Forward declaration to fix compilation errors
+// Stub to fix compilation errors
 struct VulkanPipelineBuilder {
-    // Stub - implementation needed
+    VulkanPipelineBuilder(class VulkanDevice*) {}
+    void setVertexInput(const std::vector<vk::VertexInputBindingDescription>&, 
+                        const std::vector<vk::VertexInputAttributeDescription>&) {}
+    void addShaderStage(vk::ShaderStageFlagBits, const char*) {}
+    void setInputAssembly(vk::PrimitiveTopology) {}
+    void setViewport(uint32_t width, uint32_t height) {}
+    void setRasterizer(vk::PolygonMode, vk::CullModeFlagBits) {}
+    void setMultisampling(vk::SampleCountFlagBits) {}
+    void setDepthStencil(bool depthTest, bool depthWrite, vk::CompareOp) {}
+    void addColorBlendAttachment(vk::BlendOp, vk::BlendFactor, vk::BlendFactor) {}
+    void setLayout(vk::PipelineLayout) {}
+    vk::Pipeline build() { return vk::Pipeline(); }
 };
 
 // Vertex format for entity meshes
