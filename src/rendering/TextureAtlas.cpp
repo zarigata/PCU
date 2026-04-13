@@ -5,6 +5,7 @@
 
 #include <VoxelForge/rendering/TextureAtlas.hpp>
 #include <VoxelForge/rendering/VulkanDevice.hpp>
+#include <VoxelForge/rendering/VulkanBuffer.hpp>
 #include <VoxelForge/core/Logger.hpp>
 #include <algorithm>
 #include <cmath>
@@ -29,7 +30,7 @@ void TextureAtlas::init(VulkanDevice* device, const TextureAtlasSettings& settin
     createSampler();
     createDefaultTextures();
     
-    Logger::info("TextureAtlas initialized ({}x{}, {} textures max)",
+    VF_INFO("TextureAtlas initialized ({}x{}, {} textures max)",
                  settings.atlasWidth, settings.atlasHeight, settings.maxTextures);
 }
 
@@ -68,10 +69,14 @@ void TextureAtlas::createAtlasImage() {
     imageInfo.format = settings.format;
     
     if (settings.useArray) {
-        imageInfo.extent = {settings.textureSize, settings.textureSize, 1};
+        imageInfo.extent.width = settings.textureSize;
+        imageInfo.extent.height = settings.textureSize;
+        imageInfo.extent.depth = 1;
         imageInfo.arrayLayers = settings.maxTextures;
     } else {
-        imageInfo.extent = {settings.atlasWidth, settings.atlasHeight, 1};
+        imageInfo.extent.width = settings.atlasWidth;
+        imageInfo.extent.height = settings.atlasHeight;
+        imageInfo.extent.depth = 1;
         imageInfo.arrayLayers = 1;
     }
     
@@ -176,7 +181,7 @@ uint32_t TextureAtlas::addTexture(const std::string& name, const uint8_t* data,
     
     uint32_t index = static_cast<uint32_t>(textures.size());
     if (index >= settings.maxTextures) {
-        Logger::warn("Texture atlas full, cannot add texture: {}", name);
+        VF_WARN("Texture atlas full, cannot add texture: {}", name);
         return missingTextureIndex;
     }
     
@@ -345,7 +350,7 @@ void TextureAtlas::build(vk::CommandBuffer cmd) {
     built = true;
     dirty = false;
     
-    Logger::debug("TextureAtlas built with {} textures", textures.size());
+    VF_TRACE("TextureAtlas built with {} textures", textures.size());
 }
 
 void TextureAtlas::rebuild(vk::CommandBuffer cmd) {
@@ -357,7 +362,7 @@ void TextureAtlas::copyTextureToArray(vk::CommandBuffer cmd, const uint8_t* data
                                        uint32_t width, uint32_t height, uint32_t layer) {
     // Create staging buffer
     vk::DeviceSize imageSize = width * height * 4;
-    Buffer stagingBuffer = VulkanBuffer::createStagingBuffer(
+    VulkanBuffer stagingBuffer = VulkanBuffer::createStagingBuffer(
         device->getDevice(),
         device->getPhysicalDevice(),
         imageSize
@@ -377,8 +382,12 @@ void TextureAtlas::copyTextureToArray(vk::CommandBuffer cmd, const uint8_t* data
     region.imageSubresource.mipLevel = 0;
     region.imageSubresource.baseArrayLayer = settings.useArray ? layer : 0;
     region.imageSubresource.layerCount = 1;
-    region.imageOffset = {0, 0, 0};
-    region.imageExtent = {width, height, 1};
+    region.imageOffset.x = 0;
+    region.imageOffset.y = 0;
+    region.imageOffset.z = 0;
+    region.imageExtent.width = width;
+    region.imageExtent.height = height;
+    region.imageExtent.depth = 1;
     
     cmd.copyBufferToImage(stagingBuffer.buffer, atlasImage,
                           vk::ImageLayout::eTransferDstOptimal, 1, &region);
@@ -419,16 +428,23 @@ void TextureAtlas::generateMipmaps(vk::CommandBuffer cmd) {
         blit.srcSubresource.mipLevel = i - 1;
         blit.srcSubresource.baseArrayLayer = 0;
         blit.srcSubresource.layerCount = settings.useArray ? settings.maxTextures : 1;
-        blit.srcOffsets[0] = {0, 0, 0};
-        blit.srcOffsets[1] = {mipWidth, mipHeight, 1};
+        blit.srcOffsets[0].x = 0;
+        blit.srcOffsets[0].y = 0;
+        blit.srcOffsets[0].z = 0;
+        blit.srcOffsets[1].x = mipWidth;
+        blit.srcOffsets[1].y = mipHeight;
+        blit.srcOffsets[1].z = 1;
         
         blit.dstSubresource.aspectMask = vk::ImageAspectFlagBits::eColor;
         blit.dstSubresource.mipLevel = i;
         blit.dstSubresource.baseArrayLayer = 0;
         blit.dstSubresource.layerCount = settings.useArray ? settings.maxTextures : 1;
-        blit.dstOffsets[0] = {0, 0, 0};
-        blit.dstOffsets[1] = {mipWidth > 1 ? mipWidth / 2 : 1,
-                             mipHeight > 1 ? mipHeight / 2 : 1, 1};
+        blit.dstOffsets[0].x = 0;
+        blit.dstOffsets[0].y = 0;
+        blit.dstOffsets[0].z = 0;
+        blit.dstOffsets[1].x = mipWidth > 1 ? mipWidth / 2 : 1;
+        blit.dstOffsets[1].y = mipHeight > 1 ? mipHeight / 2 : 1;
+        blit.dstOffsets[1].z = 1;
         
         cmd.blitImage(atlasImage, vk::ImageLayout::eTransferSrcOptimal,
                      atlasImage, vk::ImageLayout::eTransferDstOptimal,

@@ -10,10 +10,11 @@
 #include <sstream>
 #include <chrono>
 
+// TODO: glslang and SPIRV headers need to be added to repository
 // For SPIRV compilation
-#include <glslang/Public/ShaderLang.h>
-#include <glslang/Public/ResourceLimits.h>
-#include <SPIRV/GlslangToSpv.h>
+// #include <glslang/Public/ShaderLang.h>
+// #include <glslang/Public/ResourceLimits.h>
+// #include <SPIRV/GlslangToSpv.h>
 
 namespace VoxelForge {
 
@@ -28,9 +29,9 @@ void ShaderManager::init(VulkanDevice* device, const ShaderManagerSettings& sett
     this->settings = settings;
     
     // Initialize glslang
-    glslang::InitializeProcess();
+    // glslang::InitializeProcess(); // STUB: glslang not available
     
-    Logger::info("ShaderManager initialized");
+    VF_INFO("ShaderManager initialized");
 }
 
 void ShaderManager::cleanup() {
@@ -58,7 +59,7 @@ void ShaderManager::cleanup() {
     programs.clear();
     
     // Finalize glslang
-    glslang::FinalizeProcess();
+    // glslang::FinalizeProcess(); // STUB: glslang not available
     
     device = nullptr;
 }
@@ -210,55 +211,28 @@ void ShaderManager::addTessEvalShader(ShaderProgram& program, const std::string&
 ShaderCompileResult ShaderManager::compileGLSL(const std::string& source,
                                                 vk::ShaderStageFlagBits stage,
                                                 const std::string& name) {
+    // TODO: glslang shader compilation not implemented - headers not in repository
     ShaderCompileResult result;
-    
-    // Convert stage to EShLanguage
-    EShLanguage language;
-    switch (stage) {
-        case vk::ShaderStageFlagBits::eVertex: language = EShLangVertex; break;
-        case vk::ShaderStageFlagBits::eFragment: language = EShLangFragment; break;
-        case vk::ShaderStageFlagBits::eGeometry: language = EShLangGeometry; break;
-        case vk::ShaderStageFlagBits::eCompute: language = EShLangCompute; break;
-        case vk::ShaderStageFlagBits::eTessControl: language = EShLangTessControl; break;
-        case vk::ShaderStageFlagBits::eTessellationEvaluation: language = EShLangTessEvaluation; break;
-        default:
-            result.errorMessage = "Unknown shader stage";
-            return result;
-    }
-    
-    // Create shader
-    glslang::TShader shader(language);
-    const char* sourcePtr = source.c_str();
-    shader.setStrings(&sourcePtr, 1);
-    
-    // Set environment
-    shader.setEnvInput(glslang::EShSourceGlsl, language, glslang::EShClientVulkan, 100);
-    shader.setEnvClient(glslang::EShClientVulkan, glslang::EShTargetVulkan_1_3);
-    shader.setEnvTarget(glslang::EShTargetSpv, glslang::EShTargetSpv_1_5);
-    
-    // Parse
-    TBuiltInResource resources = *GetDefaultResources();
-    EShMessages messages = static_cast<EShMessages>(EShMsgDefault | EShMsgVulkanRules | EShMsgSpvRules);
-    
-    if (!shader.parse(&resources, 100, false, messages)) {
-        result.errorMessage = shader.getInfoLog();
-        return result;
-    }
-    
-    // Link
-    glslang::TProgram program;
-    program.addShader(&shader);
-    
-    if (!program.link(messages)) {
-        result.errorMessage = program.getInfoLog();
-        return result;
-    }
-    
-    // Generate SPIR-V
-    glslang::GlslangToSpv(*program.getIntermediate(language), result.spirv);
-    
-    result.success = true;
+    result.success = false;
+    result.errorMessage = "glslang shader compilation not implemented - headers not in repository";
+    VF_ERROR("Shader compilation stub: {}", name);
     return result;
+    
+    // glslang code commented out:
+    // Convert stage to EShLanguage
+    // EShLanguage language;
+    // switch (stage) {
+    //     case vk::ShaderStageFlagBits::eVertex: language = EShLangVertex; break;
+    //     case vk::ShaderStageFlagBits::eFragment: language = EShLangFragment; break;
+    //     case vk::ShaderStageFlagBits::eGeometry: language = EShLangGeometry; break;
+    //     case vk::ShaderStageFlagBits::eCompute: language = EShLangCompute; break;
+    //     case vk::ShaderStageFlagBits::eTessControl: language = EShLangTessControl; break;
+    //     case vk::ShaderStageFlagBits::eTessellationEvaluation: language = EShLangTessEvaluation; break;
+    //     default:
+    //         result.errorMessage = "Unknown shader stage";
+    //         return result;
+    // }
+    // // ... rest of glslang code commented out
 }
 
 void ShaderManager::checkForChanges() {
@@ -294,7 +268,7 @@ void ShaderManager::reloadShader(const std::string& path) {
     it->second.sourceCode = source;
     createShaderModule(it->second, result.spirv);
     
-    Logger::info("Shader reloaded: {}", path);
+    VF_INFO("Shader reloaded: {}", path);
 }
 
 void ShaderManager::reloadAll() {
@@ -386,7 +360,7 @@ void ShaderManager::loadBuiltinShaders() {
     postProgram->modules.push_back(loadShaderFromSource(BuiltinShaders::FXAAFragmentShader,
                                                          vk::ShaderStageFlagBits::eFragment, "fxaa.frag"));
     
-    Logger::info("Built-in shaders loaded");
+    VF_INFO("Built-in shaders loaded");
 }
 
 ShaderProgram* ShaderManager::getChunkShader() { return getProgram(CHUNK_SHADER); }
