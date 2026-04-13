@@ -6,8 +6,10 @@
 #include <VoxelForge/rendering/GUIRenderer.hpp>
 #include <VoxelForge/rendering/VulkanDevice.hpp>
 #include <VoxelForge/core/Logger.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <algorithm>
 #include <cmath>
+#include <fstream>
 
 // TODO: STB headers need to be added to repository
 // // STB for font loading
@@ -265,23 +267,23 @@ void GUIRenderer::render(vk::CommandBuffer cmd) {
     
     // Draw all commands
     uint32_t currentTexture = 0;
-    for (const auto& cmd : ctx.drawCommands) {
+    for (const auto& drawCmd : ctx.drawCommands) {
         // Bind texture if changed
-        if (cmd.textureId != currentTexture) {
+        if (drawCmd.textureId != currentTexture) {
             // Bind new texture
-            currentTexture = cmd.textureId;
+            currentTexture = drawCmd.textureId;
         }
         
         // Set scissor
         vk::Rect2D scissor;
-        scissor.offset.x = static_cast<int32_t>(cmd.clipRect.x);
-        scissor.offset.y = static_cast<int32_t>(cmd.clipRect.y);
-        scissor.extent.width = static_cast<uint32_t>(cmd.clipRect.z);
-        scissor.extent.height = static_cast<uint32_t>(cmd.clipRect.w);
+        scissor.offset.x = static_cast<int32_t>(drawCmd.clipRect.x);
+        scissor.offset.y = static_cast<int32_t>(drawCmd.clipRect.y);
+        scissor.extent.width = static_cast<uint32_t>(drawCmd.clipRect.z);
+        scissor.extent.height = static_cast<uint32_t>(drawCmd.clipRect.w);
         cmd.setScissor(0, scissor);
         
         // Draw indexed
-        cmd.drawIndexed(cmd.indexCount, 1, cmd.indexOffset, cmd.vertexOffset, 0);
+        cmd.drawIndexed(drawCmd.indexCount, 1, drawCmd.indexOffset, drawCmd.vertexOffset, 0);
     }
 }
 
@@ -361,70 +363,17 @@ Font* GUIRenderer::loadFont(const std::string& name, int size, const std::string
         
         font->lineHeight = 16.0f;
     } else {
+        // TODO: STB headers need to be added to repository
         // Use stb_truetype to rasterize font
-        stbtt_fontinfo fontInfo;
-        if (!stbtt_InitFont(&fontInfo, fontData.data(), 0)) {
-            Logger::error("Failed to initialize font: {}", path);
-            return nullptr;
-        }
+        // stbtt_fontinfo fontInfo;
+        // if (!stbtt_InitFont(&fontInfo, fontData.data(), 0)) {
+        //     VF_ERROR("Failed to initialize font: {}", path);
+        //     return nullptr;
+        // }
+        VF_ERROR("STB font loading not implemented - using bitmap font");
+        return nullptr;
         
-        // Calculate font metrics
-        int ascent, descent, lineGap;
-        stbtt_GetFontVMetrics(&fontInfo, &ascent, &descent, &lineGap);
-        
-        float scale = stbtt_ScaleForPixelHeight(&fontInfo, size);
-        font->lineHeight = (ascent - descent) * scale;
-        
-        // Rasterize characters to texture atlas
-        int textureSize = 512;
-        font->textureWidth = textureSize;
-        font->textureHeight = textureSize;
-        font->textureData.resize(textureSize * textureSize, 0);
-        
-        int x = 0;
-        int y = 0;
-        int rowHeight = 0;
-        
-        font->glyphs.resize(256);
-        
-        for (int c = 32; c < 127; c++) {
-            int width, height, xoff, yoff;
-            uint8_t* bitmap = stbtt_GetCodepointBitmap(
-                &fontInfo, 0, scale, c, &width, &height, &xoff, &yoff);
-            
-            if (x + width >= textureSize) {
-                x = 0;
-                y += rowHeight;
-                rowHeight = 0;
-            }
-            
-            if (height > rowHeight) {
-                rowHeight = height;
-            }
-            
-            // Copy bitmap to texture
-            for (int py = 0; py < height; py++) {
-                for (int px = 0; px < width; px++) {
-                    int dstIdx = (y + py) * textureSize + (x + px);
-                    font->textureData[dstIdx] = bitmap[py * width + px];
-                }
-            }
-            
-            Glyph& glyph = font->glyphs[c];
-            glyph.uvMin = glm::vec2(x / (float)textureSize, y / (float)textureSize);
-            glyph.uvMax = glm::vec2((x + width) / (float)textureSize, 
-                                    (y + height) / (float)textureSize);
-            glyph.size = glm::ivec2(width, height);
-            glyph.bearing = glm::ivec2(xoff, yoff);
-            
-            int advance;
-            stbtt_GetCodepointHMetrics(&fontInfo, c, &advance, nullptr);
-            glyph.advance = advance * scale;
-            
-            x += width + 1;
-            
-            stbtt_FreeBitmap(bitmap);
-        }
+        // STB font loading code removed - headers not in repository
     }
     
     // Create Vulkan texture

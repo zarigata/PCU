@@ -21,6 +21,12 @@ class VulkanDevice;
 class EntityManager;
 class Entity;
 
+// TODO: Implement VulkanPipelineBuilder
+// Forward declaration to fix compilation errors
+struct VulkanPipelineBuilder {
+    // Stub - implementation needed
+};
+
 // Vertex format for entity meshes
 struct EntityVertex {
     glm::vec3 position;
@@ -132,6 +138,7 @@ private:
     void renderInstanced(vk::CommandBuffer cmd, const std::vector<Entity*>& entities);
     
     VulkanDevice* device = nullptr;
+    vk::CommandPool commandPool;
     
     // Pipeline
     vk::Pipeline pipeline;

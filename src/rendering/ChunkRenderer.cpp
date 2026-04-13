@@ -40,6 +40,12 @@ ChunkRenderer::~ChunkRenderer() {
 void ChunkRenderer::init(VulkanDevice* device) {
     this->device = device;
     
+    // Create command pool
+    vk::CommandPoolCreateInfo poolInfo{};
+    poolInfo.queueFamilyIndex = device->getQueueFamilies().graphicsFamily.value();
+    poolInfo.flags = vk::CommandPoolCreateFlagBits::eTransient | vk::CommandPoolCreateFlagBits::eResetCommandBuffer;
+    commandPool = device->getDevice().createCommandPool(poolInfo);
+    
     createDescriptorSets();
     createUniformBuffers();
     createPipeline();
@@ -241,7 +247,7 @@ void ChunkRenderer::uploadPendingMeshes() {
         // Calculate bounding sphere
         glm::vec3 center(0.0f);
         for (const auto& v : mesh->vertices) {
-            center += v.position;
+            center += glm::vec3(v.x, v.y, v.z);
         }
         center /= static_cast<float>(mesh->vertices.size());
         gpuMesh.center = center + glm::vec3(pos.x * 16 + 8, pos.y * 16 + 8, pos.z * 16 + 8);
@@ -253,7 +259,7 @@ void ChunkRenderer::uploadPendingMeshes() {
             device->getDevice(),
             device->getPhysicalDevice(),
             device->getGraphicsQueue(),
-            device->getQueueFamilies().graphicsFamily.value(),
+            commandPool,
             mesh->vertices.data(),
             vertexSize
         );
@@ -264,7 +270,7 @@ void ChunkRenderer::uploadPendingMeshes() {
             device->getDevice(),
             device->getPhysicalDevice(),
             device->getGraphicsQueue(),
-            device->getQueueFamilies().graphicsFamily.value(),
+            commandPool,
             mesh->indices.data(),
             indexSize
         );

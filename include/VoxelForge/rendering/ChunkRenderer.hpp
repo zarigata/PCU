@@ -128,6 +128,7 @@ private:
     void uploadPendingMeshes();
     
     VulkanDevice* device = nullptr;
+    vk::CommandPool commandPool;
     
     // Pipeline
     vk::Pipeline pipeline;

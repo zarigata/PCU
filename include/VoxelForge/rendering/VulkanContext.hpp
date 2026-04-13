@@ -10,6 +10,8 @@
 #include <vector>
 #include <optional>
 #include <memory>
+#include <set>
+#include <algorithm>
 
 namespace VoxelForge {
 
@@ -22,12 +24,57 @@ struct QueueFamilyIndices {
     bool isComplete() const {
         return graphicsFamily.has_value() && presentFamily.has_value();
     }
+    
+    std::set<uint32_t> uniqueFamilies() const {
+        std::set<uint32_t> families;
+        if (graphicsFamily) families.insert(*graphicsFamily);
+        if (presentFamily) families.insert(*presentFamily);
+        if (computeFamily) families.insert(*computeFamily);
+        if (transferFamily) families.insert(*transferFamily);
+        return families;
+    }
 };
 
 struct SwapChainSupportDetails {
     vk::SurfaceCapabilitiesKHR capabilities;
     std::vector<vk::SurfaceFormatKHR> formats;
     std::vector<vk::PresentModeKHR> presentModes;
+    
+    vk::SurfaceFormatKHR chooseSwapSurfaceFormat() const {
+        for (const auto& format : formats) {
+            if (format.format == vk::Format::eB8G8R8A8Srgb &&
+                format.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear) {
+                return format;
+            }
+        }
+        return formats[0];
+    }
+    
+    vk::PresentModeKHR chooseSwapPresentMode(bool vsync = false) const {
+        if (vsync) {
+            return vk::PresentModeKHR::eFifo;
+        }
+        
+        for (const auto& mode : presentModes) {
+            if (mode == vk::PresentModeKHR::eMailbox) {
+                return mode;
+            }
+        }
+        return vk::PresentModeKHR::eFifo;
+    }
+    
+    vk::Extent2D chooseSwapExtent(uint32_t width, uint32_t height) const {
+        if (capabilities.currentExtent.width != UINT32_MAX) {
+            return capabilities.currentExtent;
+        }
+        
+        vk::Extent2D actualExtent = {width, height};
+        actualExtent.width = std::clamp(actualExtent.width, 
+            capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
+        actualExtent.height = std::clamp(actualExtent.height,
+            capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
+        return actualExtent;
+    }
 };
 
 class VulkanContext {

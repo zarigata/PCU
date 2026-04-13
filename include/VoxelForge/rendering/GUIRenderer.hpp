@@ -19,6 +19,12 @@ class VulkanDevice;
 class VulkanCommandBuffer;
 class Input;
 
+// TODO: Implement VulkanPipelineBuilder
+// Forward declaration to fix compilation errors
+struct VulkanPipelineBuilder {
+    // Stub - implementation needed
+};
+
 // GUI vertex format
 struct GUIVertex {
     glm::vec2 position;

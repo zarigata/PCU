@@ -22,6 +22,12 @@ EntityRenderer::~EntityRenderer() {
 void EntityRenderer::init(VulkanDevice* device) {
     this->device = device;
     
+    // Create command pool
+    vk::CommandPoolCreateInfo poolInfo{};
+    poolInfo.queueFamilyIndex = device->getQueueFamilies().graphicsFamily.value();
+    poolInfo.flags = vk::CommandPoolCreateFlagBits::eTransient | vk::CommandPoolCreateFlagBits::eResetCommandBuffer;
+    commandPool = device->getDevice().createCommandPool(poolInfo);
+    
     createDescriptorSets();
     createUniformBuffers();
     createPipeline();
@@ -207,9 +213,9 @@ void EntityRenderer::updateUniformBuffer(Camera* camera) {
     if (!camera) return;
     
     EntityUniformData data{};
-    data.viewProj = camera->getViewProjection();
-    data.view = camera->getView();
-    data.projection = camera->getProjection();
+    data.viewProj = camera->getViewProjectionMatrix();
+    data.view = camera->getViewMatrix();
+    data.projection = camera->getProjectionMatrix();
     data.cameraPos = camera->getPosition();
     data.time = 0.0f;  // TODO: Get actual time
     data.lightDir = glm::normalize(glm::vec3(0.5f, 1.0f, 0.3f));
@@ -299,7 +305,7 @@ void EntityRenderer::loadModel(const std::string& name, const std::string& path)
         device->getDevice(),
         device->getPhysicalDevice(),
         device->getGraphicsQueue(),
-        device->getQueueFamilies().graphicsFamily.value(),
+        commandPool,
         vertices.data(),
         vertices.size() * sizeof(EntityVertex)
     );
@@ -308,13 +314,13 @@ void EntityRenderer::loadModel(const std::string& name, const std::string& path)
         device->getDevice(),
         device->getPhysicalDevice(),
         device->getGraphicsQueue(),
-        device->getQueueFamilies().graphicsFamily.value(),
+        commandPool,
         indices.data(),
         indices.size() * sizeof(uint32_t)
     );
     
     models[name] = std::move(model);
-    Logger::debug("Loaded entity model: {}", name);
+    VF_TRACE("Loaded entity model: {}", name);
 }
 
 void EntityRenderer::unloadModel(const std::string& name) {
