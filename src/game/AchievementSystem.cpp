@@ -13,18 +13,45 @@ namespace VoxelForge {
 // Advancement Implementation
 // ============================================================================
 
-Advancement::Advancement() = default;
-
-Advancement::~Advancement() = default;
-
-std::string Advancement::getId() const {
-    VF_TRACE("Advancement::getId not implemented");
-    return {};
+bool Advancement::isComplete() const {
+    VF_TRACE("Advancement::isComplete not implemented");
+    return false;
 }
 
-std::string Advancement::getDisplayId() const {
-    VF_TRACE("Advancement::getDisplayId not implemented");
-    return {};
+float Advancement::getProgress() const {
+    VF_TRACE("Advancement::getProgress not implemented");
+    return 0.0f;
+}
+
+int Advancement::getCompletedCriteria() const {
+    VF_TRACE("Advancement::getCompletedCriteria not implemented");
+    return 0;
+}
+
+int Advancement::getTotalCriteria() const {
+    VF_TRACE("Advancement::getTotalCriteria not implemented");
+    return 0;
+}
+
+void Advancement::grantCriterion(const std::string& criterionId) {
+    VF_TRACE("Advancement::grantCriterion not implemented");
+    (void)criterionId;
+}
+
+void Advancement::revokeCriterion(const std::string& criterionId) {
+    VF_TRACE("Advancement::revokeCriterion not implemented");
+    (void)criterionId;
+}
+
+bool Advancement::hasCriterion(const std::string& criterionId) const {
+    VF_TRACE("Advancement::hasCriterion not implemented");
+    (void)criterionId;
+    return false;
+}
+
+AdvancementState Advancement::getState() const {
+    VF_TRACE("Advancement::getState not implemented");
+    return AdvancementState::Locked;
 }
 
 nlohmann::json Advancement::toJson() const {
@@ -39,18 +66,12 @@ std::unique_ptr<Advancement> Advancement::fromJson(const nlohmann::json& json, c
 }
 
 // ============================================================================
-// AdvancementTab Implementation
-// ============================================================================
-
-// ============================================================================
 // AchievementSystem Implementation
 // ============================================================================
 
 AchievementSystem::AchievementSystem() = default;
 
-AchievementSystem::~AchievementSystem() {
-    shutdown();
-}
+AchievementSystem::~AchievementSystem() = default;
 
 void AchievementSystem::registerAdvancement(std::unique_ptr<Advancement> advancement) {
     VF_TRACE("AchievementSystem::registerAdvancement not implemented");

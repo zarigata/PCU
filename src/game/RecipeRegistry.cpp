@@ -85,10 +85,30 @@ bool ShapelessRecipe::matches(const std::vector<ItemStack>& inputs) const {
 }
 
 // ============================================================================
+// CookingRecipe Implementation
+// ============================================================================
+
+bool CookingRecipe::matches(const std::vector<ItemStack>& inputs) const {
+    VF_TRACE("CookingRecipe::matches not implemented");
+    (void)inputs;
+    return false;
+}
+
+// ============================================================================
+// StonecuttingRecipe Implementation
+// ============================================================================
+
+bool StonecuttingRecipe::matches(const std::vector<ItemStack>& inputs) const {
+    VF_TRACE("StonecuttingRecipe::matches not implemented");
+    (void)inputs;
+    return false;
+}
+
+// ============================================================================
 // RecipeRegistry Implementation
 // ============================================================================
 
-RecipeRegistry& RecipeRegistry::get() {
+RecipeRegistry& RecipeRegistry::getInstance() {
     static RecipeRegistry instance;
     return instance;
 }
@@ -103,13 +123,13 @@ void RecipeRegistry::unregisterRecipe(const std::string& id) {
     (void)id;
 }
 
-void RecipeRegistry::loadRecipes(const std::string& directory) {
-    VF_TRACE("RecipeRegistry::loadRecipes not implemented");
-    (void)directory;
-}
-
 void RecipeRegistry::clear() {
     VF_TRACE("RecipeRegistry::clear not implemented");
+}
+
+void RecipeRegistry::clearModRecipes(const std::string& modId) {
+    VF_TRACE("RecipeRegistry::clearModRecipes not implemented");
+    (void)modId;
 }
 
 const Recipe* RecipeRegistry::getRecipe(const std::string& id) const {
@@ -118,39 +138,48 @@ const Recipe* RecipeRegistry::getRecipe(const std::string& id) const {
     return nullptr;
 }
 
-std::vector<const Recipe*> RecipeRegistry::getRecipes() const {
-    VF_TRACE("RecipeRegistry::getRecipes not implemented");
-    return {};
-}
-
-std::vector<const Recipe*> RecipeRegistry::getRecipes(RecipeType type) const {
-    VF_TRACE("RecipeRegistry::getRecipes not implemented");
+std::vector<const Recipe*> RecipeRegistry::getRecipesByType(RecipeType type) const {
+    VF_TRACE("RecipeRegistry::getRecipesByType not implemented");
     (void)type;
     return {};
 }
 
-ItemStack RecipeRegistry::craft(const Recipe& recipe, const std::vector<ItemStack>& inputs) {
-    VF_TRACE("RecipeRegistry::craft not implemented");
-    (void)recipe; (void)inputs;
-    return ItemStack();
-}
-
-std::vector<ItemStack> RecipeRegistry::craftWithRemaining(const Recipe& recipe, const std::vector<ItemStack>& inputs) {
-    VF_TRACE("RecipeRegistry::craftWithRemaining not implemented");
-    (void)recipe; (void)inputs;
+std::vector<const Recipe*> RecipeRegistry::getRecipesByCategory(RecipeCategory category) const {
+    VF_TRACE("RecipeRegistry::getRecipesByCategory not implemented");
+    (void)category;
     return {};
 }
 
-std::vector<ItemStack> RecipeRegistry::craftByPattern(const std::vector<std::string>& pattern, const std::unordered_map<char, Ingredient>& key, const RecipeResult& result) {
-    VF_TRACE("RecipeRegistry::craftByPattern not implemented");
-    (void)pattern; (void)key; (void)result;
+std::vector<const Recipe*> RecipeRegistry::getRecipesForItem(const ItemId& item) const {
+    VF_TRACE("RecipeRegistry::getRecipesForItem not implemented");
+    (void)item;
     return {};
 }
 
-std::vector<ItemStack> RecipeRegistry::craftShapeless(const std::vector<Ingredient>& ingredients, const RecipeResult& result) {
-    VF_TRACE("RecipeRegistry::craftShapeless not implemented");
-    (void)ingredients; (void)result;
+std::vector<const Recipe*> RecipeRegistry::getRecipesUsingItem(const ItemId& item) const {
+    VF_TRACE("RecipeRegistry::getRecipesUsingItem not implemented");
+    (void)item;
     return {};
+}
+
+std::vector<const Recipe*> RecipeRegistry::findMatchingRecipes(const std::vector<ItemStack>& inputs,
+                                                                RecipeType type) const {
+    VF_TRACE("RecipeRegistry::findMatchingRecipes not implemented");
+    (void)inputs; (void)type;
+    return {};
+}
+
+const Recipe* RecipeRegistry::findFirstMatchingRecipe(const std::vector<ItemStack>& inputs,
+                                                       RecipeType type) const {
+    VF_TRACE("RecipeRegistry::findFirstMatchingRecipe not implemented");
+    (void)inputs; (void)type;
+    return nullptr;
+}
+
+bool RecipeRegistry::canCraft(const Recipe& recipe, const std::vector<ItemStack>& inventory) const {
+    VF_TRACE("RecipeRegistry::canCraft not implemented");
+    (void)recipe; (void)inventory;
+    return false;
 }
 
 void RecipeRegistry::registerVanillaRecipes() {
