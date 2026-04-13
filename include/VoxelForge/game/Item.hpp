@@ -12,14 +12,15 @@
 #include <functional>
 #include <optional>
 
+#include <VoxelForge/world/Block.hpp>
+#include <VoxelForge/Engine.hpp>
+
 namespace VoxelForge {
 
 // Forward declarations
 class World;
 class Player;
 class Entity;
-struct BlockPos;
-struct BlockState;
 
 using ItemID = uint16_t;
 using ItemCount = uint8_t;
