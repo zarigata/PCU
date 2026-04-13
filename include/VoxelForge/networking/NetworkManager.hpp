@@ -36,6 +36,7 @@ struct NetworkConfig {
 enum class ConnectionState {
     Disconnected,
     Connecting,
+    Handshaking,
     Connected,
     Disconnecting
 };

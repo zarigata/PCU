@@ -478,7 +478,7 @@ bool Client::connect(const std::string& hostname, uint16_t port) {
     serverPeer = enet_host_connect(host, &address, config.maxChannels, 0);
     
     if (!serverPeer) {
-        VF_ERROR("Failed to initiate connection to {}:{}", host, port);
+        VF_ERROR("Failed to initiate connection to {}:{}", hostname, port);
         return false;
     }
     
