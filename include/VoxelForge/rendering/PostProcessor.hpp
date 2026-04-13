@@ -118,8 +118,8 @@ struct PostSettings {
     glm::vec3 gamma = glm::vec3(1.0f);
     glm::vec3 gain = glm::vec3(1.0f);
     
-    // Gamma
-    float gamma = 2.2f;
+    // Gamma correction factor
+    float gammaFactor = 2.2f;
 };
 
 // Effect uniform data

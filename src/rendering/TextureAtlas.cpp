@@ -362,7 +362,7 @@ void TextureAtlas::copyTextureToArray(vk::CommandBuffer cmd, const uint8_t* data
                                        uint32_t width, uint32_t height, uint32_t layer) {
     // Create staging buffer
     vk::DeviceSize imageSize = width * height * 4;
-    VulkanBuffer stagingBuffer = VulkanBuffer::createStagingBuffer(
+    Buffer stagingBuffer = VulkanBuffer::createStagingBuffer(
         device->getDevice(),
         device->getPhysicalDevice(),
         imageSize

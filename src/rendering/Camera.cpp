@@ -282,16 +282,17 @@ void PlayerCamera::processMouseMovement(float xoffset, float yoffset, bool const
     xoffset *= mouseSensitivity;
     yoffset *= mouseSensitivity;
     
-    rotation.y += xoffset;
-    rotation.x -= yoffset;
+    rotate(-yoffset, xoffset);
     
     // Constrain pitch
     if (constrainPitch) {
-        if (rotation.x > 89.0f) rotation.x = 89.0f;
-        if (rotation.x < -89.0f) rotation.x = -89.0f;
+        glm::vec3 rot = getRotation();
+        if (rot.x > 89.0f) {
+            setRotation(glm::vec3(89.0f, rot.y, rot.z));
+        } else if (rot.x < -89.0f) {
+            setRotation(glm::vec3(-89.0f, rot.y, rot.z));
+        }
     }
-    
-    dirty = true;
 }
 
 void PlayerCamera::processKeyboard(float deltaTime, bool forward, bool backward, bool left, bool right, bool jump, bool sneak) {

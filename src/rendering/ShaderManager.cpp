@@ -74,7 +74,7 @@ ShaderModule ShaderManager::loadShader(const std::string& path, vk::ShaderStageF
     // Read file
     std::string source = readFile(path);
     if (source.empty()) {
-        Logger::error("Failed to read shader file: {}", path);
+        VF_ERROR("Failed to read shader file: {}", path);
         return {};
     }
     
@@ -84,7 +84,7 @@ ShaderModule ShaderManager::loadShader(const std::string& path, vk::ShaderStageF
     // Compile
     auto result = compileGLSL(source, stage, path);
     if (!result.success) {
-        Logger::error("Shader compilation failed: {} - {}", path, result.errorMessage);
+        VF_ERROR("Shader compilation failed: {} - {}", path, result.errorMessage);
         return {};
     }
     
@@ -103,7 +103,7 @@ ShaderModule ShaderManager::loadShader(const std::string& path, vk::ShaderStageF
         watchFile(path);
     }
     
-    Logger::debug("Loaded shader: {}", path);
+    VF_TRACE("Loaded shader: {}", path);
     return module;
 }
 
@@ -114,7 +114,7 @@ ShaderModule ShaderManager::loadShaderFromSource(const std::string& source,
     
     auto result = compileGLSL(source, stage, shaderName);
     if (!result.success) {
-        Logger::error("Shader compilation failed: {} - {}", shaderName, result.errorMessage);
+        VF_ERROR("Shader compilation failed: {} - {}", shaderName, result.errorMessage);
         return {};
     }
     
@@ -195,7 +195,7 @@ void ShaderManager::addComputeShader(ShaderProgram& program, const std::string& 
 }
 
 void ShaderManager::addTessControlShader(ShaderProgram& program, const std::string& path) {
-    auto module = loadShader(path, vk::ShaderStageFlagBits::eTessControl);
+    auto module = loadShader(path, vk::ShaderStageFlagBits::eTessellationControl);
     if (module) {
         program.modules.push_back(module);
     }
@@ -257,7 +257,7 @@ void ShaderManager::reloadShader(const std::string& path) {
     
     auto result = compileGLSL(source, it->second.stage, path);
     if (!result.success) {
-        Logger::error("Shader reload failed: {} - {}", path, result.errorMessage);
+        VF_ERROR("Shader reload failed: {} - {}", path, result.errorMessage);
         return;
     }
     
