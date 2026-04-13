@@ -102,7 +102,7 @@ void Profiler::endSection(const std::string& name) {
         name,
         std::chrono::duration_cast<std::chrono::nanoseconds>(start.time_since_epoch()).count(),
         std::chrono::duration_cast<std::chrono::nanoseconds>(end.time_since_epoch()).count(),
-        std::hash<std::thread::id>{}()
+        static_cast<uint32_t>(std::hash<std::thread::id>{}(std::this_thread::get_id()))
     });
 }
 
