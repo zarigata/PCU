@@ -238,7 +238,7 @@ void NetworkManager::shutdown() {
     }
     
     initialized = false;
-    state = ConnectionState::Disconnected;
+    state = NetworkState::Disconnected;
 }
 
 void NetworkManager::registerCallback(PacketType type, PacketCallback callback) {

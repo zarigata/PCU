@@ -9,9 +9,6 @@
 
 namespace VoxelForge {
 
-// Static member initialization
-uint32_t Connection::nextClientId = 1;
-
 // ============================================================================
 // Connection Implementation
 // ============================================================================
@@ -315,8 +312,5 @@ std::unique_ptr<Connection> ConnectionFactory::createAndConnect(ENetHost* host,
     }
     return nullptr;
 }
-
-// Static member initialization
-uint32_t Connection::nextClientId = 1;
 
 } // namespace VoxelForge
