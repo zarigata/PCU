@@ -208,7 +208,7 @@ public:
     
     // Output
     vk::ImageView getOutputView() const;
-    vk::vk::Image getOutputImage() const;
+    vk::Image getOutputImage() const;
     
     // Settings
     PostSettings& getSettings() { return settings; }

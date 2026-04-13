@@ -124,7 +124,7 @@ private:
     vk::PipelineLayout shadowPipelineLayout;
     
     // Shadow map
-    Image shadowMapImage;
+    vk::Image shadowMapImage;
     vk::ImageView shadowMapView;
     vk::Sampler shadowSampler;
     vk::Format shadowFormat = vk::Format::eD32Sfloat;

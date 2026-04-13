@@ -8,11 +8,12 @@
 #include <VoxelForge/world/Chunk.hpp>
 #include <VoxelForge/core/Logger.hpp>
 
-// PhysX includes
-#include <PxPhysicsAPI.h>
-#include <cooking/PxCooking.h>
+// TODO: PhysX headers need to be added to repository
+// PhysX includes commented out:
+// #include <PxPhysicsAPI.h>
+// #include <cooking/PxCooking.h>
 
-using namespace physx;
+// using namespace physx;
 
 namespace VoxelForge {
 
@@ -84,50 +85,15 @@ PhysicsSystem::~PhysicsSystem() {
 }
 
 void PhysicsSystem::init(const PhysicsSettings& settings) {
-    this->settings = settings;
-    
-    // Create foundation
-    foundation = PxCreateFoundation(PX_PHYSICS_VERSION, gAllocator, gErrorCallback);
-    if (!foundation) {
-        throw std::runtime_error("Failed to create PhysX foundation");
-    }
-    
-    // Create physics
-    PxTolerancesScale toleranceScale;
-    physics = PxCreatePhysics(PX_PHYSICS_VERSION, *foundation, toleranceScale);
-    if (!physics) {
-        throw std::runtime_error("Failed to create PhysX physics");
-    }
-    
-    // Create cooking (for mesh generation)
-    PxCookingParams cookingParams(toleranceScale);
-    cookingParams.buildTriangleMeshes = true;
-    cookingParams.buildConvexMeshes = true;
-    cooking = PxCreateCooking(PX_PHYSICS_VERSION, *foundation, cookingParams);
-    if (!cooking) {
-        Logger::warn("Failed to create PhysX cooking, mesh colliders may not work");
-    }
-    
-    // Create scene
-    PxSceneDesc sceneDesc(toleranceScale);
-    sceneDesc.gravity = PxVec3(settings.gravity.x, settings.gravity.y, settings.gravity.z);
-    sceneDesc.cpuDispatcher = PxDefaultCpuDispatcherCreate(settings.cpuThreads);
-    sceneDesc.filterShader = VoxelForgeFilterShader;
-    sceneDesc.flags |= PxSceneFlag::eENABLE_ACTIVE_ACTORS;
-    
-    dispatcher = sceneDesc.cpuDispatcher;
-    scene = physics->createScene(sceneDesc);
-    if (!scene) {
-        throw std::runtime_error("Failed to create PhysX scene");
-    }
-    
-    // Create default material
-    defaultMaterial = physics->createMaterial(0.5f, 0.5f, 0.0f);
-    
-    // Create controller manager
-    controllerManager = PxCreateControllerManager(*scene);
-    
-    Logger::info("PhysicsSystem initialized with {} CPU threads", settings.cpuThreads);
+    // TODO: PhysX implementation not available - headers not in repository
+    VF_ERROR("PhysicsSystem not implemented - PhysX headers not available");
+    (void)settings; // Suppress unused warning
+}
+
+void PhysicsSystem::shutdown() {
+    // TODO: PhysX implementation not available
+    chunkColliders.clear();
+    characterControllers.clear();
 }
 
 void PhysicsSystem::shutdown() {
@@ -194,29 +160,32 @@ void PhysicsSystem::simulate(float deltaTime) {
     }
 }
 
+void PhysicsSystem::simulate(float deltaTime) {
+    // TODO: PhysX implementation not available
+    (void)deltaTime;
+}
+
 void PhysicsSystem::fetchResults() {
-    if (!scene) return;
-    scene->fetchResults(true);
+    // TODO: PhysX implementation not available
 }
 
 void PhysicsSystem::step(float deltaTime) {
     simulate(deltaTime);
+    fetchResults();
 }
 
 std::unique_ptr<DynamicActor> PhysicsSystem::createDynamicActor(
     const glm::vec3& pos, const glm::vec3& halfExtents, float mass) {
-    
-    auto actor = std::make_unique<DynamicActor>();
-    actor->init(this, pos, halfExtents, mass);
-    return actor;
+    VF_ERROR("PhysicsSystem::createDynamicActor not implemented - PhysX not available");
+    (void)pos; (void)halfExtents; (void)mass;
+    return nullptr;
 }
 
 std::unique_ptr<StaticActor> PhysicsSystem::createStaticActor(
     const glm::vec3& pos, const glm::vec3& halfExtents) {
-    
-    auto actor = std::make_unique<StaticActor>();
-    actor->init(this, pos, halfExtents);
-    return actor;
+    VF_ERROR("PhysicsSystem::createStaticActor not implemented - PhysX not available");
+    (void)pos; (void)halfExtents;
+    return nullptr;
 }
 
 void PhysicsSystem::addChunkCollider(Chunk* chunk) {
@@ -271,53 +240,21 @@ void PhysicsSystem::addChunkCollider(Chunk* chunk) {
 }
 
 void PhysicsSystem::removeChunkCollider(const glm::ivec3& chunkPos) {
-    auto it = chunkColliders.find(chunkPos);
-    if (it != chunkColliders.end()) {
-        for (auto* shape : it->second.shapes) {
-            if (shape) {
-                it->second.actor->detachShape(*shape);
-                shape->release();
-            }
-        }
-        if (it->second.actor) {
-            scene->removeActor(*it->second.actor);
-            it->second.actor->release();
-        }
-        chunkColliders.erase(it);
-    }
+    VF_TRACE("PhysicsSystem::removeChunkCollider not implemented");
+    (void)chunkPos;
 }
 
 void PhysicsSystem::updateChunkCollider(Chunk* chunk) {
-    if (!chunk) return;
-    removeChunkCollider(chunk->getPosition());
-    addChunkCollider(chunk);
+    VF_TRACE("PhysicsSystem::updateChunkCollider not implemented");
+    (void)chunk;
 }
 
 RaycastHit PhysicsSystem::raycast(const glm::vec3& origin, const glm::vec3& direction,
                                    float maxDistance, uint16_t collisionMask) {
+    VF_TRACE("PhysicsSystem::raycast not implemented");
     RaycastHit result;
-    
-    PxVec3 pxOrigin(origin.x, origin.y, origin.z);
-    PxVec3 pxDir(direction.x, direction.y, direction.z);
-    pxDir.normalize();
-    
-    PxRaycastBuffer hit;
-    bool success = scene->raycast(pxOrigin, pxDir, maxDistance, hit);
-    
-    if (success) {
-        result.hit = true;
-        result.point = glm::vec3(hit.block.position.x, hit.block.position.y, hit.block.position.z);
-        result.normal = glm::vec3(hit.block.normal.x, hit.block.normal.y, hit.block.normal.z);
-        result.distance = hit.block.distance;
-        
-        // Get actor data
-        if (hit.block.actor) {
-            // Get user data (entity ID)
-            result.entityId = reinterpret_cast<uintptr_t>(hit.block.actor->userData);
-            result.isEntity = result.entityId != 0;
-        }
-    }
-    
+    result.hit = false;
+    (void)origin; (void)direction; (void)maxDistance; (void)collisionMask;
     return result;
 }
 
@@ -351,46 +288,16 @@ std::vector<RaycastHit> PhysicsSystem::raycastAll(const glm::vec3& origin, const
 
 bool PhysicsSystem::overlapSphere(const glm::vec3& center, float radius,
                                    std::vector<uint32_t>& outEntities, uint16_t collisionMask) {
-    PxVec3 pxCenter(center.x, center.y, center.z);
-    PxSphereGeometry sphereGeom(radius);
-    
-    PxOverlapBuffer hit;
-    bool result = scene->overlap(sphereGeom, PxTransform(pxCenter), hit);
-    
-    if (result) {
-        for (PxU32 i = 0; i < hit.nbTouches; i++) {
-            if (hit.touches[i].actor) {
-                uint32_t entityId = reinterpret_cast<uintptr_t>(hit.touches[i].actor->userData);
-                if (entityId != 0) {
-                    outEntities.push_back(entityId);
-                }
-            }
-        }
-    }
-    
-    return result;
+    VF_TRACE("PhysicsSystem::overlapSphere not implemented");
+    (void)center; (void)radius; (void)outEntities; (void)collisionMask;
+    return false;
 }
 
 bool PhysicsSystem::overlapBox(const glm::vec3& center, const glm::vec3& halfExtents,
                                 std::vector<uint32_t>& outEntities, uint16_t collisionMask) {
-    PxVec3 pxCenter(center.x, center.y, center.z);
-    PxBoxGeometry boxGeom(PxVec3(halfExtents.x, halfExtents.y, halfExtents.z));
-    
-    PxOverlapBuffer hit;
-    bool result = scene->overlap(boxGeom, PxTransform(pxCenter), hit);
-    
-    if (result) {
-        for (PxU32 i = 0; i < hit.nbTouches; i++) {
-            if (hit.touches[i].actor) {
-                uint32_t entityId = reinterpret_cast<uintptr_t>(hit.touches[i].actor->userData);
-                if (entityId != 0) {
-                    outEntities.push_back(entityId);
-                }
-            }
-        }
-    }
-    
-    return result;
+    VF_TRACE("PhysicsSystem::overlapBox not implemented");
+    (void)center; (void)halfExtents; (void)outEntities; (void)collisionMask;
+    return false;
 }
 
 CharacterController* PhysicsSystem::createCharacterController(
@@ -419,9 +326,10 @@ PxMaterial* PhysicsSystem::createMaterial(const PhysicsMaterial& material) {
 
 void PhysicsSystem::setGravity(const glm::vec3& gravity) {
     settings.gravity = gravity;
-    if (scene) {
-        scene->setGravity(PxVec3(gravity.x, gravity.y, gravity.z));
-    }
+    // TODO: PhysX scene->setGravity not available
+    // if (scene) {
+    //     scene->setGravity(PxVec3(gravity.x, gravity.y, gravity.z));
+    // }
 }
 
 glm::vec3 PhysicsSystem::getGravity() const {
@@ -430,14 +338,18 @@ glm::vec3 PhysicsSystem::getGravity() const {
 
 void PhysicsSystem::setCollisionCallback(
     std::function<void(uint32_t, uint32_t, const CollisionInfo&)> callback) {
-    collisionCallback = std::move(callback);
+    // TODO: PhysX collisionCallback not available
+    // collisionCallback = std::move(callback);
+    (void)callback;
 }
 
 void PhysicsSystem::setupFiltering(PxShape* shape, CollisionGroup group, uint16_t mask) {
-    PxFilterData filterData;
-    filterData.word0 = static_cast<uint32_t>(group);  // Own group
-    filterData.word1 = mask;                          // Collision mask
-    shape->setSimulationFilterData(filterData);
+    // TODO: PhysX setupFiltering not available
+    // PxFilterData filterData;
+    // filterData.word0 = static_cast<uint32_t>(group);
+    // filterData.word1 = mask;
+    // shape->setSimulationFilterData(filterData);
+    (void)shape; (void)group; (void)mask;
 }
 
 // ============== DynamicActor ==============
