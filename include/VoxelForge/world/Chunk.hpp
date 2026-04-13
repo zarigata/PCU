@@ -362,12 +362,12 @@ private:
 
 // Vertex format for chunk meshes
 struct ChunkVertex {
-    glm::vec3 position;
-    glm::vec3 normal;
-    glm::vec2 texCoord;
-    uint32_t texIndex;  // Texture array index
-    uint32_t color;     // Packed RGBA
-    uint32_t ao;        // Ambient occlusion (4 values packed)
+    float x, y, z;        // Position
+    float nx, ny, nz;     // Normal
+    float u, v;           // UV
+    float ao;             // Ambient occlusion
+    uint32_t light;       // Packed light data
+    uint32_t color;       // Vertex color
 };
 
 struct ChunkMeshData {

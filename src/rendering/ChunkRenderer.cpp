@@ -22,12 +22,12 @@ vk::VertexInputBindingDescription getChunkVertexBindingDescription() {
 
 std::vector<vk::VertexInputAttributeDescription> getChunkVertexAttributeDescriptions() {
     return {
-        {0, 0, vk::Format::eR32G32B32Sfloat, offsetof(ChunkVertex, position)},
-        {1, 0, vk::Format::eR32G32B32Sfloat, offsetof(ChunkVertex, normal)},
-        {2, 0, vk::Format::eR32G32Sfloat, offsetof(ChunkVertex, texCoord)},
-        {3, 0, vk::Format::eR32Uint, offsetof(ChunkVertex, texIndex)},
-        {4, 0, vk::Format::eR32Uint, offsetof(ChunkVertex, color)},
-        {5, 0, vk::Format::eR32Uint, offsetof(ChunkVertex, ao)}
+        {0, 0, vk::Format::eR32G32B32Sfloat, offsetof(ChunkVertex, x)},        // Position
+        {1, 0, vk::Format::eR32G32B32Sfloat, offsetof(ChunkVertex, nx)},       // Normal
+        {2, 0, vk::Format::eR32G32Sfloat, offsetof(ChunkVertex, u)},           // UV
+        {3, 0, vk::Format::eR32Sfloat, offsetof(ChunkVertex, ao)},             // Ambient occlusion
+        {4, 0, vk::Format::eR32Uint, offsetof(ChunkVertex, light)},            // Packed light
+        {5, 0, vk::Format::eR32Uint, offsetof(ChunkVertex, color)}             // Vertex color
     };
 }
 
