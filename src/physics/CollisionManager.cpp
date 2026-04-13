@@ -139,7 +139,7 @@ bool CollisionManager::checkCollision(uint32_t entityA, uint32_t entityB) {
 std::vector<uint32_t> CollisionManager::getCollidingEntities(uint32_t entityId) {
     std::vector<uint32_t> result;
     
-    for (const auto& [pair, _] : activeCollisions) {
+    for (const auto& pair : activeCollisions) {
         if (pair.first == entityId) {
             result.push_back(pair.second);
         } else if (pair.second == entityId) {

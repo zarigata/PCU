@@ -11,6 +11,24 @@
 // #include <fmod.hpp>
 // #include <fmod_errors.h>
 
+// Stub FMOD types for compilation
+namespace FMOD {
+    struct VECTOR {
+        float x, y, z;
+    };
+    struct System {};
+    struct Sound {};
+    struct Channel {};
+    struct ChannelGroup {};
+    struct DSP {};
+    struct Reverb3D {};
+}
+
+struct _ENetHost {};
+struct _ENetPeer {};
+typedef struct _ENetHost ENetHost;
+typedef struct _ENetPeer ENetPeer;
+
 namespace VoxelForge {
 
 // ============================================================================
