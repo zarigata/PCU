@@ -4,6 +4,7 @@
  */
 
 #include <VoxelForge/rendering/PostProcessor.hpp>
+#include <VoxelForge/rendering/VulkanDevice.hpp>
 #include <VoxelForge/rendering/Camera.hpp>
 #include <VoxelForge/core/Logger.hpp>
 
@@ -71,7 +72,7 @@ void PostProcessor::cleanup() {
         }
     }
     bloomMipViews.clear();
-    bloomMips.clear();
+    bloomMipViews.clear();
     
     // Cleanup output
     if (outputView) {
@@ -138,7 +139,7 @@ vk::ImageView PostProcessor::getOutputView() const {
 }
 
 vk::Image PostProcessor::getOutputImage() const {
-    return outputImage.image;
+    return outputImage;
 }
 
 void PostProcessor::setSettings(const PostSettings& newSettings) {
@@ -152,8 +153,8 @@ void PostProcessor::applyOverworldPreset() {
 void PostProcessor::applyNetherPreset() {
     settings = PostSettings();
     settings.colorFilter = glm::vec3(1.0f, 0.8f, 0.6f);
-    settings.fogDensity = 0.05f;
-    settings.fogColor = glm::vec3(0.2f, 0.0f, 0.0f);
+    // settings.fogDensity = 0.05f;  // Fog settings removed from PostSettings
+    // settings.fogColor = glm::vec3(0.2f, 0.0f, 0.0f);
     settings.bloomIntensity = 0.8f;
     settings.exposure = 0.8f;
 }
@@ -161,8 +162,8 @@ void PostProcessor::applyNetherPreset() {
 void PostProcessor::applyEndPreset() {
     settings = PostSettings();
     settings.colorFilter = glm::vec3(0.8f, 0.8f, 1.0f);
-    settings.fogDensity = 0.02f;
-    settings.fogColor = glm::vec3(0.05f, 0.05f, 0.1f);
+    // settings.fogDensity = 0.02f;  // Fog settings removed from PostSettings
+    // settings.fogColor = glm::vec3(0.05f, 0.05f, 0.1f);
     settings.exposure = 0.6f;
 }
 

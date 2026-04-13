@@ -4,6 +4,7 @@
  */
 
 #include <VoxelForge/rendering/SkyRenderer.hpp>
+#include <VoxelForge/rendering/VulkanDevice.hpp>
 #include <VoxelForge/rendering/Camera.hpp>
 #include <VoxelForge/core/Logger.hpp>
 #include <cmath>

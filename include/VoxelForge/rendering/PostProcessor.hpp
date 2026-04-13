@@ -166,7 +166,7 @@ struct PostUniformData {
     alignas(16) glm::vec3 gain;
     
     // Gamma
-    alignas(4) float gamma;
+    alignas(4) float gammaFactor;
     
     // Time
     alignas(4) float time;
@@ -180,7 +180,7 @@ struct PostPass {
     vk::PipelineLayout layout;
     std::vector<vk::DescriptorSet> descriptorSets;
     std::vector<Buffer> uniformBuffers;
-    Image outputImage;
+    vk::Image outputImage;
     vk::ImageView outputView;
     vk::Framebuffer framebuffer;
     vk::RenderPass renderPass;
@@ -208,7 +208,7 @@ public:
     
     // Output
     vk::ImageView getOutputView() const;
-    vk::Image getOutputImage() const;
+    vk::vk::Image getOutputImage() const;
     
     // Settings
     PostSettings& getSettings() { return settings; }
@@ -264,15 +264,15 @@ private:
     // Input/Output
     vk::ImageView colorInput;
     vk::ImageView depthInput;
-    Image outputImage;
+    vk::Image outputImage;
     vk::ImageView outputView;
     
     // Bloom mip chain
-    std::vector<Image> bloomMips;
+    std::vector<vk::Image> bloomMips;
     std::vector<vk::ImageView> bloomMipViews;
     
     // History for TAA
-    Image historyImage;
+    vk::Image historyImage;
     vk::ImageView historyView;
     glm::mat4 prevViewProj;
     
