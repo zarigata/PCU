@@ -36,7 +36,6 @@ void PhysicsSystem::init(const PhysicsSettings& settings) {
 void PhysicsSystem::shutdown() {
     // TODO: PhysX implementation not available
     chunkColliders.clear();
-    characterControllers.clear();
 }
 
 void PhysicsSystem::simulate(float deltaTime) {

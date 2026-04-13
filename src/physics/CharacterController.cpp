@@ -46,28 +46,13 @@ void CharacterController::move(const glm::vec3& displacement, float deltaTime) {
     (void)displacement; (void)deltaTime;
 }
 
+void CharacterController::jump() {
+    VF_TRACE("CharacterController::jump not implemented");
+}
+
 void CharacterController::jump(float height) {
     VF_TRACE("CharacterController::jump not implemented");
     (void)height;
-}
-
-void CharacterController::setSlopeLimit(float angle) {
-    VF_TRACE("CharacterController::setSlopeLimit not implemented");
-    (void)angle;
-}
-
-void CharacterController::setCollisionGroup(CollisionGroup group) {
-    VF_TRACE("CharacterController::setCollisionGroup not implemented");
-    (void)group;
-}
-
-void CharacterController::setCollisionMask(uint16_t mask) {
-    VF_TRACE("CharacterController::setCollisionMask not implemented");
-    (void)mask;
-}
-
-bool CharacterController::onGround() const {
-    return state.isGrounded;
 }
 
 void CharacterController::setPosition(const glm::vec3& pos) {
@@ -75,9 +60,26 @@ void CharacterController::setPosition(const glm::vec3& pos) {
     (void)pos;
 }
 
-void CharacterController::setHeight(float height) {
-    VF_TRACE("CharacterController::setHeight not implemented");
-    (void)height;
+glm::vec3 CharacterController::getPosition() const {
+    return glm::vec3(0.0f);
+}
+
+glm::vec3 CharacterController::getFootPosition() const {
+    return glm::vec3(0.0f);
+}
+
+void CharacterController::setVelocity(const glm::vec3& vel) {
+    VF_TRACE("CharacterController::setVelocity not implemented");
+    (void)vel;
+}
+
+glm::vec3 CharacterController::getVelocity() const {
+    return glm::vec3(0.0f);
+}
+
+void CharacterController::addVelocity(const glm::vec3& vel) {
+    VF_TRACE("CharacterController::addVelocity not implemented");
+    (void)vel;
 }
 
 void CharacterController::setCrouch(bool crouch) {
@@ -116,8 +118,14 @@ void CharacterController::updateSettings(const CharacterControllerSettings& newS
     settings = newSettings;
 }
 
-const CharacterControllerSettings& CharacterController::getSettings() const {
-    return settings;
+void CharacterController::setCollisionGroup(uint16_t group) {
+    VF_TRACE("CharacterController::setCollisionGroup not implemented");
+    (void)group;
+}
+
+void CharacterController::setCollisionMask(uint16_t mask) {
+    VF_TRACE("CharacterController::setCollisionMask not implemented");
+    (void)mask;
 }
 
 void CharacterController::update(float deltaTime) {
@@ -167,6 +175,42 @@ void CharacterController::applyFriction(float deltaTime) {
 
 void CharacterController::integrateVelocity(float deltaTime) {
     VF_TRACE("CharacterController::integrateVelocity not implemented");
+    (void)deltaTime;
+}
+
+// ============================================================================
+// CharacterControllerManager Implementation
+// ============================================================================
+
+CharacterControllerManager::CharacterControllerManager() = default;
+
+CharacterControllerManager::~CharacterControllerManager() {
+    cleanup();
+}
+
+void CharacterControllerManager::init(PhysicsSystem* system) {
+    VF_TRACE("CharacterControllerManager::init not implemented");
+    (void)system;
+}
+
+void CharacterControllerManager::cleanup() {
+    VF_TRACE("CharacterControllerManager::cleanup not implemented");
+}
+
+CharacterController* CharacterControllerManager::createController(
+    const glm::vec3& pos, float height, float radius) {
+    VF_TRACE("CharacterControllerManager::createController not implemented");
+    (void)pos; (void)height; (void)radius;
+    return nullptr;
+}
+
+void CharacterControllerManager::destroyController(CharacterController* controller) {
+    VF_TRACE("CharacterControllerManager::destroyController not implemented");
+    (void)controller;
+}
+
+void CharacterControllerManager::updateAll(float deltaTime) {
+    VF_TRACE("CharacterControllerManager::updateAll not implemented");
     (void)deltaTime;
 }
 
