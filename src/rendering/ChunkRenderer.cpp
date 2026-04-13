@@ -15,6 +15,22 @@
 
 namespace VoxelForge {
 
+// Vulkan vertex binding/attribute descriptions for ChunkVertex
+vk::VertexInputBindingDescription getChunkVertexBindingDescription() {
+    return {0, sizeof(ChunkVertex), vk::VertexInputRate::eVertex};
+}
+
+std::vector<vk::VertexInputAttributeDescription> getChunkVertexAttributeDescriptions() {
+    return {
+        {0, 0, vk::Format::eR32G32B32Sfloat, offsetof(ChunkVertex, position)},
+        {1, 0, vk::Format::eR32G32B32Sfloat, offsetof(ChunkVertex, normal)},
+        {2, 0, vk::Format::eR32G32Sfloat, offsetof(ChunkVertex, texCoord)},
+        {3, 0, vk::Format::eR32Uint, offsetof(ChunkVertex, texIndex)},
+        {4, 0, vk::Format::eR32Uint, offsetof(ChunkVertex, color)},
+        {5, 0, vk::Format::eR32Uint, offsetof(ChunkVertex, ao)}
+    };
+}
+
 ChunkRenderer::ChunkRenderer() = default;
 
 ChunkRenderer::~ChunkRenderer() {

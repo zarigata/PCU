@@ -11,6 +11,7 @@
 // #include <VoxelForge/rendering/VulkanPipeline.hpp>
 // #include <VoxelForge/rendering/VulkanDescriptor.hpp>
 #include <VoxelForge/rendering/Camera.hpp>
+#include <VoxelForge/world/Chunk.hpp>  // For ChunkVertex definition
 #include <glm/glm.hpp>
 #include <memory>
 #include <vector>
@@ -27,30 +28,9 @@ class World;
 class Chunk;
 struct ChunkMeshData;
 
-// Vertex format for chunk meshes
-struct ChunkVertex {
-    glm::vec3 position;
-    glm::vec3 normal;
-    glm::vec2 texCoord;
-    uint32_t texIndex;  // Texture array index
-    uint32_t color;     // Packed RGBA
-    uint32_t ao;        // Ambient occlusion (4 values packed)
-    
-    static vk::VertexInputBindingDescription getBindingDescription() {
-        return {0, sizeof(ChunkVertex), vk::VertexInputRate::eVertex};
-    }
-    
-    static std::vector<vk::VertexInputAttributeDescription> getAttributeDescriptions() {
-        return {
-            {0, 0, vk::Format::eR32G32B32Sfloat, offsetof(ChunkVertex, position)},
-            {1, 0, vk::Format::eR32G32B32Sfloat, offsetof(ChunkVertex, normal)},
-            {2, 0, vk::Format::eR32G32Sfloat, offsetof(ChunkVertex, texCoord)},
-            {3, 0, vk::Format::eR32Uint, offsetof(ChunkVertex, texIndex)},
-            {4, 0, vk::Format::eR32Uint, offsetof(ChunkVertex, color)},
-            {5, 0, vk::Format::eR32Uint, offsetof(ChunkVertex, ao)}
-        };
-    }
-};
+// Vulkan vertex descriptions for ChunkVertex (defined in ChunkRenderer.cpp)
+vk::VertexInputBindingDescription getChunkVertexBindingDescription();
+std::vector<vk::VertexInputAttributeDescription> getChunkVertexAttributeDescriptions();
 
 // GPU data for a chunk mesh
 struct ChunkMeshGPU {
