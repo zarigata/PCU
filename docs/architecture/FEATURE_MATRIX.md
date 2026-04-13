@@ -556,13 +556,13 @@
 
 | Feature | Status | Priority | Notes |
 |---------|--------|----------|-------|
-| Block breaking | 📋 | Critical | Mining speed |
-| Tool requirements | 📋 | Critical | Tier system |
-| Fortune | 📋 | High | Bonus drops |
-| Silk Touch | 📋 | High | Block preservation |
-| Efficiency | 📋 | Medium | Mining speed |
-| Unbreaking | 📋 | Medium | Durability |
-| Durability loss | 📋 | Critical | Tool degradation |
+| Block breaking | 🔄 | Critical | Mining speed |
+| Tool requirements | 🔄 | Critical | Tier system |
+| Fortune | 🔄 | High | Bonus drops |
+| Silk Touch | 🔄 | High | Block preservation |
+| Efficiency | 🔄 | Medium | Mining speed |
+| Unbreaking | 🔄 | Medium | Durability |
+| Durability loss | 🔄 | Critical | Tool degradation |
 
 ### 5.3 Crafting
 
