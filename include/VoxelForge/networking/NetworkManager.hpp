@@ -264,7 +264,7 @@ public:
     
     // Getters
     bool isInitialized() const { return initialized; }
-    ConnectionState getState() const { return state; }
+    NetworkState getState() const { return state; }
     
 protected:
     void handlePacket(uint32_t clientId, PacketType type, const uint8_t* data, size_t size);
@@ -330,7 +330,7 @@ public:
     void disconnect();
     
     // Connection
-    ConnectionState getConnectionState() const { return state; }
+    NetworkState getConnectionState() const { return state; }
     bool isConnected() const { return state == NetworkState::Connected; }
     
     // Login
