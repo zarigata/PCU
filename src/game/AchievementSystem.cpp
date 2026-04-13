@@ -176,7 +176,7 @@ void AchievementSystem::registerAdvancement(std::unique_ptr<Advancement> advance
     }
     
     advancements[id] = std::move(advancement);
-    VF_DEBUG("Registered advancement: {}", id);
+    VF_TRACE("Registered advancement: {}", id);
 }
 
 void AchievementSystem::unregisterAdvancement(const std::string& id) {
@@ -516,7 +516,7 @@ void AchievementSystem::checkAndGrant(uint32_t playerId, const std::string& adva
 void AchievementSystem::grantRewards(uint32_t playerId, const Advancement& advancement) {
     if (advancement.rewards.experience > 0) {
         // TODO: Grant experience to player
-        VF_DEBUG("Granting {} XP to player {}", advancement.rewards.experience, playerId);
+        VF_TRACE("Granting {} XP to player {}", advancement.rewards.experience, playerId);
     }
     
     if (!advancement.rewards.recipes.empty()) {

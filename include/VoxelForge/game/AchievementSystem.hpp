@@ -11,6 +11,7 @@
 #include <memory>
 #include <functional>
 #include <glm/glm.hpp>
+#include <nlohmann/json.hpp>
 
 namespace VoxelForge {
 

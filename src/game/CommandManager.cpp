@@ -154,7 +154,7 @@ void CommandManager::registerCommand(std::unique_ptr<Command> command) {
     }
     
     commands[name] = std::move(command);
-    VF_DEBUG("Registered command: {}", name);
+    VF_TRACE("Registered command: {}", name);
 }
 
 void CommandManager::unregisterCommand(const std::string& name) {
@@ -173,7 +173,7 @@ void CommandManager::unregisterCommand(const std::string& name) {
     }
     
     commands.erase(lowerName);
-    VF_DEBUG("Unregistered command: {}", name);
+    VF_TRACE("Unregistered command: {}", name);
 }
 
 void CommandManager::registerAlias(const std::string& command, const std::string& alias) {
@@ -183,7 +183,7 @@ void CommandManager::registerAlias(const std::string& command, const std::string
     std::transform(lowerAlias.begin(), lowerAlias.end(), lowerAlias.begin(), ::tolower);
     
     aliases[lowerAlias] = lowerCmd;
-    VF_DEBUG("Registered alias '{}' for command '{}'", alias, command);
+    VF_TRACE("Registered alias '{}' for command '{}'", alias, command);
 }
 
 void CommandManager::clear() {

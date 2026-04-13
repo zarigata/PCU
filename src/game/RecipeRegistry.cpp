@@ -56,7 +56,7 @@ bool Recipe::matchesShaped(const std::vector<ItemStack>& inputs, int gridWidth, 
                         continue;
                     }
                     
-                    if (!ingredient.matches(input.itemId) || input.count < ingredient.count) {
+                    if (!ingredient.matches(input.getItem()) || input.getCount() < ingredient.getCount()) {
                         match = false;
                     }
                 }
@@ -91,7 +91,7 @@ bool Recipe::matchesShapeless(const std::vector<ItemStack>& inputs) const {
         for (size_t i = 0; i < inputs.size(); ++i) {
             if (used[i]) continue;
             
-            if (ingredient.matches(inputs[i].itemId) && inputs[i].count >= ingredient.count) {
+            if (ingredient.matches(inputs[i].getItem()) && inputs[i].getCount() >= ingredient.getCount()) {
                 used[i] = true;
                 found = true;
                 break;
@@ -106,8 +106,8 @@ bool Recipe::matchesShapeless(const std::vector<ItemStack>& inputs) const {
 
 ItemStack Recipe::getResult() const {
     ItemStack stack;
-    stack.itemId = result.item;
-    stack.count = result.count;
+    stack.getItem() = result.item;
+    stack.getCount() = result.getCount();
     return stack;
 }
 
@@ -132,7 +132,7 @@ nlohmann::json Recipe::toJson() const {
     for (const auto& ing : ingredients) {
         nlohmann::json ingJ;
         ingJ["items"] = ing.items;
-        ingJ["count"] = ing.count;
+        ingJ["count"] = ing.getCount();
         ingJ["isTag"] = ing.isTag;
         ingrJson.push_back(ingJ);
     }
@@ -140,7 +140,7 @@ nlohmann::json Recipe::toJson() const {
     
     // Result
     j["result"]["item"] = result.item;
-    j["result"]["count"] = result.count;
+    j["result"]["count"] = result.getCount();
     j["result"]["chance"] = result.chance;
     
     if (!isShapeless) {
@@ -176,7 +176,7 @@ std::unique_ptr<Recipe> Recipe::fromJson(const nlohmann::json& json) {
     if (json.contains("ingredients")) {
         for (const auto& ingJ : json["ingredients"]) {
             Ingredient ing;
-            ing.count = ingJ.value("count", 1);
+            ing.getCount() = ingJ.value("count", 1);
             ing.isTag = ingJ.value("isTag", false);
             if (ingJ.contains("items")) {
                 ing.items = ingJ["items"].get<std::vector<std::string>>();
@@ -188,7 +188,7 @@ std::unique_ptr<Recipe> Recipe::fromJson(const nlohmann::json& json) {
     // Parse result
     if (json.contains("result")) {
         recipe->result.item = json["result"].value("item", "");
-        recipe->result.count = json["result"].value("count", 1);
+        recipe->result.getCount() = json["result"].value("count", 1);
         recipe->result.chance = json["result"].value("chance", 1.0f);
     }
     
@@ -231,7 +231,7 @@ bool ShapelessRecipe::matches(const std::vector<ItemStack>& inputs) const {
 
 bool CookingRecipe::matches(const std::vector<ItemStack>& inputs) const {
     if (inputs.empty() || ingredients.empty()) return false;
-    return ingredients[0].matches(inputs[0].itemId);
+    return ingredients[0].matches(inputs[0].getItem());
 }
 
 // ============================================================================
@@ -269,7 +269,7 @@ void RecipeRegistry::registerRecipe(std::unique_ptr<Recipe> recipe) {
         }
     }
     
-    VF_DEBUG("Registered recipe: {}", id);
+    VF_TRACE("Registered recipe: {}", id);
 }
 
 void RecipeRegistry::unregisterRecipe(const std::string& id) {
@@ -293,7 +293,7 @@ void RecipeRegistry::unregisterRecipe(const std::string& id) {
     }
     
     recipes.erase(it);
-    VF_DEBUG("Unregistered recipe: {}", id);
+    VF_TRACE("Unregistered recipe: {}", id);
 }
 
 void RecipeRegistry::clear() {
@@ -396,12 +396,12 @@ bool RecipeRegistry::canCraft(const Recipe& recipe, const std::vector<ItemStack>
     std::unordered_map<ItemId, int> available;
     for (const auto& stack : inventory) {
         if (!stack.isEmpty()) {
-            available[stack.itemId] += stack.count;
+            available[stack.getItem()] += stack.getCount();
         }
     }
     
     for (const auto& ing : recipe.ingredients) {
-        int needed = ing.count;
+        int needed = ing.getCount();
         for (const auto& item : ing.items) {
             if (available[item] >= needed) {
                 available[item] -= needed;

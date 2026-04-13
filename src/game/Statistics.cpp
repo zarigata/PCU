@@ -7,6 +7,7 @@
 #include <VoxelForge/core/Logger.hpp>
 #include <algorithm>
 #include <fstream>
+#include <nlohmann/json.hpp>
 
 namespace VoxelForge {
 
