@@ -10,7 +10,7 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
 4. **Feature implementation**: Work through FEATURE_MATRIX.md high-priority features
 
 ## Build Status
-- **Latest build:** ⏳ FIX PUSHED (2026-04-13 04:00 UTC)
+- **Latest build:** ⏳ FIX PUSHED (2026-04-13 04:15 UTC)
   - Combat commit: `82e744a` feat(combat): implement 1.9+ attack cooldown system - FAILED
   - Fix 1: `d75a290` fix(build): correct Entity type and includes in EntityBase.cpp - FAILED
   - Fix 2: `30551d2` fix(build): correct ECS API usage and types in entity systems - FAILED
@@ -40,9 +40,10 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
   - Fix 26: `be4f554` fix(build): fix ChunkVertex field names to match ChunkMesher.cpp usage - FAILED
   - Fix 27: `6ba87c1` fix(build): fix redefinitions, command pool, and missing includes - FAILED
   - Fix 28: `591c93c` fix(build): stub VulkanPipelineBuilder methods - FAILED
-  - Fix 29: `d75136f` fix(build): stub STB image loading in TextureAtlas
-  - Fix 30: `90fae39` fix(build): fix Vulkan struct assignments and stub glslang
-  - Fixed 69 files + 1 new header created across 30 rounds
+  - Fix 29: `d75136f` fix(build): stub STB image loading in TextureAtlas - FAILED
+  - Fix 30: `90fae39` fix(build): fix Vulkan struct assignments and stub glslang - FAILED
+  - Fix 31: `61d4d4b` fix(build): fix Camera access, VulkanBuffer API, and PostSettings
+  - Fixed 73 files + 1 new header created across 31 rounds
   - Monitoring CI for latest fix
 - **Website:** Live and working
 - **GitHub Issue:** #6 created for stuck Day/Night build
@@ -81,6 +82,7 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
   - Round 28: Stubbed VulkanPipelineBuilder methods to match API usage
   - Round 29: Stubbed STB image loading in TextureAtlas
   - Round 30: Fixed Vulkan struct assignments, stubbed glslang shader compilation
+  - Round 31: Fixed Camera access, VulkanBuffer API, PostSettings redeclaration
 - ⏳ Verify new build passes → Monitoring CI for latest fix
 
 ## Notes
@@ -140,6 +142,7 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
   - fix(build): stub VulkanPipelineBuilder methods (28th round)
   - fix(build): stub STB image loading in TextureAtlas (29th round)
   - fix(build): fix Vulkan struct assignments and stub glslang (30th round)
+  - fix(build): fix Camera access, VulkanBuffer API, and PostSettings (31st round)
   - feat(world): implement World Border system
 - Recent features implemented:
   - Fluid Physics System (water/lava flow simulation, scheduled updates, fluid mixing)
