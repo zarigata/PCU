@@ -9,8 +9,9 @@
 #include <algorithm>
 #include <cmath>
 
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
+// TODO: STB headers need to be added to repository
+// #define STB_IMAGE_IMPLEMENTATION
+// #include <stb_image.h>
 
 namespace VoxelForge {
 
@@ -218,18 +219,20 @@ uint32_t TextureAtlas::addTexture(const std::string& name, const uint8_t* data,
 }
 
 uint32_t TextureAtlas::addTexture(const std::string& name, const std::string& path) {
-    int width, height, channels;
-    stbi_uc* pixels = stbi_load(path.c_str(), &width, &height, &channels, STBI_rgb_alpha);
+    // TODO: STB image loading not implemented - headers not in repository
+    VF_ERROR("STB image loading not implemented - using missing texture: {}", path);
+    return missingTextureIndex;
     
-    if (!pixels) {
-        Logger::error("Failed to load texture: {} ({})", path, stbi_failure_reason());
-        return missingTextureIndex;
-    }
-    
-    uint32_t index = addTexture(name, pixels, width, height, 4);
-    stbi_image_free(pixels);
-    
-    return index;
+    // STB loading code commented out:
+    // int width, height, channels;
+    // stbi_uc* pixels = stbi_load(path.c_str(), &width, &height, &channels, STBI_rgb_alpha);
+    // if (!pixels) {
+    //     VF_ERROR("Failed to load texture: {} ({})", path, stbi_failure_reason());
+    //     return missingTextureIndex;
+    // }
+    // uint32_t index = addTexture(name, pixels, width, height, 4);
+    // stbi_image_free(pixels);
+    // return index;
 }
 
 uint32_t TextureAtlas::addTexture(const TextureInfo& info) {
