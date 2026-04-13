@@ -1,27 +1,11 @@
 /**
  * @file LuaEngine.cpp
- * @brief LuaJIT-based scripting engine implementation
+ * @brief Lua scripting engine implementation (stubbed for compilation)
  */
 
 #include <VoxelForge/scripting/LuaEngine.hpp>
-#include <VoxelForge/scripting/LuaBindings.hpp>
 #include <VoxelForge/core/Logger.hpp>
 #include <sstream>
-#include <chrono>
-
-// TODO: LuaJIT and Sol2 headers need to be added to repository
-// Lua includes commented out:
-// #include <lua.h>
-// #include <sol/sol.hpp>
-
-// Stub Lua types for compilation
-namespace sol {
-    enum class lib {};
-    struct state {};
-    struct environment {};
-    struct function {};
-    struct table {};
-}
 
 namespace VoxelForge {
 
@@ -36,219 +20,203 @@ LuaEngine::~LuaEngine() {
 }
 
 void LuaEngine::init(const LuaEngineSettings& settings) {
-    VF_TRACE("LuaEngine::init not implemented - LuaJIT headers not available");
+    VF_TRACE("LuaEngine::init not implemented - LuaJIT/Sol2 not available");
     this->settings = settings;
+    initialized = true;
 }
 
 void LuaEngine::shutdown() {
     VF_TRACE("LuaEngine::shutdown not implemented");
+    scripts.clear();
+    eventCallbacks.clear();
+    initialized = false;
 }
 
 void LuaEngine::setupPackagePaths() {
     VF_TRACE("LuaEngine::setupPackagePaths not implemented");
 }
 
-void LuaEngine::setupJIT() {
-    VF_TRACE("LuaEngine::setupJIT not implemented");
-}
-
-void LuaEngine::setupMemoryLimit() {
-    VF_TRACE("LuaEngine::setupMemoryLimit not implemented");
-}
-
-void LuaEngine::luaPanic(lua_State* L, const char* msg) {
-    VF_TRACE("LuaEngine::luaPanic not implemented");
-    (void)L; (void)msg;
-}
-
-sol::state& LuaEngine::getState() {
-    static sol::state dummyState;
-    VF_TRACE("LuaEngine::getState not implemented");
-    return dummyState;
-}
-
-sol::environment LuaEngine::createEnvironment() {
-    static sol::environment dummyEnv;
-    VF_TRACE("LuaEngine::createEnvironment not implemented");
-    return dummyEnv;
-}
-
-bool LuaEngine::loadScript(const std::string& path) {
+bool LuaEngine::loadScript(const std::string& name, const std::string& source) {
     VF_TRACE("LuaEngine::loadScript not implemented");
-    (void)path;
+    (void)name; (void)source;
     return false;
 }
 
-bool LuaEngine::loadScriptString(const std::string& script, const std::string& name) {
-    VF_TRACE("LuaEngine::loadScriptString not implemented");
-    (void)script; (void)name;
+bool LuaEngine::loadScriptFile(const std::string& name, const std::string& path) {
+    VF_TRACE("LuaEngine::loadScriptFile not implemented");
+    (void)name; (void)path;
     return false;
 }
 
-bool LuaEngine::loadScriptDirectory(const std::string& directory, bool recursive) {
-    VF_TRACE("LuaEngine::loadScriptDirectory not implemented");
-    (void)directory; (void)recursive;
+bool LuaEngine::loadScriptFile(const ScriptInfo& info) {
+    VF_TRACE("LuaEngine::loadScriptFile not implemented");
+    (void)info;
     return false;
 }
 
-bool LuaEngine::executeScript(const std::string& script, const std::string& name) {
-    VF_TRACE("LuaEngine::executeScript not implemented");
-    (void)script; (void)name;
-    return false;
-}
-
-bool LuaEngine::executeFile(const std::string& path) {
-    VF_TRACE("LuaEngine::executeFile not implemented");
-    (void)path;
-    return false;
-}
-
-std::string LuaEngine::getError() const {
-    VF_TRACE("LuaEngine::getError not implemented");
-    return "";
-}
-
-bool LuaEngine::hasError() const {
-    VF_TRACE("LuaEngine::hasError not implemented");
-    return false;
-}
-
-void LuaEngine::clearError() {
-    VF_TRACE("LuaEngine::clearError not implemented");
-}
-
-bool LuaEngine::callFunction(const std::string& name, sol::environment* env) {
-    VF_TRACE("LuaEngine::callFunction not implemented");
-    (void)name; (void)env;
-    return false;
-}
-
-sol::function LuaEngine::getFunction(const std::string& name, sol::environment* env) {
-    static sol::function dummyFunc;
-    VF_TRACE("LuaEngine::getFunction not implemented");
-    (void)name; (void)env;
-    return dummyFunc;
-}
-
-sol::table LuaEngine::getTable(const std::string& name, sol::environment* env) {
-    static sol::table dummyTable;
-    VF_TRACE("LuaEngine::getTable not implemented");
-    (void)name; (void)env;
-    return dummyTable;
-}
-
-sol::table LuaEngine::getGlobalTable(sol::environment* env) {
-    static sol::table dummyTable;
-    VF_TRACE("LuaEngine::getGlobalTable not implemented");
-    (void)env;
-    return dummyTable;
-}
-
-void LuaEngine::setGlobal(const std::string& name, const sol::object& value) {
-    VF_TRACE("LuaEngine::setGlobal not implemented");
-    (void)name; (void)value;
-}
-
-sol::object LuaEngine::getGlobal(const std::string& name) {
-    static sol::object dummyObj;
-    VF_TRACE("LuaEngine::getGlobal not implemented");
+void LuaEngine::unloadScript(const std::string& name) {
+    VF_TRACE("LuaEngine::unloadScript not implemented");
     (void)name;
-    return dummyObj;
 }
 
-sol::environment LuaEngine::getEnvironment(sol::environment* env) {
-    static sol::environment dummyEnv;
-    VF_TRACE("LuaEngine::getEnvironment not implemented");
-    (void)env;
-    return dummyEnv;
+void LuaEngine::reloadScript(const std::string& name) {
+    VF_TRACE("LuaEngine::reloadScript not implemented");
+    (void)name;
 }
 
-void LuaEngine::collectGarbage() {
-    VF_TRACE("LuaEngine::collectGarbage not implemented");
+void LuaEngine::reloadAllScripts() {
+    VF_TRACE("LuaEngine::reloadAllScripts not implemented");
 }
 
-size_t LuaEngine::getMemoryUsage() const {
-    VF_TRACE("LuaEngine::getMemoryUsage not implemented");
-    return 0;
-}
-
-int LuaEngine::getMemoryUsedKb() const {
-    VF_TRACE("LuaEngine::getMemoryUsedKb not implemented");
-    return 0;
-}
-
-void LuaEngine::setMemoryLimit(int kilobytes) {
-    VF_TRACE("LuaEngine::setMemoryLimit not implemented");
-    (void)kilobytes;
-}
-
-void LuaEngine::enableJIT(bool enable) {
-    VF_TRACE("LuaEngine::enableJIT not implemented");
-    (void)enable;
-}
-
-bool LuaEngine::isJITEnabled() const {
-    VF_TRACE("LuaEngine::isJITEnabled not implemented");
+bool LuaEngine::isScriptLoaded(const std::string& name) const {
+    VF_TRACE("LuaEngine::isScriptLoaded not implemented");
+    (void)name;
     return false;
 }
 
-void LuaEngine::setProfilerEnabled(bool enabled) {
-    VF_TRACE("LuaEngine::setProfilerEnabled not implemented");
-    (void)enabled;
-}
-
-bool LuaEngine::isProfilerEnabled() const {
-    VF_TRACE("LuaEngine::isProfilerEnabled not implemented");
+bool LuaEngine::isScriptEnabled(const std::string& name) const {
+    VF_TRACE("LuaEngine::isScriptEnabled not implemented");
+    (void)name;
     return false;
 }
 
-std::vector<std::string> LuaEngine::getProfilerData() {
-    VF_TRACE("LuaEngine::getProfilerData not implemented");
-    return {};
+void LuaEngine::setScriptEnabled(const std::string& name, bool enabled) {
+    VF_TRACE("LuaEngine::setScriptEnabled not implemented");
+    (void)name; (void)enabled;
 }
 
-void LuaEngine::enableSandbox(bool enable) {
-    VF_TRACE("LuaEngine::enableSandbox not implemented");
-    (void)enable;
+ScriptResult LuaEngine::execute(const std::string& code) {
+    VF_TRACE("LuaEngine::execute not implemented");
+    (void)code;
+    return {false, "Not implemented", std::any{}};
 }
 
-bool LuaEngine::isSandboxEnabled() const {
-    VF_TRACE("LuaEngine::isSandboxEnabled not implemented");
-    return false;
+ScriptResult LuaEngine::executeInScript(const std::string& scriptName, const std::string& code) {
+    VF_TRACE("LuaEngine::executeInScript not implemented");
+    (void)scriptName; (void)code;
+    return {false, "Not implemented", std::any{}};
 }
 
-void LuaEngine::addSandboxFunction(const std::string& name, sol::function func) {
-    VF_TRACE("LuaEngine::addSandboxFunction not implemented");
+void LuaEngine::registerEventCallback(const std::string& scriptName, ScriptEvent event,
+                                     std::function<void()> callback, int priority) {
+    VF_TRACE("LuaEngine::registerEventCallback not implemented");
+    (void)scriptName; (void)event; (void)callback; (void)priority;
+}
+
+void LuaEngine::triggerEvent(ScriptEvent event) {
+    VF_TRACE("LuaEngine::triggerEvent not implemented");
+    (void)event;
+}
+
+void LuaEngine::registerGlobalAPI() {
+    VF_TRACE("LuaEngine::registerGlobalAPI not implemented");
+}
+
+void LuaEngine::registerMathAPI() {
+    VF_TRACE("LuaEngine::registerMathAPI not implemented");
+}
+
+void LuaEngine::registerWorldAPI() {
+    VF_TRACE("LuaEngine::registerWorldAPI not implemented");
+}
+
+void LuaEngine::registerEntityAPI() {
+    VF_TRACE("LuaEngine::registerEntityAPI not implemented");
+}
+
+void LuaEngine::registerPlayerAPI() {
+    VF_TRACE("LuaEngine::registerPlayerAPI not implemented");
+}
+
+void LuaEngine::registerBlockAPI() {
+    VF_TRACE("LuaEngine::registerBlockAPI not implemented");
+}
+
+void LuaEngine::registerItemAPI() {
+    VF_TRACE("LuaEngine::registerItemAPI not implemented");
+}
+
+void LuaEngine::registerGUIAPI() {
+    VF_TRACE("LuaEngine::registerGUIAPI not implemented");
+}
+
+void LuaEngine::registerNetworkAPI() {
+    VF_TRACE("LuaEngine::registerNetworkAPI not implemented");
+}
+
+void LuaEngine::registerFunction(const std::string& name, std::function<void()> func) {
+    VF_TRACE("LuaEngine::registerFunction not implemented");
     (void)name; (void)func;
 }
 
-void LuaEngine::removeSandboxFunction(const std::string& name) {
-    VF_TRACE("LuaEngine::removeSandboxFunction not implemented");
-    (void)name;
+void LuaEngine::setErrorHandler(std::function<void(const std::string&)> handler) {
+    VF_TRACE("LuaEngine::setErrorHandler not implemented");
+    errorHandler = std::move(handler);
 }
 
-void LuaEngine::clearSandbox() {
-    VF_TRACE("LuaEngine::clearSandbox not implemented");
+void LuaEngine::reportError(const std::string& scriptName, const std::string& error) {
+    VF_TRACE("LuaEngine::reportError not implemented");
+    if (errorHandler) {
+        errorHandler(scriptName + ": " + error);
+    }
 }
 
-ScriptState LuaEngine::createScriptState() {
-    ScriptState state;
-    VF_TRACE("LuaEngine::createScriptState not implemented");
-    return state;
+// ============================================================================
+// ScriptedBehavior Implementation
+// ============================================================================
+
+ScriptedBehavior::ScriptedBehavior() = default;
+
+void ScriptedBehavior::setScript(LuaEngine* engine, const std::string& scriptName) {
+    VF_TRACE("ScriptedBehavior::setScript not implemented");
+    this->engine = engine;
+    this->scriptName = scriptName;
 }
 
-void LuaEngine::destroyScriptState(ScriptState& state) {
-    VF_TRACE("LuaEngine::destroyScriptState not implemented");
-    (void)state;
+void ScriptedBehavior::clear() {
+    VF_TRACE("ScriptedBehavior::clear not implemented");
+    engine = nullptr;
+    scriptName.clear();
 }
 
-const LuaEngineSettings& LuaEngine::getSettings() const {
-    return settings;
+void ScriptedBehavior::onUpdate(float deltaTime) {
+    VF_TRACE("ScriptedBehavior::onUpdate not implemented");
+    (void)deltaTime;
 }
 
-void LuaEngine::setSettings(const LuaEngineSettings& settings) {
-    VF_TRACE("LuaEngine::setSettings not implemented");
-    this->settings = settings;
+void ScriptedBehavior::onEvent(ScriptEvent event) {
+    VF_TRACE("ScriptedBehavior::onEvent not implemented");
+    (void)event;
+}
+
+// ============================================================================
+// LuaHelpers Implementation
+// ============================================================================
+
+glm::vec3 LuaHelpers::makeVec3(float x, float y, float z) {
+    return glm::vec3(x, y, z);
+}
+
+glm::ivec3 LuaHelpers::makeIVec3(int x, int y, int z) {
+    return glm::ivec3(x, y, z);
+}
+
+std::vector<float> LuaHelpers::toFloatVector(const std::string& s) {
+    VF_TRACE("LuaHelpers::toFloatVector not implemented");
+    (void)s;
+    return {};
+}
+
+std::vector<int> LuaHelpers::toIntVector(const std::string& s) {
+    VF_TRACE("LuaHelpers::toIntVector not implemented");
+    (void)s;
+    return {};
+}
+
+std::vector<std::string> LuaHelpers::toStringVector(const std::string& s) {
+    VF_TRACE("LuaHelpers::toStringVector not implemented");
+    (void)s;
+    return {};
 }
 
 } // namespace VoxelForge
