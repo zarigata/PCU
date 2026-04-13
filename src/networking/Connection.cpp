@@ -9,6 +9,9 @@
 
 namespace VoxelForge {
 
+// Static member initialization
+uint32_t Connection::nextClientId = 1;
+
 // ============================================================================
 // Connection Implementation
 // ============================================================================
@@ -39,6 +42,7 @@ bool Connection::connect(ENetHost* host, const std::string& address, uint16_t po
         return false;
     }
     
+    this->host = host;
     this->address = address;
     this->port = port;
     state = ConnectionState::Connecting;
@@ -72,7 +76,7 @@ void Connection::disconnect() {
     // Wait for disconnect acknowledgment
     ENetEvent event;
     auto startTime = std::chrono::steady_clock::now();
-    while (enet_host_service(enet_peer_get_host(peer), &event, 1000) > 0) {
+    while (enet_host_service(this->host, &event, 1000) > 0) {
         if (event.type == ENET_EVENT_TYPE_DISCONNECT) {
             break;
         }
@@ -141,7 +145,7 @@ void Connection::sendPacket(const Packet& packet) {
 void Connection::sendPacketImmediate(const Packet& packet) {
     sendPacket(packet);
     if (peer) {
-        enet_host_flush(enet_peer_get_host(peer));
+        enet_host_flush(this->host);
     }
 }
 
@@ -184,7 +188,7 @@ void Connection::update() {
 void Connection::processEvents() {
     if (!peer) return;
     
-    ENetHost* host = enet_peer_get_host(peer);
+    ENetHost* host = this->host;
     ENetEvent event;
     
     while (enet_host_service(host, &event, 0) > 0) {

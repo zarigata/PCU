@@ -32,8 +32,8 @@ struct NetworkConfig {
     bool enableEncryption = false;
 };
 
-// Connection state
-enum class ConnectionState {
+// Network state (for client/server overall state)
+enum class NetworkState {
     Disconnected,
     Connecting,
     Handshaking,
@@ -272,7 +272,7 @@ protected:
     void onDisconnect(uint32_t clientId);
     
     bool initialized = false;
-    ConnectionState state = ConnectionState::Disconnected;
+    NetworkState state = NetworkState::Disconnected;
     ENetHost* host = nullptr;
     NetworkConfig config;
     NetworkStats stats;
@@ -331,7 +331,7 @@ public:
     
     // Connection
     ConnectionState getConnectionState() const { return state; }
-    bool isConnected() const { return state == ConnectionState::Connected; }
+    bool isConnected() const { return state == NetworkState::Connected; }
     
     // Login
     void login(const std::string& username);

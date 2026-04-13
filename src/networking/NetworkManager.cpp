@@ -302,7 +302,7 @@ void NetworkManager::handlePacket(uint32_t clientId, PacketType type,
 }
 
 void NetworkManager::onConnect(uint32_t clientId) {
-    state = ConnectionState::Connected;
+    state = NetworkState::Connected;
     VF_INFO("Client {} connected", clientId);
 }
 
@@ -341,7 +341,7 @@ bool Server::start(uint16_t port, uint16_t maxPlayers) {
         return false;
     }
     
-    state = ConnectionState::Connected;
+    state = NetworkState::Connected;
     VF_INFO("Server started on port {} with max {} players", port, maxPlayers);
     return true;
 }
@@ -363,7 +363,7 @@ void Server::stop() {
     }
     
     clients.clear();
-    state = ConnectionState::Disconnected;
+    state = NetworkState::Disconnected;
     VF_INFO("Server stopped");
 }
 
@@ -482,7 +482,7 @@ bool Client::connect(const std::string& hostname, uint16_t port) {
         return false;
     }
     
-    state = ConnectionState::Connecting;
+    state = NetworkState::Connecting;
     
     // Wait for connection
     ENetEvent event;
@@ -492,7 +492,7 @@ bool Client::connect(const std::string& hostname, uint16_t port) {
         serverPeer->data = reinterpret_cast<void*>(1);
         serverId = 1;
         peers[serverId] = serverPeer;
-        state = ConnectionState::Connected;
+        state = NetworkState::Connected;
         
         VF_INFO("Connected to {}:{}", hostname, port);
         return true;
@@ -500,12 +500,12 @@ bool Client::connect(const std::string& hostname, uint16_t port) {
     
     VF_ERROR("Connection to {}:{} timed out", hostname, port);
     enet_peer_reset(serverPeer);
-    state = ConnectionState::Disconnected;
+    state = NetworkState::Disconnected;
     return false;
 }
 
 void Client::disconnect() {
-    if (serverPeer && state == ConnectionState::Connected) {
+    if (serverPeer && state == NetworkState::Connected) {
         enet_peer_disconnect(serverPeer, 0);
         
         ENetEvent event;
@@ -523,7 +523,7 @@ void Client::disconnect() {
     
     serverPeer = nullptr;
     peers.clear();
-    state = ConnectionState::Disconnected;
+    state = NetworkState::Disconnected;
     VF_INFO("Disconnected from server");
 }
 

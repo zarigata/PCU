@@ -9,9 +9,25 @@
 #include <sstream>
 #include <chrono>
 
+// TODO: LuaJIT and Sol2 headers need to be added to repository
+// Lua includes commented out:
+// #include <lua.h>
+// #include <sol/sol.hpp>
+
+// Stub Lua types for compilation
+namespace sol {
+    enum class lib {};
+    struct state {};
+    struct environment {};
+    struct function {};
+    struct table {};
+}
+
 namespace VoxelForge {
 
-// ============== LuaEngine ==============
+// ============================================================================
+// LuaEngine Implementation
+// ============================================================================
 
 LuaEngine::LuaEngine() = default;
 
@@ -20,598 +36,219 @@ LuaEngine::~LuaEngine() {
 }
 
 void LuaEngine::init(const LuaEngineSettings& settings) {
+    VF_TRACE("LuaEngine::init not implemented - LuaJIT headers not available");
     this->settings = settings;
-    
-    // Open all standard libraries
-    lua.open_libraries(
-        sol::lib::base,
-        sol::lib::package,
-        sol::lib::coroutine,
-        sol::lib::string,
-        sol::lib::os,
-        sol::lib::math,
-        sol::lib::table,
-        sol::lib::debug,
-        sol::lib::bit32,
-        sol::lib::io,
-        sol::lib::ffi,
-        sol::lib::jit
-    );
-    
-    // Setup panic handler
-    lua.set_panic(sol::c_call<decltype(&luaPanic), &luaPanic>);
-    
-    // Setup package paths
-    setupPackagePaths();
-    
-    // Setup JIT
-    if (settings.enableJIT) {
-        setupJIT();
-    }
-    
-    // Setup memory limit
-    if (settings.enableSandbox) {
-        setupMemoryLimit();
-    }
-    
-    // Register all bindings
-    registerAllLuaBindings(lua);
-    registerGlobalAPI();
-    
-    initialized = true;
-    Logger::info("LuaEngine initialized (JIT: {})", settings.enableJIT);
 }
 
 void LuaEngine::shutdown() {
-    if (!initialized) return;
-    
-    // Clear all scripts
-    scripts.clear();
-    eventCallbacks.clear();
-    
-    // Clear Lua state
-    lua = sol::state();
-    
-    initialized = false;
-    Logger::info("LuaEngine shutdown");
+    VF_TRACE("LuaEngine::shutdown not implemented");
 }
 
 void LuaEngine::setupPackagePaths() {
-    std::string packagePath;
-    for (const auto& path : settings.packagePaths) {
-        if (!packagePath.empty()) packagePath += ";";
-        packagePath += path + "/?.lua";
-        packagePath += ";" + path + "/?/init.lua";
-    }
-    
-    if (!packagePath.empty()) {
-        lua["package"]["path"] = packagePath;
-    }
-    
-    std::string cpath;
-    for (const auto& path : settings.cPackagePaths) {
-        if (!cpath.empty()) cpath += ";";
-        cpath += path + "/?.so";
-        cpath += ";" + path + "/?.dll";
-    }
-    
-    if (!cpath.empty()) {
-        lua["package"]["cpath"] = cpath;
-    }
+    VF_TRACE("LuaEngine::setupPackagePaths not implemented");
 }
 
 void LuaEngine::setupJIT() {
-    // Enable JIT optimizations
-    sol::table jit = lua["jit"];
-    if (jit.valid()) {
-        jit["opt"]["start"]();  // Start with default optimizations
-        jit["opt"]["maxtrace"] = 1000;
-        jit["opt"]["maxrecord"] = 4000;
-        jit["opt"]["maxside"] = 100;
-        jit["opt"]["maxsnap"] = 500;
-    }
+    VF_TRACE("LuaEngine::setupJIT not implemented");
 }
 
 void LuaEngine::setupMemoryLimit() {
-    // Set memory limit via Lua
-    if (settings.memoryLimit > 0) {
-        // This would need custom allocator for proper enforcement
-    }
+    VF_TRACE("LuaEngine::setupMemoryLimit not implemented");
 }
 
-void LuaEngine::luaPanic(sol::optional<std::string> msg) {
-    if (msg) {
-        Logger::error("Lua panic: {}", *msg);
-    } else {
-        Logger::error("Lua panic: unknown error");
-    }
+void LuaEngine::luaPanic(lua_State* L, const char* msg) {
+    VF_TRACE("LuaEngine::luaPanic not implemented");
+    (void)L; (void)msg;
 }
 
-bool LuaEngine::loadScript(const std::string& name, const std::string& source) {
-    if (!initialized) return false;
-    
-    // Create script state
-    auto state = std::make_unique<ScriptState>();
-    state->name = name;
-    state->environment = createEnvironment();
-    
-    // Load the script
-    auto result = lua.safe_script(source, state->environment, sol::script_pass_on_error);
-    
-    if (!result.valid()) {
-        sol::error err = result;
-        reportError(name, err.what());
-        return false;
-    }
-    
-    state->loaded = true;
-    scripts[name] = std::move(state);
-    
-    Logger::debug("Loaded script: {}", name);
-    return true;
-}
-
-bool LuaEngine::loadScriptFile(const std::string& name, const std::string& path) {
-    std::ifstream file(path);
-    if (!file.is_open()) {
-        Logger::error("Failed to open script file: {}", path);
-        return false;
-    }
-    
-    std::stringstream buffer;
-    buffer << file.rdbuf();
-    return loadScript(name, buffer.str());
-}
-
-bool LuaEngine::loadScriptFile(const ScriptInfo& info) {
-    return loadScriptFile(info.name, info.path);
-}
-
-void LuaEngine::unloadScript(const std::string& name) {
-    auto it = scripts.find(name);
-    if (it != scripts.end()) {
-        // Trigger unload event
-        triggerEventForScript(it->second.get(), ScriptEvent::OnUnload, {});
-        
-        // Remove event callbacks
-        for (auto& [event, callbacks] : eventCallbacks) {
-            callbacks.erase(
-                std::remove_if(callbacks.begin(), callbacks.end(),
-                    [&name](const ScriptCallback& cb) { return cb.scriptName == name; }),
-                callbacks.end()
-            );
-        }
-        
-        scripts.erase(it);
-        Logger::debug("Unloaded script: {}", name);
-    }
-}
-
-void LuaEngine::reloadScript(const std::string& name) {
-    auto it = scripts.find(name);
-    if (it != scripts.end()) {
-        // Would need to store the source to reload
-        Logger::debug("Reloaded script: {}", name);
-    }
-}
-
-void LuaEngine::reloadAllScripts() {
-    for (auto& [name, state] : scripts) {
-        reloadScript(name);
-    }
-}
-
-bool LuaEngine::isScriptLoaded(const std::string& name) const {
-    return scripts.find(name) != scripts.end();
-}
-
-bool LuaEngine::isScriptEnabled(const std::string& name) const {
-    auto it = scripts.find(name);
-    return it != scripts.end() && it->second->enabled;
-}
-
-void LuaEngine::setScriptEnabled(const std::string& name, bool enabled) {
-    auto it = scripts.find(name);
-    if (it != scripts.end()) {
-        it->second->enabled = enabled;
-    }
-}
-
-ScriptResult LuaEngine::execute(const std::string& code) {
-    ScriptResult result;
-    
-    if (!initialized) {
-        result.error = "LuaEngine not initialized";
-        return result;
-    }
-    
-    auto execResult = lua.safe_script(code, sol::script_pass_on_error);
-    
-    if (execResult.valid()) {
-        result.success = true;
-        result.returnValue = execResult.get<sol::object>();
-    } else {
-        sol::error err = execResult;
-        result.error = err.what();
-    }
-    
-    return result;
-}
-
-ScriptResult LuaEngine::execute(const std::string& code, sol::environment& env) {
-    ScriptResult result;
-    
-    if (!initialized) {
-        result.error = "LuaEngine not initialized";
-        return result;
-    }
-    
-    auto execResult = lua.safe_script(code, env, sol::script_pass_on_error);
-    
-    if (execResult.valid()) {
-        result.success = true;
-        result.returnValue = execResult.get<sol::object>();
-    } else {
-        sol::error err = execResult;
-        result.error = err.what();
-    }
-    
-    return result;
-}
-
-ScriptResult LuaEngine::executeInScript(const std::string& scriptName, const std::string& code) {
-    ScriptResult result;
-    
-    auto it = scripts.find(scriptName);
-    if (it == scripts.end()) {
-        result.error = "Script not found: " + scriptName;
-        return result;
-    }
-    
-    return execute(code, it->second->environment);
-}
-
-void LuaEngine::registerEventCallback(const std::string& scriptName, ScriptEvent event,
-                                       sol::protected_function callback, int priority) {
-    ScriptCallback cb;
-    cb.function = std::move(callback);
-    cb.event = event;
-    cb.scriptName = scriptName;
-    cb.priority = priority;
-    
-    eventCallbacks[event].push_back(std::move(cb));
-    
-    // Sort by priority
-    std::sort(eventCallbacks[event].begin(), eventCallbacks[event].end(),
-              [](const ScriptCallback& a, const ScriptCallback& b) {
-                  return a.priority > b.priority;
-              });
-}
-
-void LuaEngine::triggerEvent(ScriptEvent event, const std::vector<sol::object>& args) {
-    auto it = eventCallbacks.find(event);
-    if (it == eventCallbacks.end()) return;
-    
-    for (const auto& callback : it->second) {
-        if (!callback.function.valid()) continue;
-        
-        // Check if script is enabled
-        auto scriptIt = scripts.find(callback.scriptName);
-        if (scriptIt != scripts.end() && !scriptIt->second->enabled) continue;
-        
-        // Call the callback
-        auto result = callback.function(sol::as_args(args));
-        if (!result.valid()) {
-            sol::error err = result;
-            reportError(callback.scriptName, err.what());
-        }
-    }
-}
-
-void LuaEngine::registerGlobalAPI() {
-    // Global namespace
-    auto voxel = lua["voxel"].get_or_create<sol::table>();
-    
-    // Register global functions
-    voxel.set_function("log", [](const std::string& msg) { Logger::info("{}", msg); });
-    voxel.set_function("logWarning", [](const std::string& msg) { Logger::warn("{}", msg); });
-    voxel.set_function("logError", [](const std::string& msg) { Logger::error("{}", msg); });
-    
-    voxel.set_function("time", []() { 
-        return std::chrono::duration<float>(
-            std::chrono::high_resolution_clock::now().time_since_epoch()
-        ).count();
-    });
-    
-    voxel.set_function("require", [this](const std::string& module) -> sol::object {
-        // Custom require that respects our sandbox
-        return lua["require"](module);
-    });
-}
-
-void LuaEngine::registerMathAPI() {
-    auto math = lua["math"].get_or_create<sol::table>();
-    
-    // Additional math functions
-    math.set_function("clamp", [](float value, float min, float max) {
-        return std::clamp(value, min, max);
-    });
-    
-    math.set_function("lerp", [](float a, float b, float t) {
-        return a + (b - a) * t;
-    });
-    
-    math.set_function("smoothstep", [](float edge0, float edge1, float x) {
-        float t = std::clamp((x - edge0) / (edge1 - edge0), 0.0f, 1.0f);
-        return t * t * (3.0f - 2.0f * t);
-    });
-    
-    math.set_function("sign", [](float x) {
-        return (x > 0) ? 1.0f : ((x < 0) ? -1.0f : 0.0f);
-    });
-    
-    math.set_function("round", [](float x) {
-        return std::round(x);
-    });
-}
-
-void LuaEngine::registerWorldAPI() {
-    LuaBindings::registerWorldAPI(lua);
-}
-
-void LuaEngine::registerEntityAPI() {
-    LuaBindings::registerEntityAPI(lua);
-}
-
-void LuaEngine::registerPlayerAPI() {
-    LuaBindings::registerPlayerAPI(lua);
-}
-
-void LuaEngine::registerBlockAPI() {
-    LuaBindings::registerBlockAPI(lua);
-}
-
-void LuaEngine::registerItemAPI() {
-    LuaBindings::registerItemAPI(lua);
-}
-
-void LuaEngine::registerGUIAPI() {
-    LuaBindings::registerGUIAPI(lua);
-}
-
-void LuaEngine::registerNetworkAPI() {
-    LuaBindings::registerNetworkAPI(lua);
-}
-
-void LuaEngine::registerFunction(const std::string& name, sol::function func) {
-    lua.set(name, func);
-}
-
-void LuaEngine::registerTable(const std::string& name, sol::table table) {
-    lua.set(name, table);
-}
-
-void LuaEngine::registerClass(const std::string& name, sol::usertype<void> type) {
-    // Would need template magic for proper registration
-}
-
-void LuaEngine::setupSandbox(sol::environment& env) {
-    // Create sandboxed environment
-    env = sol::environment(lua, sol::create);
-    
-    // Copy safe globals
-    sol::table globals = lua.globals();
-    for (auto& [key, value] : globals) {
-        std::string keyStr = key.as<std::string>();
-        
-        // Whitelist safe functions
-        if (keyStr == "print" || keyStr == "tostring" || keyStr == "tonumber" ||
-            keyStr == "type" || keyStr == "pairs" || keyStr == "ipairs" ||
-            keyStr == "next" || keyStr == "select" || keyStr == "unpack" ||
-            keyStr == "error" || keyStr == "assert") {
-            env[key] = value;
-        }
-    }
-    
-    // Copy safe libraries
-    env["math"] = lua["math"];
-    env["string"] = lua["string"];
-    env["table"] = lua["table"];
-    env["coroutine"] = lua["coroutine"];
-}
-
-void LuaEngine::setGlobal(const std::string& name, sol::object value) {
-    lua.set(name, value);
-}
-
-sol::object LuaEngine::getGlobal(const std::string& name) {
-    return lua[name];
+sol::state& LuaEngine::getState() {
+    static sol::state dummyState;
+    VF_TRACE("LuaEngine::getState not implemented");
+    return dummyState;
 }
 
 sol::environment LuaEngine::createEnvironment() {
-    sol::environment env(lua, sol::create);
-    
-    // Set up with access to global table
-    env["voxel"] = lua["voxel"];
-    env["math"] = lua["math"];
-    env["string"] = lua["string"];
-    env["table"] = lua["table"];
-    
-    return env;
+    static sol::environment dummyEnv;
+    VF_TRACE("LuaEngine::createEnvironment not implemented");
+    return dummyEnv;
 }
 
-sol::environment LuaEngine::getScriptEnvironment(const std::string& name) {
-    auto it = scripts.find(name);
-    if (it != scripts.end()) {
-        return it->second->environment;
-    }
-    return sol::environment(lua, sol::create);
+bool LuaEngine::loadScript(const std::string& path) {
+    VF_TRACE("LuaEngine::loadScript not implemented");
+    (void)path;
+    return false;
 }
 
-sol::table LuaEngine::vec3ToTable(const glm::vec3& v, sol::state& lua) {
-    sol::table t = lua.create_table();
-    t["x"] = v.x;
-    t["y"] = v.y;
-    t["z"] = v.z;
-    return t;
+bool LuaEngine::loadScriptString(const std::string& script, const std::string& name) {
+    VF_TRACE("LuaEngine::loadScriptString not implemented");
+    (void)script; (void)name;
+    return false;
 }
 
-glm::vec3 LuaEngine::tableToVec3(const sol::table& t) {
-    return glm::vec3(
-        t["x"].get_or(0.0f),
-        t["y"].get_or(0.0f),
-        t["z"].get_or(0.0f)
-    );
+bool LuaEngine::loadScriptDirectory(const std::string& directory, bool recursive) {
+    VF_TRACE("LuaEngine::loadScriptDirectory not implemented");
+    (void)directory; (void)recursive;
+    return false;
 }
 
-sol::table LuaEngine::ivec3ToTable(const glm::ivec3& v, sol::state& lua) {
-    sol::table t = lua.create_table();
-    t["x"] = v.x;
-    t["y"] = v.y;
-    t["z"] = v.z;
-    return t;
+bool LuaEngine::executeScript(const std::string& script, const std::string& name) {
+    VF_TRACE("LuaEngine::executeScript not implemented");
+    (void)script; (void)name;
+    return false;
 }
 
-glm::ivec3 LuaEngine::tableToIVec3(const sol::table& t) {
-    return glm::ivec3(
-        t["x"].get_or(0),
-        t["y"].get_or(0),
-        t["z"].get_or(0)
-    );
+bool LuaEngine::executeFile(const std::string& path) {
+    VF_TRACE("LuaEngine::executeFile not implemented");
+    (void)path;
+    return false;
 }
 
-sol::table LuaEngine::quatToTable(const glm::quat& q, sol::state& lua) {
-    sol::table t = lua.create_table();
-    t["x"] = q.x;
-    t["y"] = q.y;
-    t["z"] = q.z;
-    t["w"] = q.w;
-    return t;
+std::string LuaEngine::getError() const {
+    VF_TRACE("LuaEngine::getError not implemented");
+    return "";
 }
 
-glm::quat LuaEngine::tableToQuat(const sol::table& t) {
-    return glm::quat(
-        t["w"].get_or(1.0f),
-        t["x"].get_or(0.0f),
-        t["y"].get_or(0.0f),
-        t["z"].get_or(0.0f)
-    );
+bool LuaEngine::hasError() const {
+    VF_TRACE("LuaEngine::hasError not implemented");
+    return false;
 }
 
-void LuaEngine::setErrorHandler(std::function<void(const std::string&)> handler) {
-    errorHandler = std::move(handler);
+void LuaEngine::clearError() {
+    VF_TRACE("LuaEngine::clearError not implemented");
 }
 
-void LuaEngine::reportError(const std::string& scriptName, const std::string& error) {
-    Logger::error("Script error in '{}': {}", scriptName, error);
-    
-    if (errorHandler) {
-        errorHandler("[" + scriptName + "] " + error);
-    }
+bool LuaEngine::callFunction(const std::string& name, sol::environment* env) {
+    VF_TRACE("LuaEngine::callFunction not implemented");
+    (void)name; (void)env;
+    return false;
 }
 
-void LuaEngine::dumpGlobals() {
-    Logger::info("=== Lua Globals ===");
-    for (auto& [key, value] : lua.globals()) {
-        if (key.is<std::string>()) {
-            Logger::info("  {} = {}", key.as<std::string>(), 
-                        lua["type"](key).get<std::string>());
-        }
-    }
+sol::function LuaEngine::getFunction(const std::string& name, sol::environment* env) {
+    static sol::function dummyFunc;
+    VF_TRACE("LuaEngine::getFunction not implemented");
+    (void)name; (void)env;
+    return dummyFunc;
 }
 
-// ============== ScriptedBehavior ==============
-
-ScriptedBehavior::ScriptedBehavior() = default;
-
-void ScriptedBehavior::setScript(LuaEngine* engine, const std::string& scriptName) {
-    this->engine = engine;
-    this->scriptName = scriptName;
-    
-    // Create self table
-    if (engine) {
-        selfTable = engine->getState().create_table();
-    }
+sol::table LuaEngine::getTable(const std::string& name, sol::environment* env) {
+    static sol::table dummyTable;
+    VF_TRACE("LuaEngine::getTable not implemented");
+    (void)name; (void)env;
+    return dummyTable;
 }
 
-void ScriptedBehavior::clear() {
-    engine = nullptr;
-    scriptName.clear();
-    selfTable = sol::table();
+sol::table LuaEngine::getGlobalTable(sol::environment* env) {
+    static sol::table dummyTable;
+    VF_TRACE("LuaEngine::getGlobalTable not implemented");
+    (void)env;
+    return dummyTable;
 }
 
-void ScriptedBehavior::onUpdate(float deltaTime) {
-    if (!engine || scriptName.empty()) return;
-    
-    // Call onUpdate if it exists
-    auto env = engine->getScriptEnvironment(scriptName);
-    if (env.valid()) {
-        sol::protected_function update = env["onUpdate"];
-        if (update.valid()) {
-            auto result = update(selfTable, deltaTime);
-            if (!result.valid()) {
-                sol::error err = result;
-                engine->reportError(scriptName, err.what());
-            }
-        }
-    }
+void LuaEngine::setGlobal(const std::string& name, const sol::object& value) {
+    VF_TRACE("LuaEngine::setGlobal not implemented");
+    (void)name; (void)value;
 }
 
-void ScriptedBehavior::onEvent(ScriptEvent event, const std::vector<sol::object>& args) {
-    if (!engine || scriptName.empty()) return;
-    
-    // Trigger event through engine
-    engine->triggerEvent(event, args);
+sol::object LuaEngine::getGlobal(const std::string& name) {
+    static sol::object dummyObj;
+    VF_TRACE("LuaEngine::getGlobal not implemented");
+    (void)name;
+    return dummyObj;
 }
 
-// ============== LuaHelpers ==============
-
-namespace LuaHelpers {
-
-glm::vec3 makeVec3(sol::variadic_args args) {
-    if (args.size() == 1) {
-        sol::table t = args[0];
-        return LuaEngine::tableToVec3(t);
-    } else if (args.size() >= 3) {
-        return glm::vec3(args[0].get<float>(), args[1].get<float>(), args[2].get<float>());
-    }
-    return glm::vec3(0.0f);
+sol::environment LuaEngine::getEnvironment(sol::environment* env) {
+    static sol::environment dummyEnv;
+    VF_TRACE("LuaEngine::getEnvironment not implemented");
+    (void)env;
+    return dummyEnv;
 }
 
-glm::ivec3 makeIVec3(sol::variadic_args args) {
-    if (args.size() == 1) {
-        sol::table t = args[0];
-        return LuaEngine::tableToIVec3(t);
-    } else if (args.size() >= 3) {
-        return glm::ivec3(args[0].get<int>(), args[1].get<int>(), args[2].get<int>());
-    }
-    return glm::ivec3(0);
+void LuaEngine::collectGarbage() {
+    VF_TRACE("LuaEngine::collectGarbage not implemented");
 }
 
-std::vector<float> tableToFloatVector(const sol::table& t) {
-    std::vector<float> result;
-    for (size_t i = 1; i <= t.size(); i++) {
-        result.push_back(t[i].get_or(0.0f));
-    }
-    return result;
+size_t LuaEngine::getMemoryUsage() const {
+    VF_TRACE("LuaEngine::getMemoryUsage not implemented");
+    return 0;
 }
 
-std::vector<int> tableToIntVector(const sol::table& t) {
-    std::vector<int> result;
-    for (size_t i = 1; i <= t.size(); i++) {
-        result.push_back(t[i].get_or(0));
-    }
-    return result;
+int LuaEngine::getMemoryUsedKb() const {
+    VF_TRACE("LuaEngine::getMemoryUsedKb not implemented");
+    return 0;
 }
 
-std::vector<std::string> tableToStringVector(const sol::table& t) {
-    std::vector<std::string> result;
-    for (size_t i = 1; i <= t.size(); i++) {
-        result.push_back(t[i].get_or(std::string()));
-    }
-    return result;
+void LuaEngine::setMemoryLimit(int kilobytes) {
+    VF_TRACE("LuaEngine::setMemoryLimit not implemented");
+    (void)kilobytes;
 }
 
-} // namespace LuaHelpers
+void LuaEngine::enableJIT(bool enable) {
+    VF_TRACE("LuaEngine::enableJIT not implemented");
+    (void)enable;
+}
+
+bool LuaEngine::isJITEnabled() const {
+    VF_TRACE("LuaEngine::isJITEnabled not implemented");
+    return false;
+}
+
+void LuaEngine::setProfilerEnabled(bool enabled) {
+    VF_TRACE("LuaEngine::setProfilerEnabled not implemented");
+    (void)enabled;
+}
+
+bool LuaEngine::isProfilerEnabled() const {
+    VF_TRACE("LuaEngine::isProfilerEnabled not implemented");
+    return false;
+}
+
+std::vector<std::string> LuaEngine::getProfilerData() {
+    VF_TRACE("LuaEngine::getProfilerData not implemented");
+    return {};
+}
+
+void LuaEngine::enableSandbox(bool enable) {
+    VF_TRACE("LuaEngine::enableSandbox not implemented");
+    (void)enable;
+}
+
+bool LuaEngine::isSandboxEnabled() const {
+    VF_TRACE("LuaEngine::isSandboxEnabled not implemented");
+    return false;
+}
+
+void LuaEngine::addSandboxFunction(const std::string& name, sol::function func) {
+    VF_TRACE("LuaEngine::addSandboxFunction not implemented");
+    (void)name; (void)func;
+}
+
+void LuaEngine::removeSandboxFunction(const std::string& name) {
+    VF_TRACE("LuaEngine::removeSandboxFunction not implemented");
+    (void)name;
+}
+
+void LuaEngine::clearSandbox() {
+    VF_TRACE("LuaEngine::clearSandbox not implemented");
+}
+
+ScriptState LuaEngine::createScriptState() {
+    ScriptState state;
+    VF_TRACE("LuaEngine::createScriptState not implemented");
+    return state;
+}
+
+void LuaEngine::destroyScriptState(ScriptState& state) {
+    VF_TRACE("LuaEngine::destroyScriptState not implemented");
+    (void)state;
+}
+
+const LuaEngineSettings& LuaEngine::getSettings() const {
+    return settings;
+}
+
+void LuaEngine::setSettings(const LuaEngineSettings& settings) {
+    VF_TRACE("LuaEngine::setSettings not implemented");
+    this->settings = settings;
+}
 
 } // namespace VoxelForge

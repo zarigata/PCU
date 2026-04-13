@@ -143,6 +143,9 @@ private:
     void updateStats();
     void updateRates();
     
+    static uint32_t nextClientId;
+    
+    ENetHost* host = nullptr;
     ENetPeer* peer = nullptr;
     uint32_t peerId = 0;
     std::string address;
