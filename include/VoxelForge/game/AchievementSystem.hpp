@@ -175,7 +175,7 @@ public:
     
     // Check progress
     bool isComplete(uint32_t playerId, const std::string& id) const;
-    float getProgress(uint32_t playerId, const std::string& id) const;
+    float getProgressPercent(uint32_t playerId, const std::string& id) const;
     int getEarnedExperience(uint32_t playerId) const;
     
     // Triggers
