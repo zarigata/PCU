@@ -53,14 +53,14 @@ bool Client::connect(const std::string& hostAddress, uint16_t port) {
     serverHost = hostAddress;
     serverPort = port;
     initialized = true;
-    state = ConnectionState::Connecting;
+    state = NetworkState::Connecting;
     
     // Wait for connection
     ENetEvent event;
     if (enet_host_service(host, &event, config.connectionTimeout) > 0 &&
         event.type == ENET_EVENT_TYPE_CONNECT) {
         VF_INFO("Connected to {}:{}", hostAddress, port);
-        state = ConnectionState::Handshaking;
+        state = NetworkState::Handshaking;
         return true;
     }
     
@@ -70,7 +70,7 @@ bool Client::connect(const std::string& hostAddress, uint16_t port) {
     enet_host_destroy(host);
     host = nullptr;
     initialized = false;
-    state = ConnectionState::Disconnected;
+    state = NetworkState::Disconnected;
     return false;
 }
 
@@ -98,7 +98,7 @@ void Client::disconnect() {
     }
     
     initialized = false;
-    state = ConnectionState::Disconnected;
+    state = NetworkState::Disconnected;
     
     VF_INFO("Disconnected from server");
 }

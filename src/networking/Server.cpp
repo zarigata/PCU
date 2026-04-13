@@ -44,7 +44,7 @@ bool Server::start(uint16_t port, uint16_t maxPlayers) {
     }
     
     initialized = true;
-    state = ConnectionState::Connected;
+    state = NetworkState::Connected;
     
     VF_INFO("Server started on port {} with max {} players", port, maxPlayers);
     return true;
@@ -69,7 +69,7 @@ void Server::stop() {
     }
     
     initialized = false;
-    state = ConnectionState::Disconnected;
+    state = NetworkState::Disconnected;
     
     VF_INFO("Server stopped");
 }
