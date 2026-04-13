@@ -177,7 +177,7 @@ private:
     std::unordered_map<uint32_t, CollisionCallbackInfo> entityCollisionData;
     
     // Active collisions for tracking enter/exit
-    std::unordered_set<std::pair<uint32_t, uint32_t>, PairHash> activeCollisions;
+    std::unordered_set<EntityPair, PairHash> activeCollisions;
     
     // Callbacks
     CollisionCallback collisionCallback;
@@ -187,6 +187,8 @@ private:
 };
 
 // Pair hash for unordered_set
+using EntityPair = std::pair<uint32_t, uint32_t>;
+
 struct PairHash {
     template<typename T1, typename T2>
     size_t operator()(const std::pair<T1, T2>& p) const {

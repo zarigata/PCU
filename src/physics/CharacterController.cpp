@@ -14,80 +14,72 @@
 // #include <characterkinematic/PxCapsuleController.h>
 // #include <characterkinematic/PxBoxController.h>
 
-// using namespace physx;
-
 namespace VoxelForge {
 
 // ============================================================================
-// VoxelForgeCharacterController Implementation
+// CharacterController Implementation
 // ============================================================================
 
-VoxelForgeCharacterController::VoxelForgeCharacterController() = default;
+CharacterController::CharacterController() = default;
 
-VoxelForgeCharacterController::~VoxelForgeCharacterController() {
+CharacterController::~CharacterController() {
     cleanup();
 }
 
-void VoxelForgeCharacterController::init(
+void CharacterController::init(
     PhysicsSystem* system,
     const glm::vec3& pos,
-    float height,
-    float radius,
-    float slopeLimit,
-    uint16_t collisionMask,
-    uint16_t collisionGroup) {
+    const CharacterControllerSettings& settings) {
     // TODO: PhysX implementation not available - headers not in repository
-    VF_ERROR("VoxelForgeCharacterController not implemented - PhysX headers not available");
-    (void)system; (void)pos; (void)height; (void)radius; (void)slopeLimit;
-    (void)collisionMask; (void)collisionGroup;
+    VF_ERROR("CharacterController::init not implemented - PhysX headers not available");
+    (void)system; (void)pos; (void)settings; // Suppress unused warnings
 }
 
-void VoxelForgeCharacterController::cleanup() {
-    VF_TRACE("VoxelForgeCharacterController::cleanup not implemented");
+void CharacterController::cleanup() {
+    // TODO: PhysX implementation not available
+    state = CharacterState();
 }
 
-void VoxelForgeCharacterController::move(const glm::vec3& displacement, float deltaTime) {
-    VF_TRACE("VoxelForgeCharacterController::move not implemented");
+void CharacterController::move(const glm::vec3& displacement, float deltaTime) {
+    // TODO: PhysX implementation not available
     (void)displacement; (void)deltaTime;
 }
 
-void VoxelForgeCharacterController::jump(float height) {
-    VF_TRACE("VoxelForgeCharacterController::jump not implemented");
+void CharacterController::jump(float height) {
+    // TODO: PhysX implementation not available
     (void)height;
 }
 
-void VoxelForgeCharacterController::setSlopeLimit(float angle) {
-    VF_TRACE("VoxelForgeCharacterController::setSlopeLimit not implemented");
+void CharacterController::setSlopeLimit(float angle) {
+    // TODO: PhysX implementation not available
     (void)angle;
 }
 
-void VoxelForgeCharacterController::setCollisionGroup(CollisionGroup group) {
-    VF_TRACE("VoxelForgeCharacterController::setCollisionGroup not implemented");
+void CharacterController::setCollisionGroup(CollisionGroup group) {
+    // TODO: PhysX implementation not available
     (void)group;
 }
 
-void VoxelForgeCharacterController::setCollisionMask(uint16_t mask) {
-    VF_TRACE("VoxelForgeCharacterController::setCollisionMask not implemented");
+void CharacterController::setCollisionMask(uint16_t mask) {
+    // TODO: PhysX implementation not available
     (void)mask;
 }
 
-bool VoxelForgeCharacterController::onGround() const {
-    VF_TRACE("VoxelForgeCharacterController::onGround not implemented");
-    return false;
+bool CharacterController::onGround() const {
+    return state.isGrounded;
 }
 
-glm::vec3 VoxelForgeCharacterController::getPosition() const {
-    VF_TRACE("VoxelForgeCharacterController::getPosition not implemented");
+glm::vec3 CharacterController::getPosition() const {
     return glm::vec3(0.0f);
 }
 
-void VoxelForgeCharacterController::setPosition(const glm::vec3& pos) {
-    VF_TRACE("VoxelForgeCharacterController::setPosition not implemented");
+void CharacterController::setPosition(const glm::vec3& pos) {
+    // TODO: PhysX implementation not available
     (void)pos;
 }
 
-void VoxelForgeCharacterController::setHeight(float height) {
-    VF_TRACE("VoxelForgeCharacterController::setHeight not implemented");
+void CharacterController::setHeight(float height) {
+    // TODO: PhysX implementation not available
     (void)height;
 }
 

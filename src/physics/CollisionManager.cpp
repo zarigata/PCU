@@ -32,7 +32,7 @@ void CollisionManager::init(PhysicsSystem* physics) {
     createLayer("Projectile", 0xFFFF);
     createLayer("Trigger", 0xFFFF);
     
-    Logger::info("CollisionManager initialized with {} layers", layers.size());
+    VF_INFO("CollisionManager initialized with {} layers", layers.size());
 }
 
 void CollisionManager::shutdown() {
