@@ -10,7 +10,7 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
 4. **Feature implementation**: Work through FEATURE_MATRIX.md high-priority features
 
 ## Build Status
-- **Latest build:** ⏳ FIX PUSHED (2026-04-13 02:32 UTC)
+- **Latest build:** ⏳ FIX PUSHED (2026-04-13 03:15 UTC)
   - Combat commit: `82e744a` feat(combat): implement 1.9+ attack cooldown system - FAILED
   - Fix 1: `d75a290` fix(build): correct Entity type and includes in EntityBase.cpp - FAILED
   - Fix 2: `30551d2` fix(build): correct ECS API usage and types in entity systems - FAILED
@@ -38,8 +38,9 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
   - Fix 24: `6abf6e9` fix(build): fix rendering API mismatches and redefinitions - FAILED
   - Fix 25: `af270be` fix(build): move ChunkVertex to Chunk.hpp to fix incomplete type errors - FAILED
   - Fix 26: `be4f554` fix(build): fix ChunkVertex field names to match ChunkMesher.cpp usage - FAILED
-  - Fix 27: `6ba87c1` fix(build): fix redefinitions, command pool, and missing includes
-  - Fixed 64 files + 1 new header created across 27 rounds
+  - Fix 27: `6ba87c1` fix(build): fix redefinitions, command pool, and missing includes - FAILED
+  - Fix 28: `591c93c` fix(build): stub VulkanPipelineBuilder methods
+  - Fixed 66 files + 1 new header created across 28 rounds
   - Monitoring CI for latest fix
 - **Website:** Live and working
 - **GitHub Issue:** #6 created for stuck Day/Night build
@@ -75,6 +76,7 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
   - Round 25: Moved ChunkVertex to Chunk.hpp to fix incomplete type errors
   - Round 26: Fixed ChunkVertex field names (glm vectors → individual floats)
   - Round 27: Fixed redefinitions, command pool issues, missing includes, STB stub
+  - Round 28: Stubbed VulkanPipelineBuilder methods to match API usage
 - ⏳ Verify new build passes → Monitoring CI for latest fix
 
 ## Notes
@@ -131,6 +133,7 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
   - fix(build): move ChunkVertex to Chunk.hpp to fix incomplete type errors (25th round)
   - fix(build): fix ChunkVertex field names to match ChunkMesher.cpp usage (26th round)
   - fix(build): fix redefinitions, command pool, and missing includes (27th round)
+  - fix(build): stub VulkanPipelineBuilder methods (28th round)
   - feat(world): implement World Border system
 - Recent features implemented:
   - Fluid Physics System (water/lava flow simulation, scheduled updates, fluid mixing)
