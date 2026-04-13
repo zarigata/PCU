@@ -25,7 +25,7 @@ class VulkanDevice;
 class VulkanCommandBuffer;
 class World;
 class Chunk;
-class ChunkMesh;
+struct ChunkMeshData;
 
 // Vertex format for chunk meshes
 struct ChunkVertex {
@@ -123,9 +123,9 @@ public:
     void endFrame();
     
     // Mesh management
-    void uploadChunkMesh(ChunkMesh* mesh, const glm::ivec3& chunkPos);
+    void uploadChunkMesh(ChunkMeshData* mesh, const glm::ivec3& chunkPos);
     void removeChunkMesh(const glm::ivec3& chunkPos);
-    void updateChunkMesh(ChunkMesh* mesh, const glm::ivec3& chunkPos);
+    void updateChunkMesh(ChunkMeshData* mesh, const glm::ivec3& chunkPos);
     
     // Settings
     ChunkRenderSettings& getSettings() { return settings; }
@@ -161,7 +161,7 @@ private:
     
     // Chunk meshes
     std::unordered_map<glm::ivec3, ChunkMeshGPU, IVec3Hash> chunkMeshes;
-    std::vector<std::pair<ChunkMesh*, glm::ivec3>> pendingUploads;
+    std::vector<std::pair<ChunkMeshData*, glm::ivec3>> pendingUploads;
     
     // Settings and stats
     ChunkRenderSettings settings;

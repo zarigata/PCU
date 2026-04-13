@@ -171,9 +171,9 @@ void ChunkRenderer::updateUniformBuffer(Camera* camera) {
     if (!camera) return;
     
     ChunkUniformData data{};
-    data.viewProj = camera->getViewProjection();
-    data.view = camera->getView();
-    data.projection = camera->getProjection();
+    data.viewProj = camera->getViewProjectionMatrix();
+    data.view = camera->getViewMatrix();
+    data.projection = camera->getProjectionMatrix();
     data.cameraPos = camera->getPosition();
     data.time = 0.0f;  // TODO: Get actual time
     data.fogStart = 50.0f;
@@ -184,7 +184,7 @@ void ChunkRenderer::updateUniformBuffer(Camera* camera) {
     uniformBuffers[currentFrame].writeToBuffer(device->getDevice(), &data, sizeof(data));
 }
 
-void ChunkRenderer::uploadChunkMesh(ChunkMesh* mesh, const glm::ivec3& chunkPos) {
+void ChunkRenderer::uploadChunkMesh(ChunkMeshData* mesh, const glm::ivec3& chunkPos) {
     if (!mesh) return;
     
     pendingUploads.push_back({mesh, chunkPos});
@@ -203,7 +203,7 @@ void ChunkRenderer::removeChunkMesh(const glm::ivec3& chunkPos) {
     }
 }
 
-void ChunkRenderer::updateChunkMesh(ChunkMesh* mesh, const glm::ivec3& chunkPos) {
+void ChunkRenderer::updateChunkMesh(ChunkMeshData* mesh, const glm::ivec3& chunkPos) {
     removeChunkMesh(chunkPos);
     uploadChunkMesh(mesh, chunkPos);
 }

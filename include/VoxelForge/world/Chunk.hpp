@@ -18,6 +18,12 @@
 #include <atomic>
 #include <mutex>
 
+// Forward declare ChunkVertex for ChunkMeshData
+// The actual definition is in ChunkRenderer.hpp for Vulkan rendering
+namespace VoxelForge {
+    struct ChunkVertex;
+}
+
 namespace VoxelForge {
 
 // ============================================
@@ -358,15 +364,6 @@ private:
 // ============================================
 // Chunk Mesh
 // ============================================
-
-struct ChunkVertex {
-    float x, y, z;        // Position
-    float nx, ny, nz;     // Normal
-    float u, v;           // UV
-    float ao;             // Ambient occlusion
-    uint32_t light;       // Packed light data
-    uint32_t color;       // Vertex color
-};
 
 struct ChunkMeshData {
     std::vector<ChunkVertex> vertices;

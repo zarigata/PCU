@@ -38,7 +38,7 @@ void EntityRenderer::init(VulkanDevice* device) {
         instanceBuffers[i].map(device->getDevice());
     }
     
-    Logger::info("EntityRenderer initialized");
+    VF_INFO("EntityRenderer initialized");
 }
 
 void EntityRenderer::cleanup() {

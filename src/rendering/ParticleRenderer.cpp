@@ -5,6 +5,7 @@
 
 #include <VoxelForge/rendering/ParticleRenderer.hpp>
 #include <VoxelForge/rendering/Camera.hpp>
+#include <VoxelForge/rendering/VulkanDevice.hpp>
 #include <VoxelForge/core/Logger.hpp>
 #include <algorithm>
 #include <random>
@@ -141,7 +142,7 @@ void ParticleRenderer::emit(uint32_t systemId, int count) {
                     dis(gen) * system.emitter.lifetimeVariance;
                 particle.age = 0.0f;
                 
-                system.activeParticles++;
+                // system.activeParticles++; // No longer needed - use particles.size()
                 break;
             }
         }
@@ -208,7 +209,7 @@ void ParticleRenderer::update(float deltaTime) {
             
             if (particle.age >= particle.lifetime) {
                 particle.active = false;
-                system.activeParticles--;
+                // system.activeParticles--; // No longer needed - use particles.size()
                 continue;
             }
             
