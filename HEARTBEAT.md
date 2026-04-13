@@ -10,7 +10,7 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
 4. **Feature implementation**: Work through FEATURE_MATRIX.md high-priority features
 
 ## Build Status
-- **Latest build:** ⏳ FIX PUSHED (2026-04-13 10:50 UTC)
+- **Latest build:** ⏳ FIX PUSHED (2026-04-13 11:24 UTC)
   - Combat commit: `82e744a` feat(combat): implement 1.9+ attack cooldown system - FAILED
   - Fix 1: `d75a290` fix(build): correct Entity type and includes in EntityBase.cpp - FAILED
   - Fix 2: `30551d2` fix(build): correct ECS API usage and types in entity systems - FAILED
@@ -50,8 +50,9 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
   - Fix 36: `acd9d65` fix(build): add CharacterController stub implementations for all missing methods - FAILED
   - Fix 37: `25ea8cc` fix(build): add vector include and fix CharacterController method signatures - FAILED
   - Fix 38: `afa4dcd` fix(build): stub AudioSystem and fix CollisionManager type declarations - FAILED
-  - Fix 39: `d4eef4e` fix(build): rewrite AudioSystem stub to match header API
-  - Fixed 88 files + 1 new header created across 39 rounds
+  - Fix 39: `d4eef4e` fix(build): rewrite AudioSystem stub to match header API - FAILED
+  - Fix 40: `ddefd02` fix(build): fix CollisionManager, AudioSystem, and NetworkManager
+  - Fixed 91 files + 1 new header created across 40 rounds
   - Monitoring CI for latest fix
 - **Website:** Live and working
 - **GitHub Issue:** #6 created for stuck Day/Night build
@@ -98,7 +99,8 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
   - Round 36: Added CharacterController stub implementations for all missing methods - FAILED
   - Round 37: Added vector include, fixed CharacterController method signatures, PhysicsSystem shutdown - FAILED
   - Round 38: Stubbed AudioSystem FMOD dependencies, fixed CollisionManager type declaration order - FAILED
-  - Round 39: Rewrite AudioSystem stub to match header API exactly (450+ lines)
+  - Round 39: Rewrite AudioSystem stub to match header API exactly (450+ lines) - FAILED
+  - Round 40: Fix CollisionManager structured binding, AudioSystem stub types, NetworkManager variable shadowing
 - ⏳ Verify new build passes → Monitoring CI for latest fix
 
 ## Notes
@@ -167,6 +169,7 @@ Monitor VoxelForge CI build status continuously (4-8 times per day). Fix build f
   - fix(build): add vector include and fix CharacterController method signatures (37th round)
   - fix(build): stub AudioSystem and fix CollisionManager type declarations (38th round)
   - fix(build): rewrite AudioSystem stub to match header API (39th round)
+  - fix(build): fix CollisionManager, AudioSystem, and NetworkManager (40th round)
   - feat(world): implement World Border system
 - Recent features implemented:
   - Fluid Physics System (water/lava flow simulation, scheduled updates, fluid mixing)
