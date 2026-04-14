@@ -90,6 +90,9 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(spdlog)
 
+# Zlib (required for Anvil world format)
+find_package(ZLIB REQUIRED)
+
 # Zstandard
 set(ZSTD_BUILD_STATIC ON CACHE BOOL "" FORCE)
 set(ZSTD_BUILD_SHARED OFF CACHE BOOL "" FORCE)
@@ -317,6 +320,7 @@ target_link_libraries(VoxelForge_Engine
         nlohmann_json::nlohmann_json
         spdlog::spdlog
         libzstd_static
+        ZLIB::ZLIB
         enet
         Freetype::Freetype
         GL

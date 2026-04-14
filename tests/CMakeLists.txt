@@ -10,6 +10,7 @@ set(TEST_SOURCES
     unit/test_tree_generation.cpp
     unit/test_world_border.cpp
     unit/test_mining.cpp
+    unit/test_anvil_save.cpp
 )
 
 # Create test executable

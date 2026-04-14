@@ -1,12 +1,13 @@
 /**
  * @file AnvilLoader.hpp
- * @brief Minecraft Anvil world format loader
+ * @brief Minecraft Anvil world format loader/saver
  */
 
 #pragma once
 
 #include <VoxelForge/world/Chunk.hpp>
 #include <VoxelForge/world/ChunkPos.hpp>
+#include <VoxelForge/utils/NBT.hpp>
 #include <string>
 #include <memory>
 #include <vector>
@@ -14,8 +15,21 @@
 
 namespace VoxelForge {
 
+class ChunkSection;
+
 /**
- * @brief NBT compound tag (simplified for Anvil format)
+ * @brief Compression utilities for Anvil format (GZIP/Zlib)
+ */
+class AnvilCompression {
+public:
+    static std::vector<uint8_t> decompressGzip(const std::vector<uint8_t>& data);
+    static std::vector<uint8_t> decompressZlib(const std::vector<uint8_t>& data);
+    static std::vector<uint8_t> compressGzip(const std::vector<uint8_t>& data);
+    static std::vector<uint8_t> compressZlib(const std::vector<uint8_t>& data);
+};
+
+/**
+ * @brief Simplified NBT compound for legacy Anvil parsing
  */
 class AnvilNBTCompound {
 public:
@@ -33,7 +47,6 @@ public:
     const std::string& getString(const std::string& name) const;
 
 private:
-    // Simplified NBT storage
     struct Tag {
         enum class Type { End, Byte, Short, Int, Long, Float, Double,
                          ByteArray, String, List, Compound, LongArray };
@@ -45,22 +58,11 @@ private:
 };
 
 /**
- * @brief Compression utilities (simplified for Anvil format)
- */
-class AnvilCompression {
-public:
-    static std::vector<uint8_t> decompressGzip(const std::vector<uint8_t>& data);
-    static std::vector<uint8_t> decompressZlib(const std::vector<uint8_t>& data);
-    static std::vector<uint8_t> compressGzip(const std::vector<uint8_t>& data);
-    static std::vector<uint8_t> compressZlib(const std::vector<uint8_t>& data);
-};
-
-/**
- * @brief Loader for Minecraft Anvil world format
+ * @brief Loader/saver for Minecraft Anvil world format
  *
- * Supports loading chunks from .mca region files with
- * GZIP/Zlib compression. Handles NBT parsing for block
- * data, biomes, and block entities.
+ * Supports loading and saving chunks from/to .mca region files.
+ * Uses zlib compression (type 2) for saved chunks.
+ * Implements the 1.18+ block_states format with paletted storage.
  */
 class AnvilLoader {
 public:
@@ -73,17 +75,19 @@ public:
     // Save chunk to disk
     bool saveChunk(const Chunk* chunk);
 
-    // Check if chunk exists
+    // Check if chunk exists on disk
     bool chunkExists(const ChunkPos& pos) const;
 
 private:
     std::string worldPath_;
 
-    // Parse NBT into chunk data
+    // Legacy parsing
     std::unique_ptr<Chunk> parseChunkNBT(const AnvilNBTCompound& nbt, const ChunkPos& pos);
-
-    // Parse section NBT
     void parseSectionNBT(Chunk* chunk, const AnvilNBTCompound& sectionNbt);
+
+    // New serialization helpers
+    void serializeChunkToNBT(const Chunk* chunk, NBTCompound& level);
+    void serializeBlockStates(const ChunkSection* section, NBTCompound& sectionNbt);
 };
 
 } // namespace VoxelForge

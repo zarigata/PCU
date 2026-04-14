@@ -100,7 +100,15 @@ public:
     
     // Debug
     std::string toString(int indent = 0) const;
-    
+
+    // Internal: create compound from raw data (for deserialization)
+    static NBTTag fromCompound(std::unordered_map<std::string, NBTTag>&& compoundData) {
+        NBTTag tag;
+        tag.type = NBTTagType::Compound;
+        tag.value = std::move(compoundData);
+        return tag;
+    }
+
 private:
     NBTTagType type;
     NBTValue value;

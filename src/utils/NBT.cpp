@@ -434,4 +434,302 @@ NBTTag NBTList::toTag() const {
     return NBTTag::list(tags, contentType);
 }
 
+// ============================================
+// NBT Serialization Helpers
+// ============================================
+
+static void writeBigEndian16(std::vector<uint8_t>& out, uint16_t val) {
+    out.push_back(static_cast<uint8_t>((val >> 8) & 0xFF));
+    out.push_back(static_cast<uint8_t>(val & 0xFF));
+}
+
+static void writeBigEndian32(std::vector<uint8_t>& out, uint32_t val) {
+    out.push_back(static_cast<uint8_t>((val >> 24) & 0xFF));
+    out.push_back(static_cast<uint8_t>((val >> 16) & 0xFF));
+    out.push_back(static_cast<uint8_t>((val >> 8) & 0xFF));
+    out.push_back(static_cast<uint8_t>(val & 0xFF));
+}
+
+static void writeBigEndian64(std::vector<uint8_t>& out, uint64_t val) {
+    for (int i = 56; i >= 0; i -= 8)
+        out.push_back(static_cast<uint8_t>((val >> i) & 0xFF));
+}
+
+static void writeModifiedUTF8(std::vector<uint8_t>& out, const std::string& s) {
+    writeBigEndian16(out, static_cast<uint16_t>(s.size()));
+    out.insert(out.end(), s.begin(), s.end());
+}
+
+static void writePayload(std::vector<uint8_t>& out, const NBTTag& tag);
+
+static void writeCompoundPayload(std::vector<uint8_t>& out,
+                                 const std::unordered_map<std::string, NBTTag>& compound) {
+    for (const auto& [key, child] : compound) {
+        out.push_back(static_cast<uint8_t>(child.getType()));
+        writeModifiedUTF8(out, key);
+        writePayload(out, child);
+    }
+    // TAG_End
+    out.push_back(0);
+}
+
+static void writePayload(std::vector<uint8_t>& out, const NBTTag& tag) {
+    switch (tag.getType()) {
+        case NBTTagType::Byte:
+            out.push_back(static_cast<uint8_t>(tag.asByte()));
+            break;
+        case NBTTagType::Short: {
+            int16_t v = tag.asShort();
+            writeBigEndian16(out, static_cast<uint16_t>(v));
+            break;
+        }
+        case NBTTagType::Int:
+            writeBigEndian32(out, static_cast<uint32_t>(tag.asInt()));
+            break;
+        case NBTTagType::Long:
+            writeBigEndian64(out, static_cast<uint64_t>(tag.asLong()));
+            break;
+        case NBTTagType::Float: {
+            float v = tag.asFloat();
+            uint32_t bits;
+            std::memcpy(&bits, &v, 4);
+            writeBigEndian32(out, bits);
+            break;
+        }
+        case NBTTagType::Double: {
+            double v = tag.asDouble();
+            uint64_t bits;
+            std::memcpy(&bits, &v, 8);
+            writeBigEndian64(out, bits);
+            break;
+        }
+        case NBTTagType::ByteArray: {
+            const auto& arr = tag.asByteArray();
+            writeBigEndian32(out, static_cast<uint32_t>(arr.size()));
+            out.insert(out.end(), reinterpret_cast<const uint8_t*>(arr.data()),
+                       reinterpret_cast<const uint8_t*>(arr.data()) + arr.size());
+            break;
+        }
+        case NBTTagType::String:
+            writeModifiedUTF8(out, tag.asString());
+            break;
+        case NBTTagType::List: {
+            const auto& list = tag.asList();
+            // Determine content type from first element or End if empty
+            NBTTagType contentType = NBTTagType::End;
+            if (!list.empty()) contentType = list[0].getType();
+            out.push_back(static_cast<uint8_t>(contentType));
+            writeBigEndian32(out, static_cast<uint32_t>(list.size()));
+            for (const auto& item : list)
+                writePayload(out, item);
+            break;
+        }
+        case NBTTagType::Compound:
+            writeCompoundPayload(out, tag.asCompound());
+            break;
+        case NBTTagType::IntArray: {
+            const auto& arr = tag.asIntArray();
+            writeBigEndian32(out, static_cast<uint32_t>(arr.size()));
+            for (int32_t v : arr)
+                writeBigEndian32(out, static_cast<uint32_t>(v));
+            break;
+        }
+        case NBTTagType::LongArray: {
+            const auto& arr = tag.asLongArray();
+            writeBigEndian32(out, static_cast<uint32_t>(arr.size()));
+            for (int64_t v : arr)
+                writeBigEndian64(out, static_cast<uint64_t>(v));
+            break;
+        }
+        case NBTTagType::End:
+        default:
+            break;
+    }
+}
+
+// ============================================
+// NBTTag Serialization
+// ============================================
+
+std::vector<uint8_t> NBTTag::serialize(const std::string& name) const {
+    std::vector<uint8_t> out;
+    // Tag type byte
+    out.push_back(static_cast<uint8_t>(type));
+    // Name (modified UTF-8)
+    writeModifiedUTF8(out, name);
+    // Payload
+    writePayload(out, *this);
+    return out;
+}
+
+// ============================================
+// NBTCompound Serialization
+// ============================================
+
+std::vector<uint8_t> NBTCompound::serialize(const std::string& name) const {
+    return toTag().serialize(name);
+}
+
+// ============================================
+// NBT Deserialization Helpers
+// ============================================
+
+static uint8_t readU8(const uint8_t* data, size_t size, size_t& offset, bool& ok) {
+    if (offset >= size) { ok = false; return 0; }
+    return data[offset++];
+}
+
+static uint16_t readBE16(const uint8_t* data, size_t size, size_t& offset, bool& ok) {
+    if (offset + 1 >= size) { ok = false; return 0; }
+    uint16_t v = (static_cast<uint16_t>(data[offset]) << 8) | data[offset + 1];
+    offset += 2;
+    return v;
+}
+
+static uint32_t readBE32(const uint8_t* data, size_t size, size_t& offset, bool& ok) {
+    if (offset + 3 >= size) { ok = false; return 0; }
+    uint32_t v = (static_cast<uint32_t>(data[offset]) << 24) |
+                 (static_cast<uint32_t>(data[offset + 1]) << 16) |
+                 (static_cast<uint32_t>(data[offset + 2]) << 8) |
+                 static_cast<uint32_t>(data[offset + 3]);
+    offset += 4;
+    return v;
+}
+
+static uint64_t readBE64(const uint8_t* data, size_t size, size_t& offset, bool& ok) {
+    if (offset + 7 >= size) { ok = false; return 0; }
+    uint64_t v = 0;
+    for (int i = 0; i < 8; ++i)
+        v = (v << 8) | data[offset++];
+    return v;
+}
+
+static std::string readModifiedUTF8(const uint8_t* data, size_t size, size_t& offset, bool& ok) {
+    uint16_t len = readBE16(data, size, offset, ok);
+    if (!ok || offset + len > size) { ok = false; return ""; }
+    std::string s(reinterpret_cast<const char*>(data + offset), len);
+    offset += len;
+    return s;
+}
+
+static NBTTag readPayload(NBTTagType type, const uint8_t* data, size_t size, size_t& offset, bool& ok);
+
+static std::unordered_map<std::string, NBTTag> readCompoundPayload(
+        const uint8_t* data, size_t size, size_t& offset, bool& ok) {
+    std::unordered_map<std::string, NBTTag> compound;
+    while (ok) {
+        uint8_t typeByte = readU8(data, size, offset, ok);
+        if (!ok || typeByte == 0) break; // TAG_End
+        auto childType = static_cast<NBTTagType>(typeByte);
+        std::string name = readModifiedUTF8(data, size, offset, ok);
+        if (!ok) break;
+        NBTTag child = readPayload(childType, data, size, offset, ok);
+        if (!ok) break;
+        compound[name] = std::move(child);
+    }
+    return compound;
+}
+
+static NBTTag readPayload(NBTTagType type, const uint8_t* data, size_t size, size_t& offset, bool& ok) {
+    switch (type) {
+        case NBTTagType::Byte: {
+            int8_t v = static_cast<int8_t>(readU8(data, size, offset, ok));
+            return NBTTag::byte(v);
+        }
+        case NBTTagType::Short: {
+            int16_t v = static_cast<int16_t>(readBE16(data, size, offset, ok));
+            return NBTTag::shortVal(v);
+        }
+        case NBTTagType::Int: {
+            int32_t v = static_cast<int32_t>(readBE32(data, size, offset, ok));
+            return NBTTag::intVal(v);
+        }
+        case NBTTagType::Long: {
+            int64_t v = static_cast<int64_t>(readBE64(data, size, offset, ok));
+            return NBTTag::longVal(v);
+        }
+        case NBTTagType::Float: {
+            uint32_t bits = readBE32(data, size, offset, ok);
+            float v;
+            std::memcpy(&v, &bits, 4);
+            return NBTTag::floatVal(v);
+        }
+        case NBTTagType::Double: {
+            uint64_t bits = readBE64(data, size, offset, ok);
+            double v;
+            std::memcpy(&v, &bits, 8);
+            return NBTTag::doubleVal(v);
+        }
+        case NBTTagType::ByteArray: {
+            uint32_t len = readBE32(data, size, offset, ok);
+            if (!ok || offset + len > size) { ok = false; return NBTTag(); }
+            std::vector<int8_t> arr(reinterpret_cast<const int8_t*>(data + offset),
+                                     reinterpret_cast<const int8_t*>(data + offset + len));
+            offset += len;
+            return NBTTag::byteArray(arr);
+        }
+        case NBTTagType::String: {
+            std::string s = readModifiedUTF8(data, size, offset, ok);
+            return NBTTag::string(s);
+        }
+        case NBTTagType::List: {
+            uint8_t contentTypeByte = readU8(data, size, offset, ok);
+            auto contentType = static_cast<NBTTagType>(contentTypeByte);
+            uint32_t listLen = readBE32(data, size, offset, ok);
+            std::vector<NBTTag> items;
+            items.reserve(listLen);
+            for (uint32_t i = 0; i < listLen && ok; ++i)
+                items.push_back(readPayload(contentType, data, size, offset, ok));
+            return NBTTag::list(items, contentType);
+        }
+        case NBTTagType::Compound: {
+            auto compoundData = readCompoundPayload(data, size, offset, ok);
+            return NBTTag::fromCompound(std::move(compoundData));
+        }
+        case NBTTagType::IntArray: {
+            uint32_t len = readBE32(data, size, offset, ok);
+            std::vector<int32_t> arr;
+            arr.reserve(len);
+            for (uint32_t i = 0; i < len && ok; ++i)
+                arr.push_back(static_cast<int32_t>(readBE32(data, size, offset, ok)));
+            return NBTTag::intArray(arr);
+        }
+        case NBTTagType::LongArray: {
+            uint32_t len = readBE32(data, size, offset, ok);
+            std::vector<int64_t> arr;
+            arr.reserve(len);
+            for (uint32_t i = 0; i < len && ok; ++i)
+                arr.push_back(static_cast<int64_t>(readBE64(data, size, offset, ok)));
+            return NBTTag::longArray(arr);
+        }
+        default:
+            ok = false;
+            return NBTTag();
+    }
+}
+
+NBTTag NBTTag::deserialize(const uint8_t* data, size_t size, size_t& offset) {
+    bool ok = true;
+    uint8_t typeByte = readU8(data, size, offset, ok);
+    if (!ok) return NBTTag();
+    auto tagType = static_cast<NBTTagType>(typeByte);
+    // Read name
+    [[maybe_unused]] std::string name = readModifiedUTF8(data, size, offset, ok);
+    if (!ok) return NBTTag();
+    return readPayload(tagType, data, size, offset, ok);
+}
+
+NBTCompound NBTCompound::deserialize(const uint8_t* data, size_t size) {
+    size_t offset = 0;
+    bool ok = true;
+    uint8_t typeByte = readU8(data, size, offset, ok);
+    if (!ok || typeByte != static_cast<uint8_t>(NBTTagType::Compound)) return NBTCompound();
+    [[maybe_unused]] std::string name = readModifiedUTF8(data, size, offset, ok);
+    if (!ok) return NBTCompound();
+    auto compound = readCompoundPayload(data, size, offset, ok);
+    NBTCompound result;
+    result.tags = std::move(compound);
+    return result;
+}
+
 } // namespace VoxelForge

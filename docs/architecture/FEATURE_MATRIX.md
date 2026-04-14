@@ -31,7 +31,7 @@
 | Chunk loading/unloading | 📋 | Critical | 16x384x16 chunks |
 | Infinite world generation | 📋 | Critical | Perlin noise based |
 | World borders | 🔄 | High | Configurable size |
-| World saving (Anvil format) | 📋 | Critical | Per-chunk saving |
+| World saving (Anvil format) | 🔄 | Critical | Per-chunk saving, region file I/O |
 | World loading | 📋 | Critical | Async chunk loading |
 | Multiple dimensions | 📋 | High | Overworld, Nether, End |
 | Custom dimensions | 🔌 | Medium | Via mod API |
