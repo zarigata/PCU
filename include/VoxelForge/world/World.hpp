@@ -13,10 +13,12 @@
 #include <memory>
 #include <shared_mutex>
 #include <functional>
+#include <atomic>
 
 namespace VoxelForge {
 
 class Player;
+class WorldGenerator;
 
 struct WorldSettings {
     int64_t seed = 0;
@@ -58,6 +60,12 @@ public:
     void generateChunk(Chunk& chunk);
     void generateTerrain(Chunk& chunk);
     void generateFeatures(Chunk& chunk);
+
+    // WorldGenerator integration
+    WorldGenerator& getWorldGenerator() { return *worldGenerator_; }
+    const WorldGenerator& getWorldGenerator() const { return *worldGenerator_; }
+    void setWorldGenerator(std::unique_ptr<WorldGenerator> gen);
+    bool hasWorldGenerator() const { return worldGenerator_ != nullptr; }
     
     // Light
     uint8_t getSkyLight(const BlockPos& pos) const;
@@ -120,10 +128,16 @@ private:
     // World border
     WorldBorder worldBorder_;
     
-    // Noise generators
+    // World generator (sophisticated generation pipeline)
+    std::unique_ptr<WorldGenerator> worldGenerator_;
+
+    // Legacy noise generators (kept for fallback)
     std::unique_ptr<PerlinNoise> terrainNoise;
     std::unique_ptr<PerlinNoise> caveNoise;
     std::unique_ptr<SimplexNoise> biomeNoise;
+
+    // Async generation state
+    std::atomic<bool> generationInProgress_{false};
     
     // Chunk loading queue
     std::vector<ChunkPos> loadQueue;

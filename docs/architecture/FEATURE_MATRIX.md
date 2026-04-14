@@ -28,7 +28,7 @@
 
 | Feature | Status | Priority | Notes |
 |---------|--------|----------|-------|
-| Chunk loading/unloading | 📋 | Critical | 16x384x16 chunks |
+| Chunk loading/unloading | 🔄 | Critical | 16x384x16 chunks |
 | Infinite world generation | 📋 | Critical | Perlin noise based |
 | World borders | 🔄 | High | Configurable size |
 | World saving (Anvil format) | 🔄 | Critical | Per-chunk saving, region file I/O |
@@ -40,7 +40,7 @@
 
 | Feature | Status | Priority | Notes |
 |---------|--------|----------|-------|
-| Basic terrain (noise) | 📋 | Critical | Multi-octave noise |
+| Basic terrain (noise) | 🔄 | Critical | Multi-octave noise |
 | Biomes (60+ types) | 📋 | High | Full biome list |
 | Biome blending | 📋 | High | Smooth transitions |
 | Caves | 📋 | High | 3D noise carving |

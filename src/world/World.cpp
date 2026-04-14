@@ -6,6 +6,7 @@
 #include <VoxelForge/world/World.hpp>
 #include <VoxelForge/world/Chunk.hpp>
 #include <VoxelForge/world/Block.hpp>
+#include <VoxelForge/world/WorldGenerator.hpp>
 #include <VoxelForge/core/Logger.hpp>
 #include <cmath>
 #include <algorithm>
@@ -15,15 +16,25 @@ namespace VoxelForge {
 World::World(int64_t seed) {
     settings.seed = seed;
     
-    // Initialize noise generators
+    // Initialize legacy noise generators (fallback)
     terrainNoise = std::make_unique<PerlinNoise>(static_cast<uint32_t>(seed));
     caveNoise = std::make_unique<PerlinNoise>(static_cast<uint32_t>(seed + 1));
     biomeNoise = std::make_unique<SimplexNoise>(static_cast<uint32_t>(seed + 2));
     
-    spdlog::info("World created with seed: {}", seed);
+    // Initialize the full world generator
+    WorldGenSettings genSettings;
+    genSettings.seed = static_cast<uint64_t>(seed);
+    genSettings.seaLevel = settings.seaLevel;
+    genSettings.minHeight = settings.minBuildHeight;
+    genSettings.maxHeight = settings.maxBuildHeight;
+    genSettings.generateStructures = settings.generateFeatures;
+    worldGenerator_ = std::make_unique<WorldGenerator>(genSettings);
+    
+    spdlog::info("World created with seed: {} (using WorldGenerator)", seed);
 }
 
 World::~World() {
+    worldGenerator_.reset();
     spdlog::info("World destroyed with {} chunks", chunks.size());
 }
 
@@ -163,7 +174,27 @@ void World::updateChunks(const glm::vec3& playerPos) {
 // World Generation
 // ============================================
 
+void World::setWorldGenerator(std::unique_ptr<WorldGenerator> gen) {
+    worldGenerator_ = std::move(gen);
+    spdlog::info("WorldGenerator replaced");
+}
+
 void World::generateChunk(Chunk& chunk) {
+    if (worldGenerator_) {
+        // Use the full world generator pipeline
+        auto result = worldGenerator_->generateChunk(&chunk, this);
+        if (!result.success) {
+            spdlog::warn("WorldGenerator failed for chunk ({}, {}), falling back", 
+                chunk.getPosition().x, chunk.getPosition().z);
+            // Fallback to legacy generation
+            generateTerrain(chunk);
+            chunk.recalculateHeightMaps();
+            chunk.setStatus(Chunk::Status::Full);
+        }
+        return;
+    }
+    
+    // Legacy fallback
     generateTerrain(chunk);
     
     if (settings.generateFeatures) {
@@ -245,17 +276,21 @@ int World::calculateTerrainHeight(int x, int z) const {
 }
 
 int World::getBiomeAt(int x, int z) const {
-    // Simple biome selection based on noise
+    // Delegate to WorldGenerator if available
+    if (worldGenerator_) {
+        return static_cast<int>(worldGenerator_->getBiome(x, 64, z));
+    }
+    
+    // Legacy fallback
     float temperature = biomeNoise->noise2D(x * 0.005f, z * 0.005f);
     float humidity = biomeNoise->noise2D(x * 0.005f + 1000, z * 0.005f + 1000);
     
-    // 0 = plains, 1 = desert, 2 = forest, 3 = mountains
     if (temperature > 0.3f) {
         return 1; // Desert
     } else if (humidity > 0.3f) {
         return 2; // Forest
     } else if (temperature < -0.3f) {
-        return 3; // Mountains (cold)
+        return 3; // Mountains
     }
     
     return 0; // Plains
@@ -266,6 +301,11 @@ int World::getBiomeAt(int x, int z) const {
 // ============================================
 
 int World::getHeight(int x, int z) const {
+    // Delegate to WorldGenerator if available
+    if (worldGenerator_) {
+        return worldGenerator_->getHeight(x, z);
+    }
+    
     ChunkPos chunkPos(
         x < 0 ? (x - CHUNK_WIDTH + 1) / CHUNK_WIDTH : x / CHUNK_WIDTH,
         z < 0 ? (z - CHUNK_WIDTH + 1) / CHUNK_WIDTH : z / CHUNK_WIDTH

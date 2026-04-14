@@ -11,6 +11,7 @@ set(TEST_SOURCES
     unit/test_world_border.cpp
     unit/test_mining.cpp
     unit/test_anvil_save.cpp
+    unit/test_world_gen_integration.cpp
 )
 
 # Create test executable
