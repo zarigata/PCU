@@ -44,7 +44,7 @@
 | Biomes (60+ types) | 📋 | High | Full biome list |
 | Biome blending | 📋 | High | Smooth transitions |
 | Caves | 📋 | High | 3D noise carving |
-| Ravines | 📋 | Medium | Long narrow cuts |
+| Ravines | 🔄 | Medium | Long narrow cuts |
 | Underground lakes | 📋 | Medium | Water/lava lakes |
 | Surface lakes | 📋 | Medium | Water bodies |
 | Oceans | 📋 | High | Deep oceans |

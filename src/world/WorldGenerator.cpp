@@ -143,6 +143,13 @@ ChunkGenResult WorldGenerator::generateChunk(Chunk* chunk, World* world) {
         if (settings.generateCaves) {
             generateCaves(chunk);
         }
+
+        if (settings.generateRavines) {
+            SeededRandom ravineRandom(settings.seed ^
+                (static_cast<uint64_t>(chunk->getPosition().x) << 32) ^
+                static_cast<uint64_t>(chunk->getPosition().z) ^ 0xABCD5678ULL);
+            generateRavines(chunk, ravineRandom);
+        }
         
         if (settings.generateOres) {
             SeededRandom chunkRandom(settings.seed ^ 
@@ -428,6 +435,133 @@ void WorldGenerator::placeOreBlob(Chunk* chunk, int startX, int startY, int star
         startX = std::clamp(startX, 0, CHUNK_WIDTH - 1);
         startY = std::clamp(startY, settings.minHeight, settings.maxHeight);
         startZ = std::clamp(startZ, 0, CHUNK_WIDTH - 1);
+    }
+}
+
+void WorldGenerator::generateRavines(Chunk* chunk, SeededRandom& chunkRandom) {
+    VF_PROFILE_FUNCTION();
+
+    ChunkPos chunkPos = chunk->getPosition();
+    int worldX = chunkPos.x * CHUNK_WIDTH;
+    int worldZ = chunkPos.z * CHUNK_WIDTH;
+
+    // Use a position-based seed so the same ravines are generated
+    // regardless of chunk visit order. Only start ravines whose
+    // origin falls inside this chunk.
+    // Decide how many ravine starts land in this chunk.
+    // We use a Poisson-like approach: hash chunk pos to get count.
+    uint64_t chunkHash = static_cast<uint64_t>(chunkPos.x) * 73856093ULL ^
+                         static_cast<uint64_t>(chunkPos.z) * 19349663ULL ^
+                         settings.seed;
+    SeededRandom chunkHashRand(chunkHash);
+    
+    // ~0.5% chance per chunk to start a ravine (roughly 1 per ~200 chunks)
+    if (!chunkHashRand.chance(0.005f)) return;
+    
+    // Origin within this chunk
+    int startX = worldX + chunkHashRand.nextInt(CHUNK_WIDTH);
+    int startZ = worldZ + chunkHashRand.nextInt(CHUNK_WIDTH);
+    
+    // Start Y: between -20 and 50 (underground to near-surface)
+    int startY = chunkHashRand.nextInt(-20, 50);
+    
+    // Direction
+    float yaw = chunkHashRand.nextFloat() * 6.2831853f;  // 0..2π
+    float pitch = (chunkHashRand.nextFloat() - 0.5f) * 0.4f; // slight tilt
+    
+    // Dimensions
+    int length = chunkHashRand.nextInt(settings.ravineMinLength, settings.ravineMaxLength);
+    float width = settings.ravineMinWidth + chunkHashRand.nextFloat() * 
+                  (settings.ravineMaxWidth - settings.ravineMinWidth);
+    float height = settings.ravineMinHeight + chunkHashRand.nextFloat() * 
+                   (settings.ravineMaxHeight - settings.ravineMinHeight);
+    
+    carveRavine(chunk, startX, startY, startZ, yaw, pitch, width, height, length, chunkHashRand);
+}
+
+void WorldGenerator::carveRavine(Chunk* chunk, int startX, int startY, int startZ,
+                                  float yaw, float pitch, float width, float height,
+                                  int length, SeededRandom& random) {
+    auto& blockRegistry = BlockRegistry::get();
+    auto air = blockRegistry.getDefaultState("poorcraftultra:air");
+    auto bedrockId = blockRegistry.getBlockId("poorcraftultra:bedrock");
+    auto waterId = blockRegistry.getBlockId("poorcraftultra:water");
+
+    ChunkPos chunkPos = chunk->getPosition();
+    int chunkWorldX = chunkPos.x * CHUNK_WIDTH;
+    int chunkWorldZ = chunkPos.z * CHUNK_WIDTH;
+
+    float x = static_cast<float>(startX);
+    float y = static_cast<float>(startY);
+    float z = static_cast<float>(startZ);
+    
+    // Current width/height scale (can vary along path)
+    float currentWidth = width;
+    float currentHeight = height;
+
+    for (int step = 0; step < length; step++) {
+        // Advance position along direction
+        x += std::cos(pitch) * std::cos(yaw);
+        y += std::sin(pitch);
+        z += std::cos(pitch) * std::sin(yaw);
+
+        // Wander: gradually curve the ravine
+        yaw += (random.nextFloat() - 0.5f) * settings.ravineWanderSpeed * 2.0f;
+        pitch += (random.nextFloat() - 0.5f) * 0.01f;
+        pitch = std::clamp(pitch, -0.3f, 0.3f); // Keep mostly horizontal
+
+        // Width/height variation along length: bulge in the middle, narrow at ends
+        float t = static_cast<float>(step) / static_cast<float>(length);
+        float scale = 1.0f - 2.0f * std::abs(t - 0.5f); // 0→0, 0.5→1, 1→0
+        scale = scale * 0.6f + 0.4f; // range [0.4, 1.0]
+        currentWidth = width * scale;
+        currentHeight = height * scale;
+
+        // Only carve blocks that fall within this chunk
+        int ix = static_cast<int>(std::floor(x));
+        int iy = static_cast<int>(std::floor(y));
+        int iz = static_cast<int>(std::floor(z));
+
+        // Convert world coords to chunk-local
+        int cx = ix - chunkWorldX;
+        int cz = iz - chunkWorldZ;
+
+        // Check if the center is even near this chunk; skip if far away
+        if (cx < -static_cast<int>(currentWidth) - 1 || cx > CHUNK_WIDTH + static_cast<int>(currentWidth)) continue;
+        if (cz < -static_cast<int>(currentWidth) - 1 || cz > CHUNK_WIDTH + static_cast<int>(currentWidth)) continue;
+
+        // Carve an ellipsoid around (x, y, z)
+        int radiusXZ = static_cast<int>(std::ceil(currentWidth));
+        int radiusY = static_cast<int>(std::ceil(currentHeight));
+
+        for (int dy = -radiusY; dy <= radiusY; dy++) {
+            for (int dx = -radiusXZ; dx <= radiusXZ; dx++) {
+                for (int dz = -radiusXZ; dz <= radiusXZ; dz++) {
+                    int bx = cx + dx;
+                    int by = iy + dy;
+                    int bz = cz + dz;
+
+                    // Bounds check (chunk-local)
+                    if (bx < 0 || bx >= CHUNK_WIDTH || bz < 0 || bz >= CHUNK_WIDTH) continue;
+                    if (by < settings.minHeight + 5 || by > settings.maxHeight) continue;
+
+                    // Ellipsoid test
+                    float ndx = static_cast<float>(dx) / currentWidth;
+                    float ndy = static_cast<float>(dy) / currentHeight;
+                    float ndz = static_cast<float>(dz) / currentWidth;
+                    float dist = ndx * ndx + ndy * ndy + ndz * ndz;
+                    if (dist > 1.0f) continue;
+
+                    // Don't carve bedrock or water
+                    BlockState current = chunk->getBlock(bx, by, bz);
+                    if (current.isAir()) continue;
+                    if (current.getBlockId() == bedrockId) continue;
+                    if (current.getBlockId() == waterId) continue;
+
+                    chunk->setBlock(bx, by, bz, air);
+                }
+            }
+        }
     }
 }
 

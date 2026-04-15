@@ -63,6 +63,18 @@ struct WorldGenSettings {
     float caveFrequency = 0.02f;
     float caveThreshold = 0.6f;
     
+    // Ravine settings
+    bool generateRavines = true;
+    int ravinesPerChunk = 1;       // Average ravines per chunk (low frequency)
+    int ravineMinLength = 40;
+    int ravineMaxLength = 120;
+    float ravineMinWidth = 1.5f;
+    float ravineMaxWidth = 4.5f;
+    float ravineMinHeight = 2.5f;
+    float ravineMaxHeight = 6.0f;
+    float ravineWanderSpeed = 0.03f;
+    float ravineWanderScale = 0.05f;
+    
     // Ore settings
     bool generateOres = true;
     
@@ -211,6 +223,12 @@ private:
     void placeDarkOakTree(Chunk* chunk, int x, int y, int z, SeededRandom& random);
     void placeAcaciaTree(Chunk* chunk, int x, int y, int z, SeededRandom& random);
     
+    // Ravine generation
+    void generateRavines(Chunk* chunk, SeededRandom& chunkRandom);
+    void carveRavine(Chunk* chunk, int startX, int startY, int startZ,
+                     float yaw, float pitch, float width, float height,
+                     int length, SeededRandom& random);
+
     // Ore helpers
     void placeOreVein(Chunk* chunk, const OreVein& ore, SeededRandom& random);
     void placeOreBlob(Chunk* chunk, int startX, int startY, int startZ,
