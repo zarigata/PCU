@@ -144,7 +144,7 @@
 | Block | Status | Priority | Notes |
 |-------|--------|----------|-------|
 | Crafting Table | 📋 | Critical | 3x3 grid |
-| Furnace | 📋 | Critical | Smelting |
+| Furnace | 🔄 | Critical | Smelting (SmeltingSystem + FuelRegistry implemented) |
 | Blast Furnace | 📋 | High | Fast ore smelting |
 | Smoker | 📋 | High | Fast food cooking |
 | Chest | 📋 | Critical | 27 slots |
@@ -804,7 +804,7 @@
 |--------|--------|----------|-------|
 | Player inventory | 📋 | Critical | 36 slots |
 | Crafting table | 📋 | Critical | 3x3 grid |
-| Furnace | 📋 | Critical | Smelting |
+| Furnace | 🔄 | Critical | Smelting (SmeltingSystem + FuelRegistry implemented) |
 | Chest | 📋 | Critical | 27 slots |
 | Double chest | 📋 | High | 54 slots |
 | Hopper | 📋 | High | 5 slots |

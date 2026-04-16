@@ -292,6 +292,7 @@ add_library(VoxelForge_Engine STATIC
     src/game/AchievementSystem.cpp
     src/game/Statistics.cpp
     src/game/MiningSystem.cpp
+    src/game/SmeltingSystem.cpp
 
     # Utils
     src/utils/Noise.cpp
