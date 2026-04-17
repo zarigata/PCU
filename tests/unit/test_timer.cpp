@@ -55,9 +55,9 @@ TEST_F(TimerTest, TimerNanosWorks) {
 }
 
 TEST_F(TimerTest, GetCurrentTimeIncreases) {
-    float t1 = Timer::getCurrentTime();
+    i64 t1 = Timer::getCurrentNanos();
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
-    float t2 = Timer::getCurrentTime();
+    i64 t2 = Timer::getCurrentNanos();
     
     EXPECT_GT(t2, t1);
 }
