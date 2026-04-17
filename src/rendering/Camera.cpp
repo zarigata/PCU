@@ -282,16 +282,18 @@ void PlayerCamera::processMouseMovement(float xoffset, float yoffset, bool const
     xoffset *= mouseSensitivity;
     yoffset *= mouseSensitivity;
     
-    rotation.y += xoffset;
-    rotation.x -= yoffset;
+    // Use getters/setters to respect access control on rotation/dirtiness
+    glm::vec3 rot = getRotation();
+    rot.y += xoffset;
+    rot.x -= yoffset;
     
     // Constrain pitch
     if (constrainPitch) {
-        if (rotation.x > 89.0f) rotation.x = 89.0f;
-        if (rotation.x < -89.0f) rotation.x = -89.0f;
+        if (rot.x > 89.0f) rot.x = 89.0f;
+        if (rot.x < -89.0f) rot.x = -89.0f;
     }
     
-    dirty = true;
+    setRotation(rot);
 }
 
 void PlayerCamera::processKeyboard(float deltaTime, bool forward, bool backward, bool left, bool right, bool jump, bool sneak) {

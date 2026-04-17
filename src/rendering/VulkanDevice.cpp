@@ -3,7 +3,7 @@
  * @brief Vulkan physical and logical device management implementation
  */
 
-#include "VulkanDevice.hpp"
+#include "VoxelForge/rendering/VulkanDevice.hpp"
 #include <VoxelForge/core/Logger.hpp>
 #include <algorithm>
 
@@ -22,7 +22,7 @@ void VulkanDevice::init(vk::Instance instance, vk::SurfaceKHR surface) {
     pickPhysicalDevice();
     createLogicalDevice();
     
-    Logger::info("VulkanDevice initialized: {}", properties.deviceName);
+    VF_INFO("VulkanDevice initialized: {}", std::string(properties.deviceName.data()));
 }
 
 void VulkanDevice::cleanup() {
@@ -88,7 +88,7 @@ void VulkanDevice::pickPhysicalDevice() {
     properties = physicalDevice.getProperties();
     memoryProperties = physicalDevice.getMemoryProperties();
     
-    Logger::info("Selected GPU: {}", properties.deviceName);
+    VF_INFO("Selected GPU: {}", std::string(properties.deviceName.data()));
 }
 
 void VulkanDevice::createLogicalDevice() {
@@ -160,7 +160,7 @@ void VulkanDevice::createLogicalDevice() {
     descriptorIndexing.runtimeDescriptorArray = VK_TRUE;
     
     if (properties.apiVersion >= VK_API_VERSION_1_2) {
-        descriptorIndexing.pNext = createInfo.pNext;
+        descriptorIndexing.pNext = const_cast<void*>(createInfo.pNext);
         createInfo.pNext = &descriptorIndexing;
     }
     
@@ -188,8 +188,8 @@ void VulkanDevice::createLogicalDevice() {
     
     enabledFeatures = features;
     
-    Logger::debug("Logical device created with {} queue families", 
-                  queueIndices.uniqueFamilies().size());
+    VF_DEBUG("Logical device created with {} queue families", 
+              static_cast<uint32_t>(queueIndices.uniqueFamilies().size()));
 }
 
 bool VulkanDevice::isDeviceSuitable(vk::PhysicalDevice device) {

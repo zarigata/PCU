@@ -3,7 +3,7 @@
  * @brief Shader loading and management implementation
  */
 
-#include "ShaderManager.hpp"
+#include "VoxelForge/rendering/ShaderManager.hpp"
 #include <VoxelForge/rendering/VulkanDevice.hpp>
 #include <VoxelForge/core/Logger.hpp>
 #include <fstream>
@@ -11,9 +11,11 @@
 #include <chrono>
 
 // For SPIRV compilation
+#ifdef USE_GLSLANG
 #include <glslang/Public/ShaderLang.h>
 #include <glslang/Public/ResourceLimits.h>
 #include <SPIRV/GlslangToSpv.h>
+#endif
 
 namespace VoxelForge {
 
@@ -28,9 +30,11 @@ void ShaderManager::init(VulkanDevice* device, const ShaderManagerSettings& sett
     this->settings = settings;
     
     // Initialize glslang
+#ifdef USE_GLSLANG
     glslang::InitializeProcess();
+#endif
     
-    Logger::info("ShaderManager initialized");
+    VF_INFO("ShaderManager initialized");
 }
 
 void ShaderManager::cleanup() {
@@ -58,7 +62,9 @@ void ShaderManager::cleanup() {
     programs.clear();
     
     // Finalize glslang
+#ifdef USE_GLSLANG
     glslang::FinalizeProcess();
+#endif
     
     device = nullptr;
 }
@@ -73,7 +79,7 @@ ShaderModule ShaderManager::loadShader(const std::string& path, vk::ShaderStageF
     // Read file
     std::string source = readFile(path);
     if (source.empty()) {
-        Logger::error("Failed to read shader file: {}", path);
+        VF_ERROR("Failed to read shader file: {}", path);
         return {};
     }
     
@@ -83,7 +89,7 @@ ShaderModule ShaderManager::loadShader(const std::string& path, vk::ShaderStageF
     // Compile
     auto result = compileGLSL(source, stage, path);
     if (!result.success) {
-        Logger::error("Shader compilation failed: {} - {}", path, result.errorMessage);
+        VF_ERROR("Shader compilation failed: {} - {}", path, result.errorMessage);
         return {};
     }
     
@@ -102,7 +108,7 @@ ShaderModule ShaderManager::loadShader(const std::string& path, vk::ShaderStageF
         watchFile(path);
     }
     
-    Logger::debug("Loaded shader: {}", path);
+    VF_DEBUG("Loaded shader: {}", path);
     return module;
 }
 
@@ -113,7 +119,7 @@ ShaderModule ShaderManager::loadShaderFromSource(const std::string& source,
     
     auto result = compileGLSL(source, stage, shaderName);
     if (!result.success) {
-        Logger::error("Shader compilation failed: {} - {}", shaderName, result.errorMessage);
+        VF_ERROR("Shader compilation failed: {} - {}", shaderName, result.errorMessage);
         return {};
     }
     
@@ -194,7 +200,7 @@ void ShaderManager::addComputeShader(ShaderProgram& program, const std::string& 
 }
 
 void ShaderManager::addTessControlShader(ShaderProgram& program, const std::string& path) {
-    auto module = loadShader(path, vk::ShaderStageFlagBits::eTessControl);
+        auto module = loadShader(path, vk::ShaderStageFlagBits::eTessellationControl);
     if (module) {
         program.modules.push_back(module);
     }
@@ -212,6 +218,7 @@ ShaderCompileResult ShaderManager::compileGLSL(const std::string& source,
                                                 const std::string& name) {
     ShaderCompileResult result;
     
+#ifdef USE_GLSLANG
     // Convert stage to EShLanguage
     EShLanguage language;
     switch (stage) {
@@ -258,6 +265,11 @@ ShaderCompileResult ShaderManager::compileGLSL(const std::string& source,
     glslang::GlslangToSpv(*program.getIntermediate(language), result.spirv);
     
     result.success = true;
+#else
+    (void)source;
+    (void)stage;
+    result.errorMessage = "GLSL compilation not available (USE_GLSLANG not defined)";
+#endif
     return result;
 }
 
@@ -283,7 +295,7 @@ void ShaderManager::reloadShader(const std::string& path) {
     
     auto result = compileGLSL(source, it->second.stage, path);
     if (!result.success) {
-        Logger::error("Shader reload failed: {} - {}", path, result.errorMessage);
+        VF_ERROR("Shader reload failed: {} - {}", path, result.errorMessage);
         return;
     }
     
@@ -294,7 +306,7 @@ void ShaderManager::reloadShader(const std::string& path) {
     it->second.sourceCode = source;
     createShaderModule(it->second, result.spirv);
     
-    Logger::info("Shader reloaded: {}", path);
+    VF_INFO("Shader reloaded: {}", path);
 }
 
 void ShaderManager::reloadAll() {
@@ -386,7 +398,7 @@ void ShaderManager::loadBuiltinShaders() {
     postProgram->modules.push_back(loadShaderFromSource(BuiltinShaders::FXAAFragmentShader,
                                                          vk::ShaderStageFlagBits::eFragment, "fxaa.frag"));
     
-    Logger::info("Built-in shaders loaded");
+    VF_INFO("Built-in shaders loaded");
 }
 
 ShaderProgram* ShaderManager::getChunkShader() { return getProgram(CHUNK_SHADER); }

@@ -139,7 +139,9 @@ public:
     VulkanRenderPassBuilder& forPostProcess(vk::Format colorFormat);
     VulkanRenderPassBuilder& forUI(vk::Format colorFormat);
     
-    vk::RenderPass build(vk::Device device);
+    vk::RenderPass build(vk::Device device) const;
+    
+    uint32_t getAttachmentCount() const { return static_cast<uint32_t>(attachments.size()); }
     
 private:
     std::vector<AttachmentInfo> attachments;

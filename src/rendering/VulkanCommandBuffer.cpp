@@ -3,9 +3,10 @@
  * @brief Vulkan command buffer and pool management implementation
  */
 
-#include "VulkanCommandBuffer.hpp"
+#include "VoxelForge/rendering/VulkanCommandBuffer.hpp"
 #include <VoxelForge/rendering/VulkanDevice.hpp>
 #include <VoxelForge/core/Logger.hpp>
+#include <memory>
 
 namespace VoxelForge {
 
@@ -54,7 +55,7 @@ void VulkanCommandPool::init(VulkanDevice* device, Type type, bool transient, bo
         throw std::runtime_error("Failed to create command pool: " + std::string(e.what()));
     }
     
-    Logger::debug("Command pool created for queue family {}", queueFamilyIndex);
+    VF_DEBUG("Command pool created for queue family {}", queueFamilyIndex);
 }
 
 void VulkanCommandPool::cleanup() {
@@ -159,7 +160,7 @@ VulkanCommandBuffer::VulkanCommandBuffer(VulkanCommandBuffer&& other) noexcept
 }
 
 VulkanCommandBuffer& VulkanCommandBuffer::operator=(VulkanCommandBuffer&& other) noexcept {
-    if (this != &other) {
+    if (std::addressof(other) != this) {
         cleanup();
         device = other.device;
         pool = other.pool;
@@ -411,7 +412,7 @@ void CommandBufferManager::init(VulkanDevice* device, uint32_t frameCount) {
         buffer.init(device->getDevice(), pool->getPool(), true);
     }
     
-    Logger::debug("CommandBufferManager initialized with {} buffers", frameCount);
+    VF_DEBUG("CommandBufferManager initialized with {} buffers", frameCount);
 }
 
 void CommandBufferManager::cleanup() {

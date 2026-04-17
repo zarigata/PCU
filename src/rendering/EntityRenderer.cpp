@@ -3,8 +3,9 @@
  * @brief Entity rendering system implementation
  */
 
-#include "EntityRenderer.hpp"
+#include "VoxelForge/rendering/EntityRenderer.hpp"
 #include <VoxelForge/rendering/VulkanDevice.hpp>
+#include <VoxelForge/rendering/VulkanPipeline.hpp>
 #include <VoxelForge/entity/EntityManager.hpp>
 #include <VoxelForge/entity/Entity.hpp>
 #include <VoxelForge/core/Logger.hpp>
@@ -38,7 +39,7 @@ void EntityRenderer::init(VulkanDevice* device) {
         instanceBuffers[i].map(device->getDevice());
     }
     
-    Logger::info("EntityRenderer initialized");
+    VF_INFO("EntityRenderer initialized");
 }
 
 void EntityRenderer::cleanup() {
@@ -207,9 +208,9 @@ void EntityRenderer::updateUniformBuffer(Camera* camera) {
     if (!camera) return;
     
     EntityUniformData data{};
-    data.viewProj = camera->getViewProjection();
-    data.view = camera->getView();
-    data.projection = camera->getProjection();
+    data.viewProj = camera->getViewProjectionMatrix();
+    data.view = camera->getViewMatrix();
+    data.projection = camera->getProjectionMatrix();
     data.cameraPos = camera->getPosition();
     data.time = 0.0f;  // TODO: Get actual time
     data.lightDir = glm::normalize(glm::vec3(0.5f, 1.0f, 0.3f));
@@ -299,7 +300,7 @@ void EntityRenderer::loadModel(const std::string& name, const std::string& path)
         device->getDevice(),
         device->getPhysicalDevice(),
         device->getGraphicsQueue(),
-        device->getQueueFamilies().graphicsFamily.value(),
+        vk::CommandPool(),
         vertices.data(),
         vertices.size() * sizeof(EntityVertex)
     );
@@ -308,13 +309,13 @@ void EntityRenderer::loadModel(const std::string& name, const std::string& path)
         device->getDevice(),
         device->getPhysicalDevice(),
         device->getGraphicsQueue(),
-        device->getQueueFamilies().graphicsFamily.value(),
+        vk::CommandPool(),
         indices.data(),
         indices.size() * sizeof(uint32_t)
     );
     
     models[name] = std::move(model);
-    Logger::debug("Loaded entity model: {}", name);
+    VF_DEBUG("Loaded entity model: {}", name);
 }
 
 void EntityRenderer::unloadModel(const std::string& name) {

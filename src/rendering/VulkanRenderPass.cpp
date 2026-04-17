@@ -3,7 +3,7 @@
  * @brief Vulkan render pass management implementation
  */
 
-#include "VulkanRenderPass.hpp"
+#include "VoxelForge/rendering/VulkanRenderPass.hpp"
 #include <VoxelForge/core/Logger.hpp>
 
 namespace VoxelForge {
@@ -213,7 +213,7 @@ VulkanRenderPassBuilder& VulkanRenderPassBuilder::forUI(vk::Format colorFormat) 
     return *this;
 }
 
-vk::RenderPass VulkanRenderPassBuilder::build(vk::Device device) {
+vk::RenderPass VulkanRenderPassBuilder::build(vk::Device device) const {
     // Convert attachments
     std::vector<vk::AttachmentDescription> vkAttachments;
     for (const auto& att : attachments) {
@@ -350,7 +350,7 @@ void VulkanRenderPass::init(vk::Device device, vk::RenderPass renderPass) {
 void VulkanRenderPass::init(vk::Device device, const VulkanRenderPassBuilder& builder) {
     this->device = device;
     renderPass = builder.build(device);
-    attachmentCount = static_cast<uint32_t>(builder.attachments.size());
+    attachmentCount = builder.getAttachmentCount();
 }
 
 void VulkanRenderPass::cleanup() {

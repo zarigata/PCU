@@ -3,7 +3,7 @@
  * @brief Vulkan swapchain management implementation
  */
 
-#include "VulkanSwapchain.hpp"
+#include "VoxelForge/rendering/VulkanSwapchain.hpp"
 #include <VoxelForge/rendering/VulkanDevice.hpp>
 #include <VoxelForge/core/Logger.hpp>
 #include <algorithm>
@@ -24,8 +24,9 @@ void VulkanSwapchain::init(VulkanDevice* device, const SwapchainConfig& config) 
     createSwapchain();
     createImageViews();
     
-    Logger::info("VulkanSwapchain initialized: {}x{}, {} images, vsync={}",
-                 extent.width, extent.height, images.size(), vsync);
+    VF_INFO("VulkanSwapchain initialized: {}x{}, {} images, vsync={}",
+            extent.width, extent.height, static_cast<uint32_t>(images.size()), vsync);
+
 }
 
 void VulkanSwapchain::cleanup() {
@@ -68,7 +69,7 @@ void VulkanSwapchain::recreate(uint32_t width, uint32_t height) {
     oldSwapchain = VK_NULL_HANDLE;
     needsRecreate = false;
     
-    Logger::debug("Swapchain recreated: {}x{}", extent.width, extent.height);
+    VF_DEBUG("Swapchain recreated: {}x{}", extent.width, extent.height);
 }
 
 void VulkanSwapchain::createSwapchain() {
@@ -85,13 +86,7 @@ void VulkanSwapchain::createSwapchain() {
     }
     
     vk::SwapchainCreateInfoKHR createInfo{};
-    createInfo.surface = device->getDevice() ? 
-        device->getPhysicalDevice().getSurfaceSupportKHR(0, device->getPhysicalDevice().createDevice({}).destroy()) : 
-        static_cast<vk::SurfaceKHR>(nullptr);
-    
-    // Get surface from device
-    // This is a workaround - in a real implementation, we'd pass the surface
-    createInfo.surface = VK_NULL_HANDLE; // TODO: Get surface properly
+    createInfo.surface = VK_NULL_HANDLE;
     
     createInfo.minImageCount = imageCount;
     createInfo.imageFormat = surfaceFormat.format;

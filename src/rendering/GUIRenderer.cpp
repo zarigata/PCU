@@ -3,11 +3,14 @@
  * @brief Immediate mode GUI rendering implementation
  */
 
-#include "GUIRenderer.hpp"
+#include "VoxelForge/rendering/GUIRenderer.hpp"
 #include <VoxelForge/rendering/VulkanDevice.hpp>
+#include <VoxelForge/rendering/VulkanPipeline.hpp>
 #include <VoxelForge/core/Logger.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <algorithm>
 #include <cmath>
+#include <fstream>
 
 // STB for font loading
 #define STB_TRUETYPE_IMPLEMENTATION
@@ -66,7 +69,7 @@ void GUIRenderer::init(VulkanDevice* device) {
     // Create default font (built-in)
     defaultFont = loadFont("default", 16, "");
     
-    Logger::info("GUIRenderer initialized");
+    VF_INFO("GUIRenderer initialized");
 }
 
 void GUIRenderer::cleanup() {
@@ -226,7 +229,7 @@ void GUIRenderer::render(vk::CommandBuffer cmd) {
     // Update vertex buffer
     size_t vertexSize = ctx.vertices.size() * sizeof(GUIVertex);
     if (vertexSize > vertexBuffer.size) {
-        Logger::warn("GUI vertex buffer overflow, truncating");
+        VF_WARN("GUI vertex buffer overflow, truncating");
         vertexSize = vertexBuffer.size;
     }
     memcpy(vertexBuffer.mapped, ctx.vertices.data(), vertexSize);
@@ -234,7 +237,7 @@ void GUIRenderer::render(vk::CommandBuffer cmd) {
     // Update index buffer
     size_t indexSize = ctx.indices.size() * sizeof(uint16_t);
     if (indexSize > indexBuffer.size) {
-        Logger::warn("GUI index buffer overflow, truncating");
+        VF_WARN("GUI index buffer overflow, truncating");
         indexSize = indexBuffer.size;
     }
     memcpy(indexBuffer.mapped, ctx.indices.data(), indexSize);
@@ -264,23 +267,23 @@ void GUIRenderer::render(vk::CommandBuffer cmd) {
     
     // Draw all commands
     uint32_t currentTexture = 0;
-    for (const auto& cmd : ctx.drawCommands) {
+    for (const auto& drawCmd : ctx.drawCommands) {
         // Bind texture if changed
-        if (cmd.textureId != currentTexture) {
+        if (drawCmd.textureId != currentTexture) {
             // Bind new texture
-            currentTexture = cmd.textureId;
+            currentTexture = drawCmd.textureId;
         }
         
         // Set scissor
         vk::Rect2D scissor;
-        scissor.offset.x = static_cast<int32_t>(cmd.clipRect.x);
-        scissor.offset.y = static_cast<int32_t>(cmd.clipRect.y);
-        scissor.extent.width = static_cast<uint32_t>(cmd.clipRect.z);
-        scissor.extent.height = static_cast<uint32_t>(cmd.clipRect.w);
+        scissor.offset.x = static_cast<int32_t>(drawCmd.clipRect.x);
+        scissor.offset.y = static_cast<int32_t>(drawCmd.clipRect.y);
+        scissor.extent.width = static_cast<uint32_t>(drawCmd.clipRect.z);
+        scissor.extent.height = static_cast<uint32_t>(drawCmd.clipRect.w);
         cmd.setScissor(0, scissor);
         
         // Draw indexed
-        cmd.drawIndexed(cmd.indexCount, 1, cmd.indexOffset, cmd.vertexOffset, 0);
+        cmd.drawIndexed(drawCmd.indexCount, 1, drawCmd.indexOffset, drawCmd.vertexOffset, 0);
     }
 }
 
@@ -363,7 +366,7 @@ Font* GUIRenderer::loadFont(const std::string& name, int size, const std::string
         // Use stb_truetype to rasterize font
         stbtt_fontinfo fontInfo;
         if (!stbtt_InitFont(&fontInfo, fontData.data(), 0)) {
-            Logger::error("Failed to initialize font: {}", path);
+            VF_ERROR("Failed to initialize font: {}", path);
             return nullptr;
         }
         
@@ -422,7 +425,7 @@ Font* GUIRenderer::loadFont(const std::string& name, int size, const std::string
             
             x += width + 1;
             
-            stbtt_FreeBitmap(bitmap);
+            stbtt_FreeBitmap(bitmap, nullptr);
         }
     }
     

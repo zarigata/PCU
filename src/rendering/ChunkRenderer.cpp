@@ -3,8 +3,9 @@
  * @brief Chunk rendering system implementation
  */
 
-#include "ChunkRenderer.hpp"
+#include "VoxelForge/rendering/ChunkRenderer.hpp"
 #include <VoxelForge/rendering/VulkanDevice.hpp>
+#include <VoxelForge/rendering/VulkanPipeline.hpp>
 #include <VoxelForge/rendering/TextureAtlas.hpp>
 #include <VoxelForge/world/World.hpp>
 #include <VoxelForge/world/Chunk.hpp>
@@ -35,7 +36,7 @@ void ChunkRenderer::init(VulkanDevice* device) {
         16 * 1024 * 1024  // 16 MB staging
     );
     
-    Logger::info("ChunkRenderer initialized");
+    VF_INFO("ChunkRenderer initialized");
 }
 
 void ChunkRenderer::cleanup() {
@@ -85,7 +86,7 @@ void ChunkRenderer::createDescriptorSets() {
                        vk::ShaderStageFlagBits::eFragment, 1);
     
     descriptorLayout = std::make_unique<VulkanDescriptorSetLayout>();
-    descriptorLayout->init(device->getDevice(), builder);
+    *descriptorLayout = builder.build(device->getDevice());
     
     // Create descriptor pool
     vk::DescriptorPoolSize poolSizes[] = {
@@ -101,10 +102,11 @@ void ChunkRenderer::createDescriptorSets() {
     auto pool = device->getDevice().createDescriptorPool(poolInfo);
     
     // Allocate descriptor sets
+    auto dslayout = descriptorLayout->get();
     vk::DescriptorSetAllocateInfo allocInfo{};
     allocInfo.descriptorPool = pool;
     allocInfo.descriptorSetCount = 1;
-    allocInfo.pSetLayouts = &descriptorLayout->getLayout();
+    allocInfo.pSetLayouts = &dslayout;
     
     descriptorSets.resize(frameCount);
     for (uint32_t i = 0; i < frameCount; i++) {
@@ -131,7 +133,7 @@ void ChunkRenderer::createPipeline() {
     // Create pipeline layout
     vk::PipelineLayoutCreateInfo layoutInfo{};
     layoutInfo.setLayoutCount = 1;
-    auto layout = descriptorLayout->getLayout();
+    auto layout = descriptorLayout->get();
     layoutInfo.pSetLayouts = &layout;
     
     // Push constants
@@ -226,9 +228,9 @@ void ChunkRenderer::updateUniformBuffer(Camera* camera) {
     if (!camera) return;
     
     ChunkUniformData data{};
-    data.viewProj = camera->getViewProjection();
-    data.view = camera->getView();
-    data.projection = camera->getProjection();
+    data.viewProj = camera->getViewProjectionMatrix();
+    data.view = camera->getViewMatrix();
+    data.projection = camera->getProjectionMatrix();
     data.cameraPos = camera->getPosition();
     data.time = 0.0f;  // TODO: Get actual time
     data.fogStart = 50.0f;
@@ -292,7 +294,7 @@ void ChunkRenderer::uploadPendingMeshes() {
             device->getDevice(),
             device->getPhysicalDevice(),
             device->getGraphicsQueue(),
-            device->getQueueFamilies().graphicsFamily.value(),
+            vk::CommandPool(),
             mesh->vertices.data(),
             vertexSize
         );
@@ -303,7 +305,7 @@ void ChunkRenderer::uploadPendingMeshes() {
             device->getDevice(),
             device->getPhysicalDevice(),
             device->getGraphicsQueue(),
-            device->getQueueFamilies().graphicsFamily.value(),
+            vk::CommandPool(),
             mesh->indices.data(),
             indexSize
         );

@@ -154,13 +154,13 @@ void VulkanContext::populateDebugMessengerCreateInfo(vk::DebugUtilsMessengerCrea
         vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral |
         vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation |
         vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance;
-    createInfo.pfnUserCallback = [](VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-                                     VkDebugUtilsMessageTypeFlagsEXT messageType,
-                                     const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
-                                     void* pUserData) -> VKAPI_ATTR VkBool32 {
-        switch (messageSeverity) {
+    createInfo.pfnUserCallback = [](vk::DebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+                                     vk::DebugUtilsMessageTypeFlagsEXT messageType,
+                                     const vk::DebugUtilsMessengerCallbackDataEXT* pCallbackData,
+                                     void* pUserData) -> VkBool32 {
+        switch (static_cast<int>(messageSeverity)) {
             case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
-                LOG_TRACE("Vulkan Validation: {}", pCallbackData->pMessage);
+                VF_TRACE("Vulkan Validation: {}", pCallbackData->pMessage);
                 break;
             case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
                 VF_INFO("Vulkan Validation: {}", pCallbackData->pMessage);

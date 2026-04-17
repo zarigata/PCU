@@ -97,10 +97,15 @@ private:
     void createInstance();
     void createDevice();
     void createSwapChain();
+    void recreateSwapChain();
     void createRenderPass();
     void createFramebuffers();
     void createCommandBuffers();
     void createSyncObjects();
+    
+    vk::SurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<vk::SurfaceFormatKHR>& formats);
+    vk::PresentModeKHR chooseSwapPresentMode(const std::vector<vk::PresentModeKHR>& modes);
+    vk::Extent2D chooseSwapExtent(const vk::SurfaceCapabilitiesKHR& capabilities);
     
     void renderChunks(World* world, Camera* camera);
     void renderEntities(World* world, Camera* camera);
@@ -119,6 +124,12 @@ private:
     vk::Format swapchainFormat;
     vk::Extent2D swapchainExtent;
     
+    // Depth buffer
+    vk::Image depthImage;
+    vk::DeviceMemory depthImageMemory;
+    vk::ImageView depthImageView;
+    vk::Format depthFormat;
+    
     // Render pass
     vk::RenderPass renderPass;
     
@@ -131,6 +142,7 @@ private:
     std::vector<vk::Semaphore> renderFinishedSemaphores;
     std::vector<vk::Fence> inFlightFences;
     uint32_t currentFrame = 0;
+    uint32_t currentImageIndex = 0;
     
     // Dimensions
     int width = 1280;

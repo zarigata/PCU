@@ -115,11 +115,13 @@ struct PostSettings {
     float contrast = 1.0f;
     float brightness = 0.0f;
     glm::vec3 lift = glm::vec3(0.0f);
-    glm::vec3 gamma = glm::vec3(1.0f);
+    glm::vec3 gammaVec = glm::vec3(1.0f);
     glm::vec3 gain = glm::vec3(1.0f);
     
-    // Gamma
     float gamma = 2.2f;
+    
+    float fogDensity = 0.0f;
+    glm::vec3 fogColor = glm::vec3(0.6f, 0.8f, 1.0f);
 };
 
 // Effect uniform data
@@ -162,10 +164,9 @@ struct PostUniformData {
     alignas(4) float contrast;
     alignas(4) float brightness;
     alignas(16) glm::vec3 lift;
-    alignas(16) glm::vec3 gamma;
+    alignas(16) glm::vec3 gammaVec;
     alignas(16) glm::vec3 gain;
     
-    // Gamma
     alignas(4) float gamma;
     
     // Time

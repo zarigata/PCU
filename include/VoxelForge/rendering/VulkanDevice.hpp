@@ -13,6 +13,8 @@
 
 namespace VoxelForge {
 
+#ifndef VOXELFORGE_QUEUE_FAMILY_INDICES_DEFINED
+#define VOXELFORGE_QUEUE_FAMILY_INDICES_DEFINED
 struct QueueFamilyIndices {
     std::optional<uint32_t> graphicsFamily;
     std::optional<uint32_t> presentFamily;
@@ -32,7 +34,10 @@ struct QueueFamilyIndices {
         return families;
     }
 };
+#endif // VOXELFORGE_QUEUE_FAMILY_INDICES_DEFINED
 
+#ifndef VOXELFORGE_SWAPCHAIN_SUPPORT_DETAILS_DEFINED
+#define VOXELFORGE_SWAPCHAIN_SUPPORT_DETAILS_DEFINED
 struct SwapChainSupportDetails {
     vk::SurfaceCapabilitiesKHR capabilities;
     std::vector<vk::SurfaceFormatKHR> formats;
@@ -74,6 +79,7 @@ struct SwapChainSupportDetails {
         return actualExtent;
     }
 };
+#endif // VOXELFORGE_SWAPCHAIN_SUPPORT_DETAILS_DEFINED
 
 class VulkanDevice {
 public:

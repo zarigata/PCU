@@ -246,7 +246,7 @@ void VulkanFramebufferWithAttachments::initColorOnly(
     fbInfo.attachments = {colorAttachments[0].imageView};
     framebuffer.init(device->getDevice(), fbInfo);
     
-    Logger::debug("Color-only framebuffer created: {}x{}", width, height);
+    VF_DEBUG("Color-only framebuffer created: {}x{}", width, height);
 }
 
 void VulkanFramebufferWithAttachments::initColorDepth(
@@ -287,7 +287,7 @@ void VulkanFramebufferWithAttachments::initColorDepth(
     fbInfo.attachments = {colorAttachments[0].imageView, depthAttachment.imageView};
     framebuffer.init(device->getDevice(), fbInfo);
     
-    Logger::debug("Color+Depth framebuffer created: {}x{}", width, height);
+    VF_DEBUG("Color+Depth framebuffer created: {}x{}", width, height);
 }
 
 void VulkanFramebufferWithAttachments::initGBuffer(
@@ -332,7 +332,7 @@ void VulkanFramebufferWithAttachments::initGBuffer(
     };
     framebuffer.init(device->getDevice(), fbInfo);
     
-    Logger::debug("G-Buffer framebuffer created: {}x{}", width, height);
+    VF_DEBUG("G-Buffer framebuffer created: {}x{}", width, height);
 }
 
 void VulkanFramebufferWithAttachments::initShadowMap(
@@ -358,7 +358,7 @@ void VulkanFramebufferWithAttachments::initShadowMap(
     fbInfo.attachments = {depthAttachment.imageView};
     framebuffer.init(device->getDevice(), fbInfo);
     
-    Logger::debug("Shadow map framebuffer created: {}x{}", size, size);
+    VF_DEBUG("Shadow map framebuffer created: {}x{}", size, size);
 }
 
 void VulkanFramebufferWithAttachments::initCubeShadowMap(
@@ -370,7 +370,7 @@ void VulkanFramebufferWithAttachments::initCubeShadowMap(
     // Similar to initShadowMap but with cube map
     // For now, delegate to regular shadow map
     initShadowMap(device, size, depthFormat, renderPass);
-    Logger::debug("Cube shadow map framebuffer created: {}x{}", size, size);
+    VF_DEBUG("Cube shadow map framebuffer created: {}x{}", size, size);
 }
 
 void VulkanFramebufferWithAttachments::cleanup() {

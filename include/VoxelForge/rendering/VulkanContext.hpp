@@ -13,6 +13,8 @@
 
 namespace VoxelForge {
 
+#ifndef VOXELFORGE_QUEUE_FAMILY_INDICES_DEFINED
+#define VOXELFORGE_QUEUE_FAMILY_INDICES_DEFINED
 struct QueueFamilyIndices {
     std::optional<uint32_t> graphicsFamily;
     std::optional<uint32_t> presentFamily;
@@ -23,12 +25,16 @@ struct QueueFamilyIndices {
         return graphicsFamily.has_value() && presentFamily.has_value();
     }
 };
+#endif
 
+#ifndef VOXELFORGE_SWAPCHAIN_SUPPORT_DETAILS_DEFINED
+#define VOXELFORGE_SWAPCHAIN_SUPPORT_DETAILS_DEFINED
 struct SwapChainSupportDetails {
     vk::SurfaceCapabilitiesKHR capabilities;
     std::vector<vk::SurfaceFormatKHR> formats;
     std::vector<vk::PresentModeKHR> presentModes;
 };
+#endif
 
 class VulkanContext {
 public:

@@ -3,7 +3,7 @@
  * @brief Vulkan synchronization primitives implementation
  */
 
-#include "VulkanSync.hpp"
+#include "VoxelForge/rendering/VulkanSync.hpp"
 #include <VoxelForge/rendering/VulkanDevice.hpp>
 #include <VoxelForge/core/Logger.hpp>
 
@@ -226,7 +226,7 @@ void SyncManager::init(vk::Device device, uint32_t frameCount) {
         sync.init(device);
     }
     
-    Logger::debug("SyncManager initialized with {} frames", frameCount);
+    VF_DEBUG("SyncManager initialized with {} frames", frameCount);
 }
 
 void SyncManager::cleanup() {
@@ -267,14 +267,17 @@ vk::SubmitInfo SyncManager::getSubmitInfo(
     
     auto& sync = getCurrentSync();
     
+    vk::Semaphore waitSem = sync.imageAvailable.get();
+    vk::Semaphore signalSem = sync.renderFinished.get();
+    
     vk::SubmitInfo submitInfo{};
     submitInfo.waitSemaphoreCount = 1;
-    submitInfo.pWaitSemaphores = &sync.imageAvailable.get();
+    submitInfo.pWaitSemaphores = &waitSem;
     submitInfo.pWaitDstStageMask = &waitStage;
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = &cmd;
     submitInfo.signalSemaphoreCount = 1;
-    submitInfo.pSignalSemaphores = &sync.renderFinished.get();
+    submitInfo.pSignalSemaphores = &signalSem;
     
     return submitInfo;
 }
@@ -282,9 +285,11 @@ vk::SubmitInfo SyncManager::getSubmitInfo(
 vk::PresentInfoKHR SyncManager::getPresentInfo(vk::SwapchainKHR swapchain, uint32_t imageIndex) {
     auto& sync = getCurrentSync();
     
+    vk::Semaphore waitSem = sync.renderFinished.get();
+    
     vk::PresentInfoKHR presentInfo{};
     presentInfo.waitSemaphoreCount = 1;
-    presentInfo.pWaitSemaphores = &sync.renderFinished.get();
+    presentInfo.pWaitSemaphores = &waitSem;
     presentInfo.swapchainCount = 1;
     presentInfo.pSwapchains = &swapchain;
     presentInfo.pImageIndices = &imageIndex;

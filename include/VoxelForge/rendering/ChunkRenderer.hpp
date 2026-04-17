@@ -21,16 +21,22 @@ class VulkanDevice;
 class VulkanCommandBuffer;
 class World;
 class Chunk;
-class ChunkMesh;
 
-// Vertex format for chunk meshes
+struct IVec3Hash {
+    size_t operator()(const glm::ivec3& v) const {
+        return std::hash<int>()(v.x) ^ (std::hash<int>()(v.y) << 1) ^ (std::hash<int>()(v.z) << 2);
+    }
+};
+
+#ifndef VOXELFORGE_RENDERING_CHUNK_VERTEX_DEFINED
+#define VOXELFORGE_RENDERING_CHUNK_VERTEX_DEFINED
 struct ChunkVertex {
     glm::vec3 position;
     glm::vec3 normal;
     glm::vec2 texCoord;
-    uint32_t texIndex;  // Texture array index
-    uint32_t color;     // Packed RGBA
-    uint32_t ao;        // Ambient occlusion (4 values packed)
+    uint32_t texIndex;
+    uint32_t color;
+    uint32_t ao;
     
     static vk::VertexInputBindingDescription getBindingDescription() {
         return {0, sizeof(ChunkVertex), vk::VertexInputRate::eVertex};
@@ -47,8 +53,14 @@ struct ChunkVertex {
         };
     }
 };
+#endif
 
-// GPU data for a chunk mesh
+struct ChunkMesh {
+    std::vector<ChunkVertex> vertices;
+    std::vector<uint32_t> indices;
+    bool empty() const { return vertices.empty(); }
+};
+
 struct ChunkMeshGPU {
     Buffer vertexBuffer;
     Buffer indexBuffer;
@@ -149,7 +161,7 @@ private:
     void* uniformBufferMapped = nullptr;
     
     // Chunk meshes
-    std::unordered_map<glm::ivec3, ChunkMeshGPU, glm::ivec3Hash> chunkMeshes;
+    std::unordered_map<glm::ivec3, ChunkMeshGPU, IVec3Hash> chunkMeshes;
     std::vector<std::pair<ChunkMesh*, glm::ivec3>> pendingUploads;
     
     // Settings and stats
@@ -164,14 +176,5 @@ private:
     // Staging buffer for uploads
     std::unique_ptr<VulkanRingBuffer> stagingBuffer;
 };
-
-// Hash function for glm::ivec3
-namespace glm {
-    struct ivec3Hash {
-        size_t operator()(const glm::ivec3& v) const {
-            return std::hash<int>()(v.x) ^ (std::hash<int>()(v.y) << 1) ^ (std::hash<int>()(v.z) << 2);
-        }
-    };
-}
 
 } // namespace VoxelForge
