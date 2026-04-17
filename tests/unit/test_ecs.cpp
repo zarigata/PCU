@@ -8,16 +8,16 @@
 
 using namespace VoxelForge;
 
-// Test components
+// Test components (use distinct names to avoid clashing with VoxelForge::VelocityComponent etc.)
 struct PositionComponent {
     float x = 0, y = 0, z = 0;
 };
 
-struct VelocityComponent {
+struct TestVelocity {
     float vx = 0, vy = 0, vz = 0;
 };
 
-struct NameComponent {
+struct TestName {
     std::string name;
 };
 
@@ -27,15 +27,15 @@ protected:
 };
 
 TEST_F(ECSTest, CreateEntity) {
-    Entity e = world.createEntity();
+    EntityID e = world.createEntity();
     EXPECT_NE(e, INVALID_ENTITY);
     EXPECT_TRUE(world.isAlive(e));
 }
 
 TEST_F(ECSTest, CreateMultipleEntities) {
-    Entity e1 = world.createEntity();
-    Entity e2 = world.createEntity();
-    Entity e3 = world.createEntity();
+    EntityID e1 = world.createEntity();
+    EntityID e2 = world.createEntity();
+    EntityID e3 = world.createEntity();
     
     EXPECT_NE(e1, e2);
     EXPECT_NE(e2, e3);
@@ -43,7 +43,7 @@ TEST_F(ECSTest, CreateMultipleEntities) {
 }
 
 TEST_F(ECSTest, DestroyEntity) {
-    Entity e = world.createEntity();
+    EntityID e = world.createEntity();
     EXPECT_TRUE(world.isAlive(e));
     
     world.destroyEntity(e);
@@ -51,7 +51,7 @@ TEST_F(ECSTest, DestroyEntity) {
 }
 
 TEST_F(ECSTest, AddComponent) {
-    Entity e = world.createEntity();
+    EntityID e = world.createEntity();
     
     auto& pos = world.addComponent<PositionComponent>(e, 10.0f, 20.0f, 30.0f);
     
@@ -61,7 +61,7 @@ TEST_F(ECSTest, AddComponent) {
 }
 
 TEST_F(ECSTest, GetComponent) {
-    Entity e = world.createEntity();
+    EntityID e = world.createEntity();
     world.addComponent<PositionComponent>(e, 1.0f, 2.0f, 3.0f);
     
     auto* pos = world.getComponent<PositionComponent>(e);
@@ -72,14 +72,14 @@ TEST_F(ECSTest, GetComponent) {
 }
 
 TEST_F(ECSTest, GetComponentNonExistent) {
-    Entity e = world.createEntity();
+    EntityID e = world.createEntity();
     
     auto* pos = world.getComponent<PositionComponent>(e);
     EXPECT_EQ(pos, nullptr);
 }
 
 TEST_F(ECSTest, HasComponent) {
-    Entity e = world.createEntity();
+    EntityID e = world.createEntity();
     
     EXPECT_FALSE(world.hasComponent<PositionComponent>(e));
     
@@ -89,7 +89,7 @@ TEST_F(ECSTest, HasComponent) {
 }
 
 TEST_F(ECSTest, RemoveComponent) {
-    Entity e = world.createEntity();
+    EntityID e = world.createEntity();
     world.addComponent<PositionComponent>(e);
     
     EXPECT_TRUE(world.hasComponent<PositionComponent>(e));
@@ -100,63 +100,62 @@ TEST_F(ECSTest, RemoveComponent) {
 }
 
 TEST_F(ECSTest, MultipleComponents) {
-    Entity e = world.createEntity();
+    EntityID e = world.createEntity();
     
     world.addComponent<PositionComponent>(e, 1.0f, 2.0f, 3.0f);
-    world.addComponent<VelocityComponent>(e, 4.0f, 5.0f, 6.0f);
-    world.addComponent<NameComponent>(e, NameComponent{"TestEntity"});
+    world.addComponent<TestVelocity>(e, 4.0f, 5.0f, 6.0f);
+    world.addComponent<TestName>(e, TestName{"TestEntity"});
     
     EXPECT_TRUE(world.hasComponent<PositionComponent>(e));
-    EXPECT_TRUE(world.hasComponent<VelocityComponent>(e));
-    EXPECT_TRUE(world.hasComponent<NameComponent>(e));
+    EXPECT_TRUE(world.hasComponent<TestVelocity>(e));
+    EXPECT_TRUE(world.hasComponent<TestName>(e));
     
-    auto* name = world.getComponent<NameComponent>(e);
+    auto* name = world.getComponent<TestName>(e);
     ASSERT_NE(name, nullptr);
     EXPECT_EQ(name->name, "TestEntity");
 }
 
 TEST_F(ECSTest, HasAllComponents) {
-    Entity e = world.createEntity();
+    EntityID e = world.createEntity();
     
     world.addComponent<PositionComponent>(e);
-    world.addComponent<VelocityComponent>(e);
+    world.addComponent<TestVelocity>(e);
     
-    EXPECT_TRUE(world.hasAllComponents<PositionComponent, VelocityComponent>(e));
-    EXPECT_FALSE(world.hasAllComponents<PositionComponent, NameComponent>(e));
+    EXPECT_TRUE((world.hasAllComponents<PositionComponent, TestVelocity>(e)));
+    EXPECT_FALSE((world.hasAllComponents<PositionComponent, TestName>(e)));
 }
 
 TEST_F(ECSTest, ViewIteration) {
-    // Create entities with different component combinations
-    Entity e1 = world.createEntity();
+    EntityID e1 = world.createEntity();
     world.addComponent<PositionComponent>(e1);
-    world.addComponent<VelocityComponent>(e1);
+    world.addComponent<TestVelocity>(e1);
     
-    Entity e2 = world.createEntity();
+    EntityID e2 = world.createEntity();
     world.addComponent<PositionComponent>(e2);
-    world.addComponent<VelocityComponent>(e2);
+    world.addComponent<TestVelocity>(e2);
     
-    Entity e3 = world.createEntity();
+    EntityID e3 = world.createEntity();
     world.addComponent<PositionComponent>(e3); // No velocity
     
     int count = 0;
-    for (auto entity : world.view<PositionComponent, VelocityComponent>()) {
+    for (auto entity : world.view<PositionComponent, TestVelocity>()) {
         count++;
         EXPECT_TRUE(world.hasComponent<PositionComponent>(entity));
-        EXPECT_TRUE(world.hasComponent<VelocityComponent>(entity));
+        EXPECT_TRUE(world.hasComponent<TestVelocity>(entity));
     }
     
     EXPECT_EQ(count, 2); // Only e1 and e2 have both components
 }
 
 TEST_F(ECSTest, ViewEach) {
-    Entity e1 = world.createEntity();
+    EntityID e1 = world.createEntity();
     world.addComponent<PositionComponent>(e1, 10.0f, 0.0f, 0.0f);
     
-    Entity e2 = world.createEntity();
+    EntityID e2 = world.createEntity();
     world.addComponent<PositionComponent>(e2, 20.0f, 0.0f, 0.0f);
     
     float totalX = 0;
-    world.view<PositionComponent>().each([&](Entity e, PositionComponent& pos) {
+    world.view<PositionComponent>().each([&](EntityID e, PositionComponent& pos) {
         totalX += pos.x;
     });
     
@@ -167,30 +166,30 @@ TEST_F(ECSTest, ViewSize) {
     world.addComponent<PositionComponent>(world.createEntity());
     world.addComponent<PositionComponent>(world.createEntity());
     world.addComponent<PositionComponent>(world.createEntity());
-    world.addComponent<VelocityComponent>(world.createEntity()); // No position
+    world.addComponent<TestVelocity>(world.createEntity()); // No position
     
     auto view = world.view<PositionComponent>();
     EXPECT_EQ(view.size(), 3);
 }
 
 TEST_F(ECSTest, GetEntitiesWith) {
-    Entity e1 = world.createEntity();
+    EntityID e1 = world.createEntity();
     world.addComponent<PositionComponent>(e1);
-    world.addComponent<VelocityComponent>(e1);
+    world.addComponent<TestVelocity>(e1);
     
-    Entity e2 = world.createEntity();
+    EntityID e2 = world.createEntity();
     world.addComponent<PositionComponent>(e2);
     
-    Entity e3 = world.createEntity();
+    EntityID e3 = world.createEntity();
     world.addComponent<PositionComponent>(e3);
-    world.addComponent<VelocityComponent>(e3);
+    world.addComponent<TestVelocity>(e3);
     
-    auto entities = world.getEntitiesWith<PositionComponent, VelocityComponent>();
+    auto entities = world.getEntitiesWith<PositionComponent, TestVelocity>();
     EXPECT_EQ(entities.size(), 2);
 }
 
 TEST_F(ECSTest, ComponentModification) {
-    Entity e = world.createEntity();
+    EntityID e = world.createEntity();
     world.addComponent<PositionComponent>(e, 0.0f, 0.0f, 0.0f);
     
     // Modify component
@@ -206,7 +205,7 @@ TEST_F(ECSTest, LargeEntityCount) {
     const int ENTITY_COUNT = 10000;
     
     for (int i = 0; i < ENTITY_COUNT; i++) {
-        Entity e = world.createEntity();
+        EntityID e = world.createEntity();
         world.addComponent<PositionComponent>(e, float(i), 0.0f, 0.0f);
     }
     
