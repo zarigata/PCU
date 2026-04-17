@@ -5,6 +5,7 @@
 
 #include <VoxelForge/game/Statistics.hpp>
 #include <VoxelForge/core/Logger.hpp>
+#include <nlohmann/json.hpp>
 #include <algorithm>
 #include <fstream>
 

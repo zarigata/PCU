@@ -3,21 +3,19 @@
  * @brief Mod loading and management implementation
  */
 
-#include "ModLoader.hpp"
+#include <VoxelForge/modding/ModLoader.hpp>
 #include <VoxelForge/scripting/LuaEngine.hpp>
 #include <VoxelForge/core/Logger.hpp>
+#include <sol/sol.hpp>
 #include <fstream>
 #include <sstream>
 #include <algorithm>
 
-// Include JSON parsing
 #include <nlohmann/json.hpp>
 
 namespace VoxelForge {
 
 // ============== ModLoader ==============
-
-ModLoader::ModLoader() = default;
 
 ModLoader::~ModLoader() {
     shutdown();
@@ -33,7 +31,7 @@ void ModLoader::init(LuaEngine* luaEngine, const ModConfig& config) {
     std::filesystem::create_directories(config.configDirectory);
     
     initialized = true;
-    Logger::info("ModLoader initialized (mods directory: {})", config.modsDirectory);
+    VF_INFO("ModLoader initialized (mods directory: {})", config.modsDirectory.string());
 }
 
 void ModLoader::shutdown() {
@@ -44,7 +42,7 @@ void ModLoader::shutdown() {
     loadOrder.clear();
     
     initialized = false;
-    Logger::info("ModLoader shutdown");
+    VF_INFO("ModLoader shutdown");
 }
 
 std::vector<ModInfo> ModLoader::discoverMods() {
@@ -145,7 +143,7 @@ ModLoadResult ModLoader::loadMod(const ModInfo& info) {
         sortModsByDependency();
         
         triggerEvent(ModEvent::ModLoaded, info.id);
-        Logger::info("Loaded mod: {} v{}", info.id, info.version);
+        VF_INFO("Loaded mod: {} v{}", info.id, info.version);
     } else {
         mod->state = ModState::Error;
         mod->lastError = result.error;
@@ -253,7 +251,7 @@ void ModLoader::unloadNativeMod(LoadedMod& mod) {
         try {
             mod.modInstance->onUnload();
         } catch (const std::exception& e) {
-            Logger::error("Exception in mod onUnload: {}", e.what());
+            VF_ERROR("Exception in mod onUnload: {}", e.what());
         }
         
         if (mod.destroyFunc) {
@@ -338,10 +336,6 @@ ModLoadResult ModLoader::loadLuaMod(const ModInfo& info) {
     buffer << file.rdbuf();
     std::string source = buffer.str();
     
-    // Create mod environment
-    sol::environment env = luaEngine->createEnvironment();
-    
-    // Add mod context
     auto& mod = mods[info.id];
     if (!mod) {
         mod = std::make_unique<LoadedMod>();
@@ -349,19 +343,7 @@ ModLoadResult ModLoader::loadLuaMod(const ModInfo& info) {
     mod->scriptPath = scriptPath.string();
     mod->context = new ModContext(info.id, this);
     
-    // Set up mod API in environment
-    env["MOD_ID"] = info.id;
-    env["MOD_NAME"] = info.name;
-    env["MOD_VERSION"] = info.version;
-    env["mod"] = luaEngine->getState().create_table();
-    
-    // Register mod API functions
-    // env["mod"]["registerBlock"] = ...
-    // env["mod"]["registerItem"] = ...
-    // etc.
-    
-    // Execute script
-    auto execResult = luaEngine->execute(source, env);
+    auto execResult = luaEngine->execute(source);
     if (!execResult.success) {
         delete mod->context;
         mod->context = nullptr;
@@ -431,7 +413,7 @@ void ModLoader::unloadMod(const std::string& modId) {
     mods.erase(it);
     
     triggerEvent(ModEvent::ModUnloaded, modId);
-    Logger::info("Unloaded mod: {}", modId);
+    VF_INFO("Unloaded mod: {}", modId);
 }
 
 void ModLoader::reloadMod(const std::string& modId) {
@@ -495,7 +477,7 @@ void ModLoader::enableMod(const std::string& modId) {
     mod->info.enabled = true;
     
     triggerEvent(ModEvent::ModEnabled, modId);
-    Logger::info("Enabled mod: {}", modId);
+    VF_INFO("Enabled mod: {}", modId);
 }
 
 void ModLoader::disableMod(const std::string& modId) {
@@ -510,7 +492,7 @@ void ModLoader::disableMod(const std::string& modId) {
     mod->info.enabled = false;
     
     triggerEvent(ModEvent::ModDisabled, modId);
-    Logger::info("Disabled mod: {}", modId);
+    VF_INFO("Disabled mod: {}", modId);
 }
 
 bool ModLoader::isModEnabled(const std::string& modId) const {
@@ -525,7 +507,7 @@ bool ModLoader::isModLoaded(const std::string& modId) const {
 bool ModLoader::checkDependencies(const ModInfo& info) const {
     for (const auto& dep : info.dependencies) {
         if (!isModLoaded(dep)) {
-            Logger::warn("Missing dependency '{}' for mod '{}'", dep, info.id);
+            VF_WARN("Missing dependency '{}' for mod '{}'", dep, info.id);
             return false;
         }
     }
@@ -533,7 +515,7 @@ bool ModLoader::checkDependencies(const ModInfo& info) const {
     // Check incompatibilities
     for (const auto& incompat : info.incompatibilities) {
         if (isModLoaded(incompat)) {
-            Logger::warn("Mod '{}' is incompatible with '{}'", info.id, incompat);
+            VF_WARN("Mod '{}' is incompatible with '{}'", info.id, incompat);
             return false;
         }
     }
@@ -550,7 +532,7 @@ std::vector<std::string> ModLoader::getDependencyOrder() {
     std::function<bool(const std::string&)> visit = [&](const std::string& modId) -> bool {
         if (visited.count(modId)) return true;
         if (visiting.count(modId)) {
-            Logger::error("Circular dependency detected: {}", modId);
+            VF_ERROR("Circular dependency detected: {}", modId);
             return false;
         }
         
@@ -683,7 +665,7 @@ ModInfo ModLoader::parseModJson(const std::filesystem::path& jsonPath) {
         }
         
     } catch (const std::exception& e) {
-        Logger::error("Failed to parse mod.json: {} - {}", jsonPath.string(), e.what());
+        VF_ERROR("Failed to parse mod.json: {} - {}", jsonPath.string(), e.what());
     }
     
     return info;
@@ -747,130 +729,6 @@ void ModLoader::triggerEvent(ModEvent event, const std::string& modId, const std
         data.message = message;
         eventCallback(data);
     }
-}
-
-// ============== ModContext ==============
-
-ModContext::ModContext(const std::string& modId, ModLoader* loader)
-    : modId(modId), loader(loader) {}
-
-void ModContext::logInfo(const std::string& message) {
-    Logger::info("[{}] {}", modId, message);
-}
-
-void ModContext::logWarning(const std::string& message) {
-    Logger::warn("[{}] {}", modId, message);
-}
-
-void ModContext::logError(const std::string& message) {
-    Logger::error("[{}] {}", modId, message);
-}
-
-std::filesystem::path ModContext::getModPath() const {
-    auto* mod = loader->getMod(modId);
-    return mod ? mod->info.path : std::filesystem::path();
-}
-
-std::filesystem::path ModContext::getConfigPath() const {
-    return loader->getConfig().configDirectory / (modId + ".json");
-}
-
-std::filesystem::path ModContext::getDataPath() const {
-    return loader->getConfig().dataDirectory / modId;
-}
-
-bool ModContext::hasConfig() const {
-    return std::filesystem::exists(getConfigPath());
-}
-
-sol::table ModContext::getConfig(sol::this_state s) {
-    sol::state_view lua(s);
-    sol::table config = lua.create_table();
-    
-    auto configPath = getConfigPath();
-    if (std::filesystem::exists(configPath)) {
-        std::ifstream file(configPath);
-        std::stringstream buffer;
-        buffer << file.rdbuf();
-        
-        auto result = lua.script(buffer.str());
-        if (result.valid()) {
-            config = result;
-        }
-    }
-    
-    return config;
-}
-
-void ModContext::saveConfig(sol::table config) {
-    // Serialize table to JSON and save
-}
-
-std::vector<uint8_t> ModContext::loadResource(const std::string& path) {
-    auto fullPath = getModPath() / path;
-    
-    if (!std::filesystem::exists(fullPath)) {
-        return {};
-    }
-    
-    std::ifstream file(fullPath, std::ios::binary);
-    std::vector<uint8_t> data((std::istreambuf_iterator<char>(file)),
-                              std::istreambuf_iterator<char>());
-    return data;
-}
-
-bool ModContext::resourceExists(const std::string& path) const {
-    return std::filesystem::exists(getModPath() / path);
-}
-
-void ModContext::registerBlock(const std::string& id, sol::table properties) {
-    // Register block with full ID (modid:blockname)
-    std::string fullId = modId + ":" + id;
-    logInfo("Registering block: {}", fullId);
-}
-
-void ModContext::registerItem(const std::string& id, sol::table properties) {
-    std::string fullId = modId + ":" + id;
-    logInfo("Registering item: {}", fullId);
-}
-
-void ModContext::registerRecipe(sol::table recipe) {
-    logInfo("Registering recipe");
-}
-
-void ModContext::registerEntity(const std::string& id, sol::table properties) {
-    std::string fullId = modId + ":" + id;
-    logInfo("Registering entity: {}", fullId);
-}
-
-void ModContext::registerBiome(const std::string& id, sol::table properties) {
-    std::string fullId = modId + ":" + id;
-    logInfo("Registering biome: {}", fullId);
-}
-
-void ModContext::registerDimension(const std::string& id, sol::table properties) {
-    std::string fullId = modId + ":" + id;
-    logInfo("Registering dimension: {}", fullId);
-}
-
-void ModContext::registerCommand(const std::string& name, sol::function callback) {
-    logInfo("Registering command: {}", name);
-}
-
-void ModContext::subscribeEvent(const std::string& event, sol::function callback) {
-    // Subscribe to game events
-}
-
-LuaEngine* ModContext::getLuaEngine() {
-    return loader->getLuaEngine();
-}
-
-World* ModContext::getWorld() {
-    return nullptr;  // Would get from game
-}
-
-EntityManager* ModContext::getEntityManager() {
-    return nullptr;  // Would get from game
 }
 
 // ============== ModRegistry ==============

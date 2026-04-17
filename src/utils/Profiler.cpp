@@ -98,12 +98,13 @@ void Profiler::endSection(const std::string& name) {
     else if (name == "GPUWait") currentFrame.gpuWaitMs += durationMs;
     
     // Store result
-    frameResults.push_back({
-        name,
-        std::chrono::duration_cast<std::chrono::nanoseconds>(start.time_since_epoch()).count(),
-        std::chrono::duration_cast<std::chrono::nanoseconds>(end.time_since_epoch()).count(),
-        std::hash<std::thread::id>{}()
-    });
+        frameResults.push_back({
+            name,
+            std::chrono::duration_cast<std::chrono::nanoseconds>(start.time_since_epoch()).count(),
+            std::chrono::duration_cast<std::chrono::nanoseconds>(end.time_since_epoch()).count(),
+            static_cast<uint32_t>(std::hash<std::thread::id>{}(std::this_thread::get_id()))
+        });
+
 }
 
 void Profiler::printStats() {

@@ -4,8 +4,9 @@
  */
 
 #include <VoxelForge/entity/Entity.hpp>
-#include <VoxelForge/entity/Player.hpp>
+#include <VoxelForge/entity/EntitySystems.hpp>
 #include <VoxelForge/core/Logger.hpp>
+#include <algorithm>
 
 namespace VoxelForge {
 
@@ -57,9 +58,9 @@ void LivingEntitySystem::applyEffectModifiers(LivingComponent& living, float del
     }
 }
 
-void LivingEntitySystem::onDeath(ECSWorld& world, Entity entity, LivingComponent& living, EntityBaseComponent& base) {
+void LivingEntitySystem::onDeath(ECSWorld& world, EntityID entity, LivingComponent& living, EntityBaseComponent& base) {
     base.isAlive = false;
-    VF_DEBUG("Entity {} died", entity);
+    VF_INFO("Entity {} died", entity);
     
     // TODO: Spawn death particles
     // TODO: Drop items
@@ -97,15 +98,15 @@ void LivingEntitySystem::heal(LivingComponent& living, float amount) {
     
     float healed = living.health - oldHealth;
     if (healed > 0) {
-        VF_DEBUG("Healed for {} HP", healed);
+        VF_INFO("Healed for {} HP", healed);
     }
 }
 
-void LivingEntitySystem::damage(ECSWorld& world, Entity entity, LivingComponent& living, float amount, DamageType type) {
+void LivingEntitySystem::damage(ECSWorld& world, EntityID entity, LivingComponent& living, float amount, DamageType type) {
     float actualDamage = calculateDamage(living, amount, type);
     living.health -= actualDamage;
     
-    VF_DEBUG("Entity {} took {} damage (type: {})", entity, actualDamage, static_cast<int>(type));
+    VF_INFO("Entity {} took {} damage (type: {})", entity, actualDamage, static_cast<int>(type));
     
     if (living.health <= 0) {
         living.health = 0;

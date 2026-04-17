@@ -1,14 +1,14 @@
-/**
- * @file MobBase.cpp
- * @brief Base mob AI implementation
- */
-
 #include <VoxelForge/entity/Entity.hpp>
+#include <VoxelForge/entity/EntitySystems.hpp>
 #include <VoxelForge/world/World.hpp>
 #include <VoxelForge/core/Logger.hpp>
 #include <random>
 
 namespace VoxelForge {
+
+// ============================================================================
+// MobAISystem Implementation
+// ============================================================================
 
 MobAISystem::MobAISystem() {
     VF_INFO("MobAISystem created");
@@ -98,39 +98,32 @@ void MobAISystem::updateWander(AIComponent& ai, MovementComponent& movement, flo
 
 void MobAISystem::updateFollow(AIComponent& ai, MovementComponent& movement, float deltaTime) {
     // Move towards target
-    // TODO: Implement pathfinding
 }
 
 void MobAISystem::updateFlee(AIComponent& ai, MovementComponent& movement, float deltaTime) {
     // Move away from threat
-    // TODO: Implement flee behavior
 }
 
 void MobAISystem::updateAttack(AIComponent& ai, MovementComponent& movement, float deltaTime) {
     // Attack target
-    // TODO: Implement attack behavior
 }
 
 void MobAISystem::updateEat(AIComponent& ai, MovementComponent& movement, float deltaTime) {
-    // Eating animation and logic
     movement.moveForward = 0.0f;
     movement.moveStrafe = 0.0f;
 }
 
 void MobAISystem::updateSleep(AIComponent& ai, MovementComponent& movement, float deltaTime) {
-    // Sleeping logic
     movement.moveForward = 0.0f;
     movement.moveStrafe = 0.0f;
 }
 
 void MobAISystem::updateBreed(AIComponent& ai, MovementComponent& movement, float deltaTime) {
     // Breeding behavior
-    // TODO: Implement breeding
 }
 
 void MobAISystem::updateWork(AIComponent& ai, MovementComponent& movement, float deltaTime) {
     // Villager work behavior
-    // TODO: Implement work behavior
 }
 
 // ============================================================================
@@ -139,20 +132,20 @@ void MobAISystem::updateWork(AIComponent& ai, MovementComponent& movement, float
 
 namespace MobFactory {
 
-Entity createZombie(ECSWorld& world, const Vec3& position) {
+EntityID createZombie(ECSWorld& world, const Vec3& position) {
     return EntityFactory::createZombie(world, position);
 }
 
-Entity createSkeleton(ECSWorld& world, const Vec3& position) {
+EntityID createSkeleton(ECSWorld& world, const Vec3& position) {
     return EntityFactory::createSkeleton(world, position);
 }
 
-Entity createCreeper(ECSWorld& world, const Vec3& position) {
+EntityID createCreeper(ECSWorld& world, const Vec3& position) {
     return EntityFactory::createCreeper(world, position);
 }
 
-Entity createSpider(ECSWorld& world, const Vec3& position) {
-    Entity entity = world.createEntity();
+EntityID createSpider(ECSWorld& world, const Vec3& position) {
+    EntityID entity = world.createEntity();
     
     auto& base = world.addComponent<EntityBaseComponent>(entity);
     base.type = EntityType::Monster;
@@ -173,8 +166,8 @@ Entity createSpider(ECSWorld& world, const Vec3& position) {
     return entity;
 }
 
-Entity createEnderman(ECSWorld& world, const Vec3& position) {
-    Entity entity = world.createEntity();
+EntityID createEnderman(ECSWorld& world, const Vec3& position) {
+    EntityID entity = world.createEntity();
     
     auto& base = world.addComponent<EntityBaseComponent>(entity);
     base.type = EntityType::Monster;
@@ -195,8 +188,8 @@ Entity createEnderman(ECSWorld& world, const Vec3& position) {
     return entity;
 }
 
-Entity createBlaze(ECSWorld& world, const Vec3& position) {
-    Entity entity = world.createEntity();
+EntityID createBlaze(ECSWorld& world, const Vec3& position) {
+    EntityID entity = world.createEntity();
     
     auto& base = world.addComponent<EntityBaseComponent>(entity);
     base.type = EntityType::Monster;
@@ -218,14 +211,14 @@ Entity createBlaze(ECSWorld& world, const Vec3& position) {
     return entity;
 }
 
-Entity createSlime(ECSWorld& world, const Vec3& position, int size) {
-    Entity entity = world.createEntity();
+EntityID createSlime(ECSWorld& world, const Vec3& position, int size) {
+    EntityID entity = world.createEntity();
     
     auto& base = world.addComponent<EntityBaseComponent>(entity);
     base.type = EntityType::Monster;
     base.isAlive = true;
     
-    float health = size * size; // Size 1 = 1 HP, size 2 = 4 HP, size 4 = 16 HP
+    float health = size * size; 
     auto& living = world.addComponent<LivingComponent>(entity);
     living.health = health;
     living.maxHealth = health;
@@ -245,3 +238,4 @@ Entity createSlime(ECSWorld& world, const Vec3& position, int size) {
 } // namespace MobFactory
 
 } // namespace VoxelForge
+

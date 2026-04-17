@@ -10,13 +10,17 @@
 #include <memory>
 #include <vector>
 #include <functional>
+#include <optional>
+#include <glm/glm.hpp>
 
 namespace VoxelForge {
 
-// Forward declarations
 class World;
 class Player;
 class Entity;
+class BlockState;
+
+using BlockPos = glm::ivec3;
 
 using ItemID = uint16_t;
 using ItemCount = uint8_t;

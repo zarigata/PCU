@@ -6,6 +6,8 @@
 #include <VoxelForge/modding/ModLoader.hpp>
 #include <VoxelForge/scripting/LuaEngine.hpp>
 #include <VoxelForge/core/Logger.hpp>
+#include <sol/sol.hpp>
+#include <nlohmann/json.hpp>
 #include <filesystem>
 #include <fstream>
 
@@ -103,7 +105,7 @@ bool ModContext::resourceExists(const std::string& resourcePath) const {
 
 void ModContext::registerBlock(const std::string& id, sol::table properties) {
     if (loader) {
-        loader->getLuaEngine()->executeScript(
+        loader->getLuaEngine()->execute(
             "voxelforge.blocks.register('" + modId + ":" + id + "', " +
             propertiesToScript(properties) + ")"
         );
@@ -113,7 +115,7 @@ void ModContext::registerBlock(const std::string& id, sol::table properties) {
 
 void ModContext::registerItem(const std::string& id, sol::table properties) {
     if (loader) {
-        loader->getLuaEngine()->executeScript(
+        loader->getLuaEngine()->execute(
             "voxelforge.items.register('" + modId + ":" + id + "', " +
             propertiesToScript(properties) + ")"
         );
@@ -123,7 +125,7 @@ void ModContext::registerItem(const std::string& id, sol::table properties) {
 
 void ModContext::registerRecipe(sol::table recipe) {
     if (loader) {
-        loader->getLuaEngine()->executeScript(
+        loader->getLuaEngine()->execute(
             "voxelforge.recipes.register(" + propertiesToScript(recipe) + ")"
         );
     }
@@ -132,7 +134,7 @@ void ModContext::registerRecipe(sol::table recipe) {
 
 void ModContext::registerEntity(const std::string& id, sol::table properties) {
     if (loader) {
-        loader->getLuaEngine()->executeScript(
+        loader->getLuaEngine()->execute(
             "voxelforge.entities.register('" + modId + ":" + id + "', " +
             propertiesToScript(properties) + ")"
         );
@@ -142,7 +144,7 @@ void ModContext::registerEntity(const std::string& id, sol::table properties) {
 
 void ModContext::registerBiome(const std::string& id, sol::table properties) {
     if (loader) {
-        loader->getLuaEngine()->executeScript(
+        loader->getLuaEngine()->execute(
             "voxelforge.biomes.register('" + modId + ":" + id + "', " +
             propertiesToScript(properties) + ")"
         );
@@ -152,7 +154,7 @@ void ModContext::registerBiome(const std::string& id, sol::table properties) {
 
 void ModContext::registerDimension(const std::string& id, sol::table properties) {
     if (loader) {
-        loader->getLuaEngine()->executeScript(
+        loader->getLuaEngine()->execute(
             "voxelforge.dimensions.register('" + modId + ":" + id + "', " +
             propertiesToScript(properties) + ")"
         );

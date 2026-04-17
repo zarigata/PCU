@@ -11,6 +11,7 @@
 #include <memory>
 #include <functional>
 #include <glm/glm.hpp>
+#include <nlohmann/json.hpp>
 
 namespace VoxelForge {
 
@@ -174,7 +175,7 @@ public:
     
     // Check progress
     bool isComplete(uint32_t playerId, const std::string& id) const;
-    float getProgress(uint32_t playerId, const std::string& id) const;
+    float getProgressValue(uint32_t playerId, const std::string& id) const;
     int getEarnedExperience(uint32_t playerId) const;
     
     // Triggers

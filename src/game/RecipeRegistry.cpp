@@ -10,6 +10,13 @@
 
 namespace VoxelForge {
 
+namespace {
+ItemId itemIdToString(ItemID id) {
+    const auto* def = ItemRegistry::get().getDefinition(id);
+    return def ? def->registryName : "";
+}
+}
+
 // ============================================================================
 // Ingredient Implementation
 // ============================================================================
@@ -56,7 +63,7 @@ bool Recipe::matchesShaped(const std::vector<ItemStack>& inputs, int gridWidth, 
                         continue;
                     }
                     
-                    if (!ingredient.matches(input.itemId) || input.count < ingredient.count) {
+                    if (!ingredient.matches(itemIdToString(input.getItem())) || input.getCount() < ingredient.count) {
                         match = false;
                     }
                 }
@@ -91,7 +98,7 @@ bool Recipe::matchesShapeless(const std::vector<ItemStack>& inputs) const {
         for (size_t i = 0; i < inputs.size(); ++i) {
             if (used[i]) continue;
             
-            if (ingredient.matches(inputs[i].itemId) && inputs[i].count >= ingredient.count) {
+            if (ingredient.matches(itemIdToString(inputs[i].getItem())) && inputs[i].getCount() >= ingredient.count) {
                 used[i] = true;
                 found = true;
                 break;
@@ -105,9 +112,7 @@ bool Recipe::matchesShapeless(const std::vector<ItemStack>& inputs) const {
 }
 
 ItemStack Recipe::getResult() const {
-    ItemStack stack;
-    stack.itemId = result.item;
-    stack.count = result.count;
+    ItemStack stack(result.item, static_cast<ItemCount>(result.count));
     return stack;
 }
 
@@ -231,7 +236,7 @@ bool ShapelessRecipe::matches(const std::vector<ItemStack>& inputs) const {
 
 bool CookingRecipe::matches(const std::vector<ItemStack>& inputs) const {
     if (inputs.empty() || ingredients.empty()) return false;
-    return ingredients[0].matches(inputs[0].itemId);
+    return ingredients[0].matches(itemIdToString(inputs[0].getItem())) && inputs[0].getCount() >= ingredients[0].count;
 }
 
 // ============================================================================
@@ -396,7 +401,10 @@ bool RecipeRegistry::canCraft(const Recipe& recipe, const std::vector<ItemStack>
     std::unordered_map<ItemId, int> available;
     for (const auto& stack : inventory) {
         if (!stack.isEmpty()) {
-            available[stack.itemId] += stack.count;
+            const auto* def = ItemRegistry::get().getDefinition(stack.getItem());
+            if (def) {
+                available[def->registryName] += stack.getCount();
+            }
         }
     }
     

@@ -160,14 +160,14 @@ MOD_EXPORT const char* getPluginDescription() { return ""; }
 MOD_EXPORT int getAPIMajorVersion() { return 1; }
 MOD_EXPORT int getAPIMinorVersion() { return 0; }
 MOD_EXPORT const char** getDependencies(int* count) { 
-    static const char* noDeps[] = {};
+    static const char* noDeps[] = { nullptr };
     *count = 0;
     return noDeps;
 }
 
-// Plugin entry points
-MOD_EXPORT IMod* createMod() { return nullptr; }
-MOD_EXPORT void destroyMod(IMod* mod) { delete mod; }
+// Plugin entry points (stub: replace IMod with void* for compatibility)
+MOD_EXPORT void* createMod() { return nullptr; }
+MOD_EXPORT void destroyMod(void* mod) { /* no-op for stubbed plugin */ }
 
 } // extern "C"
 

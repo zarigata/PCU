@@ -386,11 +386,11 @@ bool AchievementSystem::isComplete(uint32_t playerId, const std::string& id) con
     return progress && progress->achieved;
 }
 
-float AchievementSystem::getProgress(uint32_t playerId, const std::string& id) const {
+float AchievementSystem::getProgressValue(uint32_t playerId, const std::string& id) const {
     const Advancement* adv = getAdvancement(id);
     if (!adv) return 0.0f;
     
-    auto progress = getProgress(playerId, id);
+    auto* progress = getProgress(playerId, id);
     if (!progress) return 0.0f;
     
     int completed = 0;

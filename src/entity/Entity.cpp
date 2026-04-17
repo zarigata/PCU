@@ -4,6 +4,7 @@
  */
 
 #include <VoxelForge/entity/Entity.hpp>
+#include <VoxelForge/game/Item.hpp>
 #include <VoxelForge/core/Logger.hpp>
 #include <algorithm>
 

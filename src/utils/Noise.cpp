@@ -360,6 +360,44 @@ float VoronoiNoise::distance3D(float x, float y, float z) const {
     return noise3D(x, y, z).distance;
 }
 
+VoronoiNoise::Cell VoronoiNoise::noise3D(float x, float y, float z) const {
+    Cell result;
+    result.distance = std::numeric_limits<float>::max();
+    result.distanceToSecond = std::numeric_limits<float>::max();
+    
+    int cellX = static_cast<int>(std::floor(x));
+    int cellY = static_cast<int>(std::floor(y));
+    int cellZ = static_cast<int>(std::floor(z));
+    
+    for (int dz = -1; dz <= 1; dz++) {
+        for (int dy = -1; dy <= 1; dy++) {
+            for (int dx = -1; dx <= 1; dx++) {
+                int cx = cellX + dx;
+                int cy = cellY + dy;
+                int cz = cellZ + dz;
+                
+                uint32_t h = hash(cx, cy, cz, seed);
+                float px = cx + (h & 0xffff) / 65535.0f;
+                float py = cy + ((h >> 16) & 0xffff) / 65535.0f;
+                float pz = cz + (h & 0xff) / 255.0f;
+                
+                float dist = std::sqrt((x - px) * (x - px) + (y - py) * (y - py) + (z - pz) * (z - pz));
+                
+                if (dist < result.distance) {
+                    result.distanceToSecond = result.distance;
+                    result.distance = dist;
+                    result.cellX = cx;
+                    result.cellY = cy;
+                } else if (dist < result.distanceToSecond) {
+                    result.distanceToSecond = dist;
+                }
+            }
+        }
+    }
+    
+    return result;
+}
+
 // ============================================
 // Utility Functions
 // ============================================

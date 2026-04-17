@@ -4,6 +4,7 @@
  */
 
 #include <VoxelForge/entity/Entity.hpp>
+#include <VoxelForge/entity/EntitySystems.hpp>
 #include <VoxelForge/world/World.hpp>
 #include <VoxelForge/core/Logger.hpp>
 #include <cmath>
@@ -41,25 +42,26 @@ void ProjectileSystem::update(ECSWorld& world, float deltaTime) {
     }
 }
 
-void ProjectileSystem::onHitBlock(ECSWorld& world, Entity entity, ProjectileComponent& projectile, const BlockPos& pos) {
+void ProjectileSystem::onHitBlock(ECSWorld& world, EntityID entity, ProjectileComponent& projectile, const BlockPos& pos) {
     projectile.inGround = true;
-    VF_DEBUG("Projectile {} hit block at ({}, {}, {})", entity, pos.x, pos.y, pos.z);
+    VF_INFO("Projectile {} hit block at ({}, {}, {})", entity, pos.x, pos.y, pos.z);
 }
 
-void ProjectileSystem::onHitEntity(ECSWorld& world, Entity projectileEntity, ProjectileComponent& projectile, 
-                                    Entity target, LivingComponent& targetLiving) {
+void ProjectileSystem::onHitEntity(ECSWorld& world, EntityID projectileEntity, ProjectileComponent& projectile, 
+                                     EntityID target, LivingComponent& targetLiving) {
     // Apply damage
     targetLiving.health -= projectile.damage;
     
-    VF_DEBUG("Projectile {} hit entity {} for {} damage", 
-              projectileEntity, target, projectile.damage);
+    VF_INFO("Projectile {} hit entity {} for {} damage", 
+               projectileEntity, target, projectile.damage);
     
     // Handle piercing
     if (projectile.pierce && projectile.pierceLevel > 0) {
         projectile.pierceLevel--;
     } else {
         // Destroy projectile
-        world.getComponent<EntityBaseComponent>(projectileEntity).isAlive = false;
+        auto* base = world.getComponent<EntityBaseComponent>(projectileEntity);
+        if (base) base->isAlive = false;
     }
 }
 
@@ -69,12 +71,12 @@ void ProjectileSystem::onHitEntity(ECSWorld& world, Entity projectileEntity, Pro
 
 namespace ProjectileFactory {
 
-Entity createArrow(ECSWorld& world, const Vec3& position, const Vec3& velocity, Entity owner) {
+EntityID createArrow(ECSWorld& world, const Vec3& position, const Vec3& velocity, EntityID owner) {
     return EntityFactory::createArrow(world, position, velocity, owner);
 }
 
-Entity createSpectralArrow(ECSWorld& world, const Vec3& position, const Vec3& velocity, Entity owner) {
-    Entity entity = world.createEntity();
+EntityID createSpectralArrow(ECSWorld& world, const Vec3& position, const Vec3& velocity, EntityID owner) {
+    EntityID entity = world.createEntity();
     
     auto& base = world.addComponent<EntityBaseComponent>(entity);
     base.type = EntityType::Projectile;
@@ -91,12 +93,12 @@ Entity createSpectralArrow(ECSWorld& world, const Vec3& position, const Vec3& ve
     return entity;
 }
 
-Entity createSnowball(ECSWorld& world, const Vec3& position, const Vec3& velocity, Entity owner) {
+EntityID createSnowball(ECSWorld& world, const Vec3& position, const Vec3& velocity, EntityID owner) {
     return EntityFactory::createSnowball(world, position, velocity, owner);
 }
 
-Entity createEgg(ECSWorld& world, const Vec3& position, const Vec3& velocity, Entity owner) {
-    Entity entity = world.createEntity();
+EntityID createEgg(ECSWorld& world, const Vec3& position, const Vec3& velocity, EntityID owner) {
+    EntityID entity = world.createEntity();
     
     auto& base = world.addComponent<EntityBaseComponent>(entity);
     base.type = EntityType::Projectile;
@@ -113,8 +115,8 @@ Entity createEgg(ECSWorld& world, const Vec3& position, const Vec3& velocity, En
     return entity;
 }
 
-Entity createEnderPearl(ECSWorld& world, const Vec3& position, const Vec3& velocity, Entity owner) {
-    Entity entity = world.createEntity();
+EntityID createEnderPearl(ECSWorld& world, const Vec3& position, const Vec3& velocity, EntityID owner) {
+    EntityID entity = world.createEntity();
     
     auto& base = world.addComponent<EntityBaseComponent>(entity);
     base.type = EntityType::Projectile;
@@ -131,8 +133,8 @@ Entity createEnderPearl(ECSWorld& world, const Vec3& position, const Vec3& veloc
     return entity;
 }
 
-Entity createFireball(ECSWorld& world, const Vec3& position, const Vec3& velocity, Entity owner) {
-    Entity entity = world.createEntity();
+EntityID createFireball(ECSWorld& world, const Vec3& position, const Vec3& velocity, EntityID owner) {
+    EntityID entity = world.createEntity();
     
     auto& base = world.addComponent<EntityBaseComponent>(entity);
     base.type = EntityType::Projectile;
@@ -149,8 +151,8 @@ Entity createFireball(ECSWorld& world, const Vec3& position, const Vec3& velocit
     return entity;
 }
 
-Entity createSmallFireball(ECSWorld& world, const Vec3& position, const Vec3& velocity, Entity owner) {
-    Entity entity = world.createEntity();
+EntityID createSmallFireball(ECSWorld& world, const Vec3& position, const Vec3& velocity, EntityID owner) {
+    EntityID entity = world.createEntity();
     
     auto& base = world.addComponent<EntityBaseComponent>(entity);
     base.type = EntityType::Projectile;
@@ -167,8 +169,8 @@ Entity createSmallFireball(ECSWorld& world, const Vec3& position, const Vec3& ve
     return entity;
 }
 
-Entity createDragonFireball(ECSWorld& world, const Vec3& position, const Vec3& velocity, Entity owner) {
-    Entity entity = world.createEntity();
+EntityID createDragonFireball(ECSWorld& world, const Vec3& position, const Vec3& velocity, EntityID owner) {
+    EntityID entity = world.createEntity();
     
     auto& base = world.addComponent<EntityBaseComponent>(entity);
     base.type = EntityType::Projectile;
@@ -185,8 +187,8 @@ Entity createDragonFireball(ECSWorld& world, const Vec3& position, const Vec3& v
     return entity;
 }
 
-Entity createWitherSkull(ECSWorld& world, const Vec3& position, const Vec3& velocity, Entity owner) {
-    Entity entity = world.createEntity();
+EntityID createWitherSkull(ECSWorld& world, const Vec3& position, const Vec3& velocity, EntityID owner) {
+    EntityID entity = world.createEntity();
     
     auto& base = world.addComponent<EntityBaseComponent>(entity);
     base.type = EntityType::Projectile;
@@ -203,8 +205,8 @@ Entity createWitherSkull(ECSWorld& world, const Vec3& position, const Vec3& velo
     return entity;
 }
 
-Entity createShulkerBullet(ECSWorld& world, const Vec3& position, Entity owner, Entity target) {
-    Entity entity = world.createEntity();
+EntityID createShulkerBullet(ECSWorld& world, const Vec3& position, EntityID owner, EntityID target) {
+    EntityID entity = world.createEntity();
     
     auto& base = world.addComponent<EntityBaseComponent>(entity);
     base.type = EntityType::Projectile;
@@ -221,8 +223,8 @@ Entity createShulkerBullet(ECSWorld& world, const Vec3& position, Entity owner, 
     return entity;
 }
 
-Entity createFishingBobber(ECSWorld& world, const Vec3& position, Entity owner) {
-    Entity entity = world.createEntity();
+EntityID createFishingBobber(ECSWorld& world, const Vec3& position, EntityID owner) {
+    EntityID entity = world.createEntity();
     
     auto& base = world.addComponent<EntityBaseComponent>(entity);
     base.type = EntityType::Projectile;
@@ -239,8 +241,8 @@ Entity createFishingBobber(ECSWorld& world, const Vec3& position, Entity owner) 
     return entity;
 }
 
-Entity createLlamaSpit(ECSWorld& world, const Vec3& position, const Vec3& velocity, Entity owner) {
-    Entity entity = world.createEntity();
+EntityID createLlamaSpit(ECSWorld& world, const Vec3& position, const Vec3& velocity, EntityID owner) {
+    EntityID entity = world.createEntity();
     
     auto& base = world.addComponent<EntityBaseComponent>(entity);
     base.type = EntityType::Projectile;
@@ -257,8 +259,8 @@ Entity createLlamaSpit(ECSWorld& world, const Vec3& position, const Vec3& veloci
     return entity;
 }
 
-Entity createTrident(ECSWorld& world, const Vec3& position, const Vec3& velocity, Entity owner) {
-    Entity entity = world.createEntity();
+EntityID createTrident(ECSWorld& world, const Vec3& position, const Vec3& velocity, EntityID owner) {
+    EntityID entity = world.createEntity();
     
     auto& base = world.addComponent<EntityBaseComponent>(entity);
     base.type = EntityType::Projectile;
@@ -278,3 +280,4 @@ Entity createTrident(ECSWorld& world, const Vec3& position, const Vec3& velocity
 } // namespace ProjectileFactory
 
 } // namespace VoxelForge
+
