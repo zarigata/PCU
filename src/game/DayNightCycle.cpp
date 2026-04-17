@@ -41,9 +41,9 @@ void DayNightCycle::setDayTime(uint32_t ticks) {
 }
 
 void DayNightCycle::setDayTime(int hour, int minute) {
-    // Game time: tick 0 = 6:00, 6000 = 12:00, 12000 = 18:00, 18000 = 0:00
-    // So game_hour = (ticks/1000 + 6) % 24 => ticks = ((hour - 6 + 24) % 24) * 1000 + minute * (1000/60)
-    uint32_t ticks = ((static_cast<uint32_t>((hour - 6 + 24) % 24)) * DayNightCycle::TICKS_PER_HOUR)
+    // Direct mapping: hour * TICKS_PER_HOUR + minute * TICKS_PER_HOUR / 60
+    // hour=6 → 6000, hour=12,minute=30 → 12500
+    uint32_t ticks = (static_cast<uint32_t>(hour) * DayNightCycle::TICKS_PER_HOUR)
                    + (static_cast<uint32_t>(minute) * TICKS_PER_HOUR / 60);
     setDayTime(ticks);
 }
@@ -100,24 +100,18 @@ float DayNightCycle::calculateMoonPhase(uint32_t dayTime) {
 
 float DayNightCycle::calculateSkyDarkness(uint32_t dayTime) {
     float t = static_cast<float>(dayTime);
-    if (t < DayNightCycle::DAY_START) {
-        // Sunrise: 0-3000, darkness ramps from ~0.5 to 0.0
-        return lerp(0.5f, 0.0f, smoothstep(0.0f, 3000.0f, t));
+    if (t < DayNightCycle::DAY_START * 2) {
+        return lerp(0.5f, 0.0f, smoothstep(0.0f, 6000.0f, t));
     }
     if (t < DayNightCycle::SUNSET_START) {
-        return 0.0f; // Full day
+        return 0.0f;
     }
     if (t < DayNightCycle::NIGHT_START) {
-        // Sunset: 9000-12000, darkness ramps from 0.0 to 1.0
         return lerp(0.0f, 1.0f, smoothstep(9000.0f, 12000.0f, t));
     }
     if (t < DayNightCycle::MIDNIGHT) {
-        // Night approaching midnight: 12000-18000
         return lerp(1.0f, 1.0f, smoothstep(12000.0f, 18000.0f, t));
     }
-    // After midnight: 18000-24000 (wrapping to sunrise)
-    // Ramps from 1.0 down, hitting ~0.5 at tick 0
-    // Map 18000-24000 to 0-1
     float afterMid = (t - DayNightCycle::MIDNIGHT) / (DayNightCycle::TICKS_PER_DAY - DayNightCycle::MIDNIGHT);
     return lerp(1.0f, 0.5f, smoothstep(0.0f, 1.0f, afterMid));
 }

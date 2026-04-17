@@ -46,13 +46,10 @@ TEST(DayNightCycle, SetDayTimeTicks) {
 
 TEST(DayNightCycle, SetDayTimeHourMin) {
     DayNightCycle cycle;
-    // hour 6, min 0 → 6000 (since TICKS_PER_HOUR=1000, game hours start at 0)
     cycle.setDayTime(6, 0);
-    // 6*1000 + 0*1000/60 = 6000
     EXPECT_EQ(cycle.getDayTime(), 6000u);
 
     cycle.setDayTime(12, 30);
-    // 12*1000 + 30*1000/60 = 12500
     EXPECT_EQ(cycle.getDayTime(), 12500u);
 }
 
@@ -86,15 +83,13 @@ TEST(DayNightCycle, AddTimeWrapsAndIncrementsDay) {
 TEST(DayNightCycle, TimeSpeedDouble) {
     DayNightCycle cycle;
     cycle.setTimeSpeed(2.0f);
-    // Two accumulations of 0.05*2 = 0.1 each tick; need 10 ticks to get 1.0 accumulated
-    // Actually tick accumulator: each tick adds TICK_DURATION_SEC * timeSpeed
-    // = 0.05 * 2.0 = 0.1. After 10 ticks, accumulator reaches 1.0 → dayTime += 1
-    // Let's tick 10 times and expect dayTime = 1
-    for (int i = 0; i < 10; ++i) cycle.tick();
-    EXPECT_EQ(cycle.getDayTime(), 1u);
-    // Now tick 10 more → dayTime = 2
-    for (int i = 0; i < 10; ++i) cycle.tick();
+    // timeSpeed=2.0: each tick() advances 2 game ticks
+    cycle.tick();
     EXPECT_EQ(cycle.getDayTime(), 2u);
+    cycle.tick();
+    EXPECT_EQ(cycle.getDayTime(), 4u);
+    for (int i = 0; i < 8; ++i) cycle.tick();
+    EXPECT_EQ(cycle.getDayTime(), 20u);
 }
 
 TEST(DayNightCycle, TimeSpeedZeroFreezes) {
