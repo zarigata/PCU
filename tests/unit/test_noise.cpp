@@ -45,8 +45,8 @@ TEST_F(NoiseTest, PerlinNoiseDifferentSeeds) {
     
     bool allDifferent = true;
     for (int i = 0; i < 10; i++) {
-        float x = static_cast<float>(i);
-        float z = static_cast<float>(i * 2);
+        float x = static_cast<float>(i) + 0.37f;
+        float z = static_cast<float>(i * 2) + 0.71f;
         
         if (std::abs(noise1.noise(x, z) - noise2.noise(x, z)) < 0.01f) {
             allDifferent = false;

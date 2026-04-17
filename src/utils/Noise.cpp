@@ -166,7 +166,7 @@ float SimplexNoise::grad2D(int hash, float x, float y) {
     int h = hash & 7;
     float u = h < 4 ? x : y;
     float v = h < 4 ? y : x;
-    return ((h & 1) != 0 ? -u : u) + ((h & 2) != 0 ? -2.0f * v : 2.0f * v);
+    return ((h & 1) != 0 ? -u : u) + ((h & 2) != 0 ? -v : v);
 }
 
 float SimplexNoise::grad3D(int hash, float x, float y, float z) {
