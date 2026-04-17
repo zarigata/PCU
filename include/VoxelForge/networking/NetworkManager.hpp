@@ -13,6 +13,7 @@
 #include <memory>
 #include <functional>
 #include <queue>
+#include <VoxelForge/networking/Connection.hpp>
 
 namespace VoxelForge {
 
@@ -30,14 +31,6 @@ struct NetworkConfig {
     uint32_t connectionTimeout = 5000;  // ms
     uint32_t keepAliveInterval = 1000;  // ms
     bool enableEncryption = false;
-};
-
-// Connection state
-enum class ConnectionState {
-    Disconnected,
-    Connecting,
-    Connected,
-    Disconnecting
 };
 
 // Packet types
@@ -330,7 +323,7 @@ public:
     
     // Connection
     ConnectionState getConnectionState() const { return state; }
-    bool isConnected() const { return state == ConnectionState::Connected; }
+    bool isConnected() const { return state == ConnectionState::Playing; }
     
     // Login
     void login(const std::string& username);

@@ -3,7 +3,7 @@
  * @brief ENet-based networking implementation
  */
 
-#include "NetworkManager.hpp"
+#include <VoxelForge/networking/NetworkManager.hpp>
 #include <VoxelForge/core/Logger.hpp>
 #include <cstring>
 #include <algorithm>
@@ -171,12 +171,12 @@ void NetworkManager::init() {
     if (initialized) return;
     
     if (enet_initialize() != 0) {
-        Logger::error("Failed to initialize ENet");
+        VF_ERROR("Failed to initialize ENet");
         return;
     }
     
     initialized = true;
-    Logger::info("NetworkManager initialized");
+    VF_INFO("NetworkManager initialized");
 }
 
 void NetworkManager::shutdown() {
@@ -197,7 +197,7 @@ void NetworkManager::shutdown() {
     enet_deinitialize();
     initialized = false;
     
-    Logger::info("NetworkManager shutdown");
+    VF_INFO("NetworkManager shutdown");
 }
 
 void NetworkManager::registerCallback(PacketType type, PacketCallback callback) {
@@ -216,7 +216,7 @@ void NetworkManager::sendPacket(uint32_t clientId, const Packet& packet) {
         packet.data.data(),
         packet.data.size(),
         static_cast<enet_uint32>(packet.reliability) |
-        (packet.priority == PacketPriority::Immediate ? ENET_PACKET_FLAG_IMMEDIATE : 0)
+        (packet.priority == PacketPriority::Immediate ? ENET_PACKET_FLAG_RELIABLE : 0)
     );
     
     if (enetPacket) {
@@ -257,7 +257,7 @@ void NetworkManager::pollEvents() {
     while (enet_host_service(host, &event, 0) > 0) {
         switch (event.type) {
             case ENET_EVENT_TYPE_CONNECT:
-                onConnect(event.peer);
+                onConnect(reinterpret_cast<uintptr_t>(event.peer->data));
                 break;
                 
             case ENET_EVENT_TYPE_DISCONNECT:
@@ -300,13 +300,13 @@ void NetworkManager::handlePacket(uint32_t clientId, PacketType type,
 }
 
 void NetworkManager::onConnect(uint32_t clientId) {
-    state = ConnectionState::Connected;
-    Logger::info("Client {} connected", clientId);
+    state = ConnectionState::Playing;
+    VF_INFO("Client {} connected", clientId);
 }
 
 void NetworkManager::onDisconnect(uint32_t clientId) {
     peers.erase(clientId);
-    Logger::info("Client {} disconnected", clientId);
+    VF_INFO("Client {} disconnected", clientId);
 }
 
 void NetworkManager::resetStats() {
@@ -335,12 +335,12 @@ bool Server::start(uint16_t port, uint16_t maxPlayers) {
                            config.incomingBandwidth, config.outgoingBandwidth);
     
     if (!host) {
-        Logger::error("Failed to create server on port {}", port);
+        VF_ERROR("Failed to create server on port {}", port);
         return false;
     }
     
-    state = ConnectionState::Connected;
-    Logger::info("Server started on port {} with max {} players", port, maxPlayers);
+    state = ConnectionState::Playing;
+    VF_INFO("Server started on port {} with max {} players", port, maxPlayers);
     return true;
 }
 
@@ -362,7 +362,7 @@ void Server::stop() {
     
     clients.clear();
     state = ConnectionState::Disconnected;
-    Logger::info("Server stopped");
+    VF_INFO("Server stopped");
 }
 
 void Server::kickClient(uint32_t clientId, const std::string& reason) {
@@ -455,28 +455,28 @@ Client::~Client() {
     disconnect();
 }
 
-bool Client::connect(const std::string& host, uint16_t port) {
+bool Client::connect(const std::string& hostAddr, uint16_t port) {
     if (!initialized) init();
     
-    this->serverHost = host;
+    this->serverHost = hostAddr;
     this->serverPort = port;
     
-    host = enet_host_create(nullptr, 1, config.maxChannels,
+    this->host = enet_host_create(nullptr, 1, config.maxChannels,
                            config.incomingBandwidth, config.outgoingBandwidth);
     
-    if (!host) {
-        Logger::error("Failed to create client");
+    if (!this->host) {
+        VF_ERROR("Failed to create client");
         return false;
     }
     
     ENetAddress address;
-    enet_address_set_host(&address, host.c_str());
+    enet_address_set_host(&address, hostAddr.c_str());
     address.port = port;
     
-    serverPeer = enet_host_connect(host, &address, config.maxChannels, 0);
+    serverPeer = enet_host_connect(this->host, &address, config.maxChannels, 0);
     
     if (!serverPeer) {
-        Logger::error("Failed to initiate connection to {}:{}", host, port);
+        VF_ERROR("Failed to initiate connection to {}:{}", hostAddr, port);
         return false;
     }
     
@@ -484,26 +484,26 @@ bool Client::connect(const std::string& host, uint16_t port) {
     
     // Wait for connection
     ENetEvent event;
-    if (enet_host_service(host, &event, config.connectionTimeout) > 0 &&
+    if (enet_host_service(this->host, &event, config.connectionTimeout) > 0 &&
         event.type == ENET_EVENT_TYPE_CONNECT) {
         
         serverPeer->data = reinterpret_cast<void*>(1);
         serverId = 1;
         peers[serverId] = serverPeer;
-        state = ConnectionState::Connected;
+        state = ConnectionState::Playing;
         
-        Logger::info("Connected to {}:{}", host, port);
+        VF_INFO("Connected to {}:{}", hostAddr, port);
         return true;
     }
     
-    Logger::error("Connection to {}:{} timed out", host, port);
+    VF_ERROR("Connection to {}:{} timed out", hostAddr, port);
     enet_peer_reset(serverPeer);
     state = ConnectionState::Disconnected;
     return false;
 }
 
 void Client::disconnect() {
-    if (serverPeer && state == ConnectionState::Connected) {
+    if (serverPeer && state == ConnectionState::Playing) {
         enet_peer_disconnect(serverPeer, 0);
         
         ENetEvent event;
@@ -522,7 +522,7 @@ void Client::disconnect() {
     serverPeer = nullptr;
     peers.clear();
     state = ConnectionState::Disconnected;
-    Logger::info("Disconnected from server");
+    VF_INFO("Disconnected from server");
 }
 
 void Client::login(const std::string& username) {

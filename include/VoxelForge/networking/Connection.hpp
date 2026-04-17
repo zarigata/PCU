@@ -145,6 +145,7 @@ private:
     
     ENetPeer* peer = nullptr;
     uint32_t peerId = 0;
+    static uint32_t nextClientId;
     std::string address;
     uint16_t port = 0;
     
