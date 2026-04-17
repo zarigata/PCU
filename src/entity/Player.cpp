@@ -120,7 +120,7 @@ AttackResult PlayerSystem::performAttack(ECSWorld& world, EntityID attacker,
     if (result.wasCritical) {
         // Critical hits deal 150% damage
         scaledDamage *= 1.5f;
-        VF_DEBUG("Critical hit! Damage: {}", scaledDamage);
+        VF_TRACE("Critical hit! Damage: {}", scaledDamage);
     }
 
     // Apply damage to target
@@ -140,7 +140,7 @@ AttackResult PlayerSystem::performAttack(ECSWorld& world, EntityID attacker,
         }
         result.didHit = true;
 
-        VF_DEBUG("Player attacked entity {} for {} damage (cooldown: {:.0f}%, crit: {})",
+        VF_TRACE("Player attacked entity {} for {} damage (cooldown: {:.0f}%, crit: {})",
                  target, scaledDamage, result.cooldownStrength * 100.0f, result.wasCritical);
     } else {
         result.didHit = false;

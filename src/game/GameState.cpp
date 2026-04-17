@@ -25,7 +25,7 @@ void GameStateManager::pushState(std::unique_ptr<GameState> state) {
     states_.push(std::move(state));
     states_.top()->onEnter();
     
-    VF_DEBUG("Pushed game state: {}", states_.top()->getName());
+    VF_TRACE("Pushed game state: {}", states_.top()->getName());
 }
 
 void GameStateManager::popState() {
@@ -38,7 +38,7 @@ void GameStateManager::popState() {
         states_.top()->onResume();
     }
     
-    VF_DEBUG("Popped game state");
+    VF_TRACE("Popped game state");
 }
 
 void GameStateManager::changeState(std::unique_ptr<GameState> state) {
@@ -50,7 +50,7 @@ void GameStateManager::changeState(std::unique_ptr<GameState> state) {
     states_.push(std::move(state));
     states_.top()->onEnter();
     
-    VF_DEBUG("Changed to game state: {}", states_.top()->getName());
+    VF_TRACE("Changed to game state: {}", states_.top()->getName());
 }
 
 void GameStateManager::update(float deltaTime) {

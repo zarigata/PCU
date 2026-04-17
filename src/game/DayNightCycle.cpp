@@ -60,7 +60,7 @@ void DayNightCycle::addTime(uint32_t ticks) {
 
 void DayNightCycle::setTimeSpeed(float multiplier) {
     timeSpeed = (multiplier < 0.0f) ? 0.0f : multiplier;
-    VF_DEBUG("Time speed set to {}", timeSpeed);
+    VF_TRACE("Time speed set to {}", timeSpeed);
 }
 
 void DayNightCycle::setFrozen(bool frozen) {

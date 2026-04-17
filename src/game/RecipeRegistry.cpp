@@ -338,7 +338,7 @@ void RecipeRegistry::registerRecipe(std::unique_ptr<Recipe> recipe) {
     recipesByOutput[outputItem].push_back(rid);
     recipes[rid] = std::move(recipe);
 
-    VF_DEBUG("Registered recipe: {}", rid);
+    VF_TRACE("Registered recipe: {}", rid);
 }
 
 void RecipeRegistry::unregisterRecipe(const std::string& id) {

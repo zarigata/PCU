@@ -197,7 +197,7 @@ void DescriptorSetManager::createLayout(const std::string& name,
     layoutInfo.pBindings = bindings.data();
     
     layouts_[name] = device_.createDescriptorSetLayoutUnique(layoutInfo);
-    VF_DEBUG("Created descriptor set layout: {}", name);
+    VF_TRACE("Created descriptor set layout: {}", name);
 }
 
 vk::DescriptorSetLayout DescriptorSetManager::getLayout(const std::string& name) const {
@@ -220,7 +220,7 @@ void DescriptorSetManager::createPool(const std::string& name,
     poolInfo.pPoolSizes = poolSizes.data();
     
     pools_[name] = device_.createDescriptorPoolUnique(poolInfo);
-    VF_DEBUG("Created descriptor pool: {}", name);
+    VF_TRACE("Created descriptor pool: {}", name);
 }
 
 vk::DescriptorPool DescriptorSetManager::getPool(const std::string& name) const {

@@ -68,7 +68,7 @@ CraftingSystem::~CraftingSystem() {
 
 void CraftingSystem::registerRecipe(const Recipe& recipe) {
     recipes_.push_back(recipe);
-    VF_DEBUG("Registered recipe: {} -> {}", recipe.name, recipe.result.item);
+    VF_TRACE("Registered recipe: {} -> {}", recipe.name, recipe.result.item);
 }
 
 const Recipe* CraftingSystem::findRecipe(const std::vector<ItemStack>& ingredients, 

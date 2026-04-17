@@ -220,7 +220,7 @@ vk::UniquePipeline VulkanPipelineBuilder::build(vk::PipelineCache cache) {
     
     auto result = device_.createGraphicsPipelineUnique(cache, pipelineInfo);
     if (result.result == vk::Result::eSuccess) {
-        VF_DEBUG("Created Vulkan pipeline");
+        VF_TRACE("Created Vulkan pipeline");
         return std::move(result.value);
     } else {
         VF_ERROR("Failed to create Vulkan pipeline");

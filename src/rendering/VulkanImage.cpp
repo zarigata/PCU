@@ -240,7 +240,7 @@ void Texture::createTextureImage(const void* data, uint32_t width, uint32_t heig
     // Cleanup staging buffer
     VulkanBuffer::destroyBuffer(device_, stagingBuffer);
     
-    VF_DEBUG("Created texture image: {}x{}, {} mip levels", width, height, mipLevels);
+    VF_TRACE("Created texture image: {}x{}, {} mip levels", width, height, mipLevels);
 }
 
 void Texture::createTextureImageView(vk::Format format) {
