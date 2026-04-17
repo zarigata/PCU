@@ -427,6 +427,11 @@ public:
             return count;
         }
         
+        template<typename T>
+        T& get(EntityID entity) {
+            return *world->getComponent<T>(entity);
+        }
+        
     private:
         ECSWorld* world;
         ComponentMask requiredMask;

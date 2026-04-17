@@ -359,14 +359,17 @@ private:
 // Chunk Mesh
 // ============================================
 
+#ifndef VOXELFORGE_RENDERING_CHUNK_VERTEX_DEFINED
+#define VOXELFORGE_RENDERING_CHUNK_VERTEX_DEFINED
 struct ChunkVertex {
-    float x, y, z;        // Position
-    float nx, ny, nz;     // Normal
-    float u, v;           // UV
-    float ao;             // Ambient occlusion
-    uint32_t light;       // Packed light data
-    uint32_t color;       // Vertex color
+    float x, y, z;
+    float nx, ny, nz;
+    float u, v;
+    float ao;
+    uint32_t light;
+    uint32_t color;
 };
+#endif
 
 struct ChunkMeshData {
     std::vector<ChunkVertex> vertices;

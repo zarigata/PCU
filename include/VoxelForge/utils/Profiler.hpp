@@ -96,7 +96,7 @@ private:
 };
 
 // Scoped profiler macro
-#define VF_PROFILE_SCOPE(name) VoxelForge::ProfilerScope profilerScope##__LINE__(name)
+#define VF_PROFILE_SCOPE(name) ::VoxelForge::ProfilerScope profilerScope##__LINE__(name)
 #define VF_PROFILE_FUNCTION() VF_PROFILE_SCOPE(__FUNCTION__)
 
 // Convenience functions
