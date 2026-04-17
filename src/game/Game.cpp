@@ -48,14 +48,18 @@ void Game::onUpdate(float deltaTime) {
         return;
     }
     
-    // Update day/night cycle time
-    settings.dayTime += deltaTime;
+    // Update day/night cycle time on the world if available
+    // The GameSettings struct does not own dayTime; time is tracked by World/dayTime.
+    if (world) {
+        world->setDayTime(world->getDayTime() + deltaTime);
+    }
     
     // Check for day/night cycle advancement (every 20 minutes = 12000 ticks)
-    float cycleProgress = getDayProgress();
-    if (cycleProgress >= 1.0f) {
-        // Day ended, transition to night
-        resetDayNightCycle();
+    if (world) {
+        float cycleProgress = getDayProgress();
+        if (cycleProgress >= 1.0f) {
+            resetDayNightCycle();
+        }
     }
     
     gameTime += deltaTime;
@@ -76,7 +80,9 @@ void Game::onUpdate(float deltaTime) {
     processInput(deltaTime);
     
     // Update ECS systems
-    ecsWorld->updateSystems(deltaTime);
+    if (ecsWorld) {
+        ecsWorld->updateSystems(deltaTime);
+    }
 }
 
 void Game::onRender() {
@@ -203,10 +209,8 @@ void Game::setDayTime(float time) {
     world->setDayTime(time);
 }
 
-    props.windowWidth = 1280;
-    props.windowHeight = 720;
-    props.vsync = true;
-    return new Game(props);
+Application* createApplication() {
+    return new Game();
 }
 
 } // namespace VoxelForge

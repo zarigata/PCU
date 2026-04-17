@@ -74,6 +74,15 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(stb)
 
+# glslang (shader compiler headers/libraries)
+FetchContent_Declare(
+    glslang
+    GIT_REPOSITORY https://github.com/KhronosGroup/glslang.git
+    GIT_TAG        16.2.0
+)
+set(ENABLE_OPT OFF CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(glslang)
+
 # tinygltf
 FetchContent_Declare(
     tinygltf
@@ -161,6 +170,7 @@ else()
         -Wextra
         -Wpedantic
         -Wno-unused-parameter
+        -Wno-template-body
         -fPIC
     )
     
@@ -190,11 +200,6 @@ add_library(VoxelForge_Engine STATIC
     src/core/Timer.cpp
     
     # Engine Systems
-    src/engine/EventSystem.cpp
-    src/engine/ResourceManager.cpp
-    src/engine/JobSystem.cpp
-    src/engine/Config.cpp
-# Engine Systems
     src/engine/EventSystem.cpp
     src/engine/ResourceManager.cpp
     src/engine/JobSystem.cpp
@@ -299,10 +304,12 @@ add_library(VoxelForge_Engine STATIC
 target_include_directories(VoxelForge_Engine
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/include/VoxelForge
+        ${stb_SOURCE_DIR}
+        ${glslang_SOURCE_DIR}/include
         ${sol2_SOURCE_DIR}/include
         ${CMAKE_CURRENT_BINARY_DIR}/_deps/lua-src/lua-5.4.6/include
         ${enet_SOURCE_DIR}/include
+        ${nlohmann_json_SOURCE_DIR}/single_include
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src
 )

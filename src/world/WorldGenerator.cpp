@@ -111,29 +111,35 @@ ChunkGenResult WorldGenerator::generateChunk(Chunk* chunk, World* world) {
     
     // Flat world for testing
     if (settings.flatWorld) {
-        // Simple flat terrain
-        int waterLevel = settings.seaLevel;
+        int surfaceY = static_cast<int>(settings.terrainBaseHeight);
         
         for (int x = 0; x < CHUNK_WIDTH; x++) {
             for (int z = 0; z < CHUNK_WIDTH; z++) {
-                // Bedrock
-                chunk->setBlock(x, settings.bedrockFloor, z,
+                int minY = std::max(0, settings.bedrockFloor);
+                
+                chunk->setBlock(x, minY, z,
                     BlockRegistry::get().getDefaultState("poorcraftultra:bedrock"));
                 
-                // Dirt layers
-                for (int y = settings.bedrockFloor + 1; y < waterLevel - 4; y++) {
+                for (int y = minY + 1; y < surfaceY; y++) {
                     chunk->setBlock(x, y, z,
                         BlockRegistry::get().getDefaultState("poorcraftultra:dirt"));
                 }
                 
-                // Grass on top
-                chunk->setBlock(x, waterLevel - 4, z,
-                    BlockRegistry::get().getDefaultState("poorcraftultra:grass_block"));
+                if (chunk->getBlock(x, surfaceY, z).isAir()) {
+                    chunk->setBlock(x, surfaceY, z,
+                        BlockRegistry::get().getDefaultState("poorcraftultra:grass_block"));
+                }
             }
         }
         
         result.success = true;
-        result.blocksGenerated = CHUNK_WIDTH * CHUNK_WIDTH * (waterLevel - settings.bedrockFloor - 3);
+        result.blocksGenerated = CHUNK_WIDTH * CHUNK_WIDTH * (surfaceY - std::max(0, settings.bedrockFloor) - 1);
+        
+        chunk->recalculateHeightMaps();
+        
+        if (settings.generateStructures) {
+            generateFeatures(chunk, world);
+        }
     } else {
         // Full terrain generation
         generateBiomes(chunk);
@@ -150,6 +156,8 @@ ChunkGenResult WorldGenerator::generateChunk(Chunk* chunk, World* world) {
                 static_cast<uint64_t>(chunk->getPosition().z));
             generateOres(chunk, chunkRandom);
         }
+        
+        chunk->recalculateHeightMaps();
         
         if (settings.generateStructures) {
             generateFeatures(chunk, world);
@@ -542,11 +550,23 @@ void WorldGenerator::placeTree(Chunk* chunk, World* world, int x, int y, int z,
 }
 
 // Helper lambda to safely set a block within chunk bounds
+// Place a block at (x,y,z) if within bounds and height range.
+// Important: allow tree leaves to overwrite non-air blocks in the canopy
+// to ensure canopy generation succeeds even if the target block isn't empty.
 static void setBlockClamped(Chunk* chunk, int x, int y, int z, BlockState state, int minY, int maxY) {
     if (x >= 0 && x < CHUNK_WIDTH && z >= 0 && z < CHUNK_WIDTH && y >= minY && y <= maxY) {
-        if (chunk->getBlock(x, y, z).isAir()) {
-            chunk->setBlock(x, y, z, state);
-        }
+        // Previously we only wrote when the current block was air. That prevented
+        // canopy generation from placing leaves on top of blocks like grass or dirt.
+        // For trees to reliably generate, we should allow overwriting non-air blocks
+        // in the canopy region (leaves can occupy space occupied by non-solid blocks).
+        chunk->setBlock(x, y, z, state);
+    }
+}
+
+// Canopy helper: always place canopy blocks (leaves) regardless of existing blocks
+static void setBlockCanopy(Chunk* chunk, int x, int y, int z, BlockState state, int minY, int maxY) {
+    if (x >= 0 && x < CHUNK_WIDTH && z >= 0 && z < CHUNK_WIDTH && y >= minY && y <= maxY) {
+        chunk->setBlock(x, y, z, state);
     }
 }
 
@@ -572,12 +592,12 @@ void WorldGenerator::placeOakTree(Chunk* chunk, int x, int y, int z, SeededRando
                 if (abs(dx) == radius && abs(dz) == radius && random.chance(0.4f)) continue;
                 // Don't overwrite trunk
                 if (dx == 0 && dz == 0 && dy < 2) continue;
-                setBlockClamped(chunk, x + dx, leafBase + dy, z + dz, leaves, settings.minHeight, settings.maxHeight);
+                setBlockCanopy(chunk, x + dx, leafBase + dy, z + dz, leaves, settings.minHeight, settings.maxHeight);
             }
         }
     }
     // Top leaf
-    setBlockClamped(chunk, x, leafBase + 3, z, leaves, settings.minHeight, settings.maxHeight);
+    setBlockCanopy(chunk, x, leafBase + 3, z, leaves, settings.minHeight, settings.maxHeight);
 }
 
 void WorldGenerator::placeBirchTree(Chunk* chunk, int x, int y, int z, SeededRandom& random) {
@@ -599,14 +619,14 @@ void WorldGenerator::placeBirchTree(Chunk* chunk, int x, int y, int z, SeededRan
         for (int dx = -radius; dx <= radius; dx++) {
             for (int dz = -radius; dz <= radius; dz++) {
                 if (dx == 0 && dz == 0 && dy < 2) continue; // trunk space
-                setBlockClamped(chunk, x + dx, leafBase + dy, z + dz, leaves, settings.minHeight, settings.maxHeight);
+                setBlockCanopy(chunk, x + dx, leafBase + dy, z + dz, leaves, settings.minHeight, settings.maxHeight);
             }
         }
     }
     // Extra top leaves for height
-    setBlockClamped(chunk, x, leafBase + 3, z, leaves, settings.minHeight, settings.maxHeight);
-    setBlockClamped(chunk, x + 1, leafBase + 3, z, leaves, settings.minHeight, settings.maxHeight);
-    setBlockClamped(chunk, x, leafBase + 3, z + 1, leaves, settings.minHeight, settings.maxHeight);
+    setBlockCanopy(chunk, x, leafBase + 3, z, leaves, settings.minHeight, settings.maxHeight);
+    setBlockCanopy(chunk, x + 1, leafBase + 3, z, leaves, settings.minHeight, settings.maxHeight);
+    setBlockCanopy(chunk, x, leafBase + 3, z + 1, leaves, settings.minHeight, settings.maxHeight);
 }
 
 void WorldGenerator::placeSpruceTree(Chunk* chunk, int x, int y, int z, SeededRandom& random) {
@@ -635,7 +655,7 @@ void WorldGenerator::placeSpruceTree(Chunk* chunk, int x, int y, int z, SeededRa
                 // Skip corners for rounder shape
                 if (abs(dx) == radius && abs(dz) == radius) continue;
                 if (dx == 0 && dz == 0) continue; // trunk
-                setBlockClamped(chunk, x + dx, leafBase - leafLayers + 1 + dy, z + dz, leaves, settings.minHeight, settings.maxHeight);
+                setBlockCanopy(chunk, x + dx, leafBase - leafLayers + 1 + dy, z + dz, leaves, settings.minHeight, settings.maxHeight);
             }
         }
     }
