@@ -285,6 +285,7 @@ add_library(VoxelForge_Engine STATIC
     
     # Game
     src/game/Game.cpp
+    src/game/DayNightCycle.cpp
     # src/game/GameState.cpp  # TODO: missing headers
     src/game/Inventory.cpp
     # src/game/CraftingSystem.cpp  # TODO: missing headers

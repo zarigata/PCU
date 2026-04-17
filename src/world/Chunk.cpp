@@ -70,10 +70,25 @@ BlockState BlockPalette::get(int x, int y, int z) const {
 bool BlockPalette::set(int x, int y, int z, BlockState state) {
     int index = y * CHUNK_WIDTH * CHUNK_WIDTH + z * CHUNK_WIDTH + x;
     
-    // First block in empty section
     if (isSingleValue && singleValue.isAir()) {
-        singleValue = state;
-        isSingleValue = true;
+        if (state.isAir()) {
+            return false;
+        }
+        
+        palette.push_back(singleValue);
+        palette.push_back(state);
+        bitsPerBlock = MIN_BITS;
+        isSingleValue = false;
+        
+        data.clear();
+        int blocksPerLong = 64 / bitsPerBlock;
+        int longCount = (BLOCKS_PER_SECTION + blocksPerLong - 1) / blocksPerLong;
+        data.resize(longCount, 0);
+        
+        int li = index / blocksPerLong;
+        int bo = (index % blocksPerLong) * bitsPerBlock;
+        data[li] |= 1ULL << bo;
+        
         return true;
     }
     

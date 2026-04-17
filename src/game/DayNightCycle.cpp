@@ -26,7 +26,7 @@ void DayNightCycle::tick() {
         tickAccumulator -= static_cast<float>(static_cast<uint32_t>(tickAccumulator));
     }
     uint32_t oldTime = state.dayTime;
-    state.dayTime = (state.dayTime + wholeTicks) % TICKS_PER_DAY;
+    state.dayTime = (state.dayTime + wholeTicks) % DayNightCycle::TICKS_PER_DAY;
     if (state.dayTime < oldTime) {
         state.dayCount++;
     }
@@ -43,7 +43,7 @@ void DayNightCycle::setDayTime(uint32_t ticks) {
 void DayNightCycle::setDayTime(int hour, int minute) {
     // Game time: tick 0 = 6:00, 6000 = 12:00, 12000 = 18:00, 18000 = 0:00
     // So game_hour = (ticks/1000 + 6) % 24 => ticks = ((hour - 6 + 24) % 24) * 1000 + minute * (1000/60)
-    uint32_t ticks = ((static_cast<uint32_t>((hour - 6 + 24) % 24)) * TICKS_PER_HOUR)
+    uint32_t ticks = ((static_cast<uint32_t>((hour - 6 + 24) % 24)) * DayNightCycle::TICKS_PER_HOUR)
                    + (static_cast<uint32_t>(minute) * TICKS_PER_HOUR / 60);
     setDayTime(ticks);
 }
@@ -72,24 +72,24 @@ void DayNightCycle::setFrozen(bool frozen) {
 }
 
 void DayNightCycle::updateDerivedState() {
-    state.phase = calculatePhase(state.dayTime);
-    state.celestialAngle = calculateCelestialAngle(state.dayTime);
+    state.phase = DayNightCycle::calculatePhase(state.dayTime);
+    state.celestialAngle = DayNightCycle::calculateCelestialAngle(state.dayTime);
     state.moonPhase = static_cast<float>(state.dayCount % 8);
-    state.skyDarkness = calculateSkyDarkness(state.dayTime);
-    state.skyColors = calculateSkyGradient(state.dayTime);
-    state.sun = calculateSunPosition(state.dayTime);
-    state.moon = calculateMoonPosition(state.dayTime);
+    state.skyDarkness = DayNightCycle::calculateSkyDarkness(state.dayTime);
+    state.skyColors = DayNightCycle::calculateSkyGradient(state.dayTime);
+    state.sun = DayNightCycle::calculateSunPosition(state.dayTime);
+    state.moon = DayNightCycle::calculateMoonPosition(state.dayTime);
 }
 
 TimePhase DayNightCycle::calculatePhase(uint32_t dayTime) {
-    if (dayTime < DAY_START) return TimePhase::Sunrise;
-    if (dayTime < SUNSET_START) return TimePhase::Day;
-    if (dayTime < NIGHT_START) return TimePhase::Sunset;
+    if (dayTime < DayNightCycle::DAY_START) return TimePhase::Sunrise;
+    if (dayTime < DayNightCycle::SUNSET_START) return TimePhase::Day;
+    if (dayTime < DayNightCycle::NIGHT_START) return TimePhase::Sunset;
     return TimePhase::Night;
 }
 
 float DayNightCycle::calculateCelestialAngle(uint32_t dayTime) {
-    return (static_cast<float>(dayTime) / static_cast<float>(TICKS_PER_DAY)) * 2.0f * static_cast<float>(M_PI);
+    return (static_cast<float>(dayTime) / static_cast<float>(DayNightCycle::TICKS_PER_DAY)) * 2.0f * static_cast<float>(M_PI);
 }
 
 float DayNightCycle::calculateMoonPhase(uint32_t dayTime) {
@@ -100,25 +100,25 @@ float DayNightCycle::calculateMoonPhase(uint32_t dayTime) {
 
 float DayNightCycle::calculateSkyDarkness(uint32_t dayTime) {
     float t = static_cast<float>(dayTime);
-    if (t < DAY_START) {
+    if (t < DayNightCycle::DAY_START) {
         // Sunrise: 0-3000, darkness ramps from ~0.5 to 0.0
         return lerp(0.5f, 0.0f, smoothstep(0.0f, 3000.0f, t));
     }
-    if (t < SUNSET_START) {
+    if (t < DayNightCycle::SUNSET_START) {
         return 0.0f; // Full day
     }
-    if (t < NIGHT_START) {
+    if (t < DayNightCycle::NIGHT_START) {
         // Sunset: 9000-12000, darkness ramps from 0.0 to 1.0
         return lerp(0.0f, 1.0f, smoothstep(9000.0f, 12000.0f, t));
     }
-    if (t < MIDNIGHT) {
+    if (t < DayNightCycle::MIDNIGHT) {
         // Night approaching midnight: 12000-18000
         return lerp(1.0f, 1.0f, smoothstep(12000.0f, 18000.0f, t));
     }
     // After midnight: 18000-24000 (wrapping to sunrise)
     // Ramps from 1.0 down, hitting ~0.5 at tick 0
     // Map 18000-24000 to 0-1
-    float afterMid = (t - MIDNIGHT) / (TICKS_PER_DAY - MIDNIGHT);
+    float afterMid = (t - DayNightCycle::MIDNIGHT) / (DayNightCycle::TICKS_PER_DAY - DayNightCycle::MIDNIGHT);
     return lerp(1.0f, 0.5f, smoothstep(0.0f, 1.0f, afterMid));
 }
 
@@ -132,7 +132,7 @@ SkyGradient DayNightCycle::calculateSkyGradient(uint32_t dayTime) {
     float t = static_cast<float>(dayTime);
     SkyGradient result;
 
-    if (dayTime < DAY_START) {
+    if (dayTime < DayNightCycle::DAY_START) {
         // 0-3000: Sunrise. Interpolate from night-ish (start of sunrise) to sunrise colors.
         // At tick 0: blend between night and sunrise; at 3000: blend to day
         float p = smoothstep(0.0f, 3000.0f, t);
@@ -140,10 +140,10 @@ SkyGradient DayNightCycle::calculateSkyGradient(uint32_t dayTime) {
         result.horizonColor = lerpColor(kNight.horizonColor, kSunrise.horizonColor, p);
         result.fogColor     = lerpColor(kNight.fogColor, kSunrise.fogColor, p);
         result.ambientLight = lerp(kNight.ambientLight, kSunrise.ambientLight, p);
-    } else if (dayTime < SUNSET_START) {
+    } else if (dayTime < DayNightCycle::SUNSET_START) {
         // 3000-9000: Day
         result = kDay;
-    } else if (dayTime < NIGHT_START) {
+    } else if (dayTime < DayNightCycle::NIGHT_START) {
         // 9000-12000: Sunset
         float p = smoothstep(9000.0f, 12000.0f, t);
         result.zenithColor  = lerpColor(kDay.zenithColor, kSunset.zenithColor, p);
@@ -225,13 +225,13 @@ std::string DayNightCycle::toString() const {
 bool DayNightCycle::executeCommand(const std::string& cmd, const std::string& args) {
     if (cmd == "set") {
         if (args == "day") {
-            setDayTime(DAY_START);
+            setDayTime(DayNightCycle::DAY_START);
         } else if (args == "night") {
-            setDayTime(NIGHT_START);
+            setDayTime(DayNightCycle::NIGHT_START);
         } else if (args == "noon") {
-            setDayTime(NOON);
+            setDayTime(DayNightCycle::NOON);
         } else if (args == "midnight") {
-            setDayTime(MIDNIGHT);
+            setDayTime(DayNightCycle::MIDNIGHT);
         } else {
             // Try parsing as integer ticks
             try {
