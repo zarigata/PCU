@@ -54,13 +54,14 @@ BlockID BlockRegistry::registerBlock(const String& id, BlockDefinition definitio
     BlockID newId = nextId++;
     definition.id = id;
     
+    idToIndex[id] = newId;
+    
     // Generate state variants
     if (!definition.properties.empty()) {
         generateStateVariants(definition);
     }
     
     blocks.push_back(std::move(definition));
-    idToIndex[id] = newId;
     
     // Store states
     blockStates[newId] = blocks.back().stateVariants;
@@ -278,6 +279,66 @@ void BlockRegistry::registerVanillaBlocks() {
     };
     oakLog.defaultProperties.setEnum("axis", "y");
     registerBlock("poorcraftultra:oak_log", std::move(oakLog));
+    
+    // Birch Log (with axis property)
+    BlockDefinition birchLog;
+    birchLog.id = "poorcraftultra:birch_log";
+    birchLog.name = "Birch Log";
+    birchLog.material = Material::Wood;
+    birchLog.hardness = 2.0f;
+    birchLog.requiredTool = ToolType::Axe;
+    birchLog.flammable = true;
+    birchLog.sounds = BlockSoundGroup::WOOD;
+    birchLog.properties = {
+        {"axis", BlockProperty::Type::Direction, {"y", "x", "z"}, 0}
+    };
+    birchLog.defaultProperties.setEnum("axis", "y");
+    registerBlock("poorcraftultra:birch_log", std::move(birchLog));
+    
+    // Spruce Log (with axis property)
+    BlockDefinition spruceLog;
+    spruceLog.id = "poorcraftultra:spruce_log";
+    spruceLog.name = "Spruce Log";
+    spruceLog.material = Material::Wood;
+    spruceLog.hardness = 2.0f;
+    spruceLog.requiredTool = ToolType::Axe;
+    spruceLog.flammable = true;
+    spruceLog.sounds = BlockSoundGroup::WOOD;
+    spruceLog.properties = {
+        {"axis", BlockProperty::Type::Direction, {"y", "x", "z"}, 0}
+    };
+    spruceLog.defaultProperties.setEnum("axis", "y");
+    registerBlock("poorcraftultra:spruce_log", std::move(spruceLog));
+    
+    // Dark Oak Log (with axis property)
+    BlockDefinition darkOakLog;
+    darkOakLog.id = "poorcraftultra:dark_oak_log";
+    darkOakLog.name = "Dark Oak Log";
+    darkOakLog.material = Material::Wood;
+    darkOakLog.hardness = 2.0f;
+    darkOakLog.requiredTool = ToolType::Axe;
+    darkOakLog.flammable = true;
+    darkOakLog.sounds = BlockSoundGroup::WOOD;
+    darkOakLog.properties = {
+        {"axis", BlockProperty::Type::Direction, {"y", "x", "z"}, 0}
+    };
+    darkOakLog.defaultProperties.setEnum("axis", "y");
+    registerBlock("poorcraftultra:dark_oak_log", std::move(darkOakLog));
+    
+    // Acacia Log (with axis property)
+    BlockDefinition acaciaLog;
+    acaciaLog.id = "poorcraftultra:acacia_log";
+    acaciaLog.name = "Acacia Log";
+    acaciaLog.material = Material::Wood;
+    acaciaLog.hardness = 2.0f;
+    acaciaLog.requiredTool = ToolType::Axe;
+    acaciaLog.flammable = true;
+    acaciaLog.sounds = BlockSoundGroup::WOOD;
+    acaciaLog.properties = {
+        {"axis", BlockProperty::Type::Direction, {"y", "x", "z"}, 0}
+    };
+    acaciaLog.defaultProperties.setEnum("axis", "y");
+    registerBlock("poorcraftultra:acacia_log", std::move(acaciaLog));
     
     // Water
     registerBlock("poorcraftultra:water", BlockDefinition{
