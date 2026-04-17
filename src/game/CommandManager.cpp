@@ -4,6 +4,8 @@
  */
 
 #include <VoxelForge/game/CommandManager.hpp>
+#include <VoxelForge/game/Item.hpp>
+#include <VoxelForge/entity/Entity.hpp>
 #include <VoxelForge/world/World.hpp>
 #include <VoxelForge/core/Logger.hpp>
 #include <sstream>
@@ -318,6 +320,7 @@ void CommandManager::registerVanillaCommands() {
     registerCommand(Commands::createDifficultyCommand());
     registerCommand(Commands::createSeedCommand());
     registerCommand(Commands::createWorldBorderCommand());
+    registerCommand(Commands::createSummonCommand());
     
     VF_INFO("Registered {} commands", commands.size());
 }
@@ -394,7 +397,7 @@ std::unique_ptr<Command> createHelpCommand() {
     cmd->usage = "help [command]";
     cmd->aliases = {"?"};
     cmd->execute = [](CommandContext& ctx, const std::vector<std::string>& args) -> CommandResult {
-        ctx.sendSuccess("Available commands: /help, /gamemode, /tp, /give, /time, /weather, /kill, /heal, /clear, /list, /stop");
+        ctx.sendSuccess("Available commands: /help, /gamemode, /tp, /give, /time, /weather, /kill, /heal, /clear, /list, /stop, /summon");
         return {true, "", 0};
     };
     return cmd;
@@ -598,7 +601,194 @@ std::unique_ptr<Command> createSeedCommand() {
 // Placeholder implementations for remaining commands
 std::unique_ptr<Command> createEffectCommand() { return std::make_unique<Command>(); }
 std::unique_ptr<Command> createEnchantCommand() { return std::make_unique<Command>(); }
-std::unique_ptr<Command> createSummonCommand() { return std::make_unique<Command>(); }
+
+std::unique_ptr<Command> createSummonCommand() {
+    auto cmd = std::make_unique<Command>();
+    cmd->name = "summon";
+    cmd->description = "Summons an entity";
+    cmd->usage = "summon <entity> [<x> <y> <z>] [nbt]";
+    cmd->requiredPermission = 2;
+    cmd->arguments = {
+        {"entity", ArgumentType::String, false, {}, ""},
+        {"x", ArgumentType::Float, true, {}, "~"},
+        {"y", ArgumentType::Float, true, {}, "~"},
+        {"z", ArgumentType::Float, true, {}, "~"},
+        {"nbt", ArgumentType::String, true, {}, ""}
+    };
+
+    // List of known entity IDs and their factory mappings
+    static const std::unordered_map<std::string, std::string> entityIdAliases = {
+        {"zombie", "poorcraftultra:zombie"},
+        {"skeleton", "poorcraftultra:skeleton"},
+        {"creeper", "poorcraftultra:creeper"},
+        {"spider", "poorcraftultra:spider"},
+        {"enderman", "poorcraftultra:enderman"},
+        {"blaze", "poorcraftultra:blaze"},
+        {"slime", "poorcraftultra:slime"},
+        {"cow", "poorcraftultra:cow"},
+        {"pig", "poorcraftultra:pig"},
+        {"sheep", "poorcraftultra:sheep"},
+        {"chicken", "poorcraftultra:chicken"},
+        {"arrow", "poorcraftultra:arrow"},
+        {"snowball", "poorcraftultra:snowball"},
+        {"item", "poorcraftultra:item"},
+    };
+
+    cmd->execute = [](CommandContext& ctx, const std::vector<std::string>& args) -> CommandResult {
+        if (args.empty()) {
+            return {false, "Usage: summon <entity> [<x> <y> <z>] [nbt]", 0};
+        }
+
+        // Resolve entity type
+        std::string entityType = args[0];
+        // Lowercase for comparison
+        std::string entityTypeLower = entityType;
+        std::transform(entityTypeLower.begin(), entityTypeLower.end(), entityTypeLower.begin(), ::tolower);
+
+        // Strip namespace prefix for matching if it matches ours
+        std::string bare = entityTypeLower;
+        const std::string ns = "poorcraftultra:";
+        if (bare.rfind(ns, 0) == 0) {
+            bare = bare.substr(ns.size());
+        }
+        // Also handle minecraft: prefix
+        const std::string mcns = "minecraft:";
+        if (bare.rfind(mcns, 0) == 0) {
+            bare = bare.substr(mcns.size());
+        }
+
+        // Parse position
+        glm::vec3 spawnPos = ctx.position; // Default: executor's position
+        bool hasPos = false;
+
+        if (args.size() >= 4) {
+            // Try to parse x y z
+            auto px = args[1];
+            auto py = args[2];
+            auto pz = args[3];
+
+            // Handle ~ relative notation
+            auto parseCoord = [&](const std::string& s, float base) -> std::optional<float> {
+                if (s.empty()) return std::nullopt;
+                if (s[0] == '~') {
+                    if (s.size() == 1) return base; // Just ~ means use base
+                    try {
+                        return base + std::stof(s.substr(1));
+                    } catch (...) {
+                        return std::nullopt;
+                    }
+                }
+                try {
+                    return std::stof(s);
+                } catch (...) {
+                    return std::nullopt;
+                }
+            };
+
+            auto ox = parseCoord(px, spawnPos.x);
+            auto oy = parseCoord(py, spawnPos.y);
+            auto oz = parseCoord(pz, spawnPos.z);
+
+            if (!ox || !oy || !oz) {
+                return {false, "Invalid position coordinates", 0};
+            }
+
+            spawnPos = glm::vec3(*ox, *oy, *oz);
+            hasPos = true;
+        }
+
+        // Spawn the entity using the ECS world
+        // The CommandContext may have an ECS world through the server/world.
+        // For now, use EntityFactory which requires an ECSWorld.
+        // We'll log the spawn and return success; the actual spawn will be
+        // routed through the world's entity manager when integrated.
+
+        EntityID spawnedEntity = INVALID_ENTITY;
+
+        // Determine entity type and create via factory
+        if (ctx.world) {
+            auto& ecsWorld = ctx.world->getECSWorld();
+
+            if (bare == "zombie") {
+                spawnedEntity = EntityFactory::createZombie(ecsWorld, spawnPos);
+            } else if (bare == "skeleton") {
+                spawnedEntity = EntityFactory::createSkeleton(ecsWorld, spawnPos);
+            } else if (bare == "creeper") {
+                spawnedEntity = EntityFactory::createCreeper(ecsWorld, spawnPos);
+            } else if (bare == "spider") {
+                spawnedEntity = MobFactory::createSpider(ecsWorld, spawnPos);
+            } else if (bare == "enderman") {
+                spawnedEntity = MobFactory::createEnderman(ecsWorld, spawnPos);
+            } else if (bare == "blaze") {
+                spawnedEntity = MobFactory::createBlaze(ecsWorld, spawnPos);
+            } else if (bare == "slime") {
+                spawnedEntity = MobFactory::createSlime(ecsWorld, spawnPos, 1);
+            } else if (bare == "cow") {
+                spawnedEntity = EntityFactory::createCow(ecsWorld, spawnPos);
+            } else if (bare == "pig") {
+                spawnedEntity = EntityFactory::createPig(ecsWorld, spawnPos);
+            } else if (bare == "sheep") {
+                spawnedEntity = EntityFactory::createSheep(ecsWorld, spawnPos);
+            } else if (bare == "chicken") {
+                spawnedEntity = EntityFactory::createChicken(ecsWorld, spawnPos);
+            } else if (bare == "arrow") {
+                auto vel = glm::vec3(0.0f, 0.0f, 0.0f);
+                spawnedEntity = EntityFactory::createArrow(ecsWorld, spawnPos, vel, INVALID_ENTITY);
+            } else if (bare == "snowball") {
+                auto vel = glm::vec3(0.0f, 0.0f, 0.0f);
+                spawnedEntity = EntityFactory::createSnowball(ecsWorld, spawnPos, vel, INVALID_ENTITY);
+            } else if (bare == "item") {
+                // Summoning an item entity requires an item stack; create empty for now
+                ItemStack emptyStack;
+                spawnedEntity = EntityFactory::createItem(ecsWorld, spawnPos, emptyStack);
+            } else {
+                // Generic entity spawn for unknown types
+                spawnedEntity = ecsWorld.createEntity();
+                auto& transform = ecsWorld.addComponent<TransformComponent>(spawnedEntity);
+                transform.position = spawnPos;
+                auto& name = ecsWorld.addComponent<NameComponent>(spawnedEntity);
+                name.name = bare;
+                auto& base = ecsWorld.addComponent<EntityBaseComponent>(spawnedEntity);
+                base.type = EntityType::Generic;
+                base.uuid = UUID::generate();
+            }
+        }
+
+        if (spawnedEntity == INVALID_ENTITY) {
+            return {false, "Failed to summon entity: " + entityType, 0};
+        }
+
+        // Format position string
+        std::string posStr = hasPos ?
+            (std::to_string(static_cast<int>(spawnPos.x)) + ", " +
+             std::to_string(static_cast<int>(spawnPos.y)) + ", " +
+             std::to_string(static_cast<int>(spawnPos.z))) :
+            "executor position";
+
+        ctx.sendSuccess("Summoned " + entityType + " at (" + posStr + ")");
+        return {true, "", 1};
+    };
+
+    // Tab completion: suggest entity types
+    cmd->tabComplete = [](const std::string& partial) -> std::vector<std::string> {
+        static const std::vector<std::string> entityTypes = {
+            "zombie", "skeleton", "creeper", "spider", "enderman", "blaze", "slime",
+            "cow", "pig", "sheep", "chicken", "arrow", "snowball", "item"
+        };
+        std::vector<std::string> results;
+        std::string lower = partial;
+        std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+        for (const auto& type : entityTypes) {
+            if (type.find(lower) == 0) {
+                results.push_back(type);
+            }
+        }
+        return results;
+    };
+
+    return cmd;
+}
+
 std::unique_ptr<Command> createSetBlockCommand() { return std::make_unique<Command>(); }
 std::unique_ptr<Command> createFillCommand() { return std::make_unique<Command>(); }
 std::unique_ptr<Command> createCloneCommand() { return std::make_unique<Command>(); }

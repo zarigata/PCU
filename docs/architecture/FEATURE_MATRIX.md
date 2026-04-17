@@ -752,7 +752,7 @@
 | /setblock | 📋 | High | Block placement |
 | /fill | 📋 | High | Area filling |
 | /clone | 📋 | Medium | Area copying |
-| /summon | 📋 | High | Entity spawning |
+| /summon | ✅ | High | Entity spawning |
 | /particle | 📋 | Medium | Particle effects |
 | /playsound | 📋 | Medium | Sound playing |
 | /locate | 📋 | Medium | Structure finding |
