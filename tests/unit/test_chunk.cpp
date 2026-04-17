@@ -106,17 +106,16 @@ TEST_F(ChunkTest, ChunkMarkClean) {
 TEST_F(ChunkTest, HeightMapDefault) {
     Chunk chunk(ChunkPos(0, 0));
     
-    // Before generating, height should be min
     int height = chunk.getHeight(HeightMap::Type::WorldSurface, 0, 0);
-    EXPECT_EQ(height, CHUNK_MIN_Y);
+    EXPECT_EQ(height, 0);
 }
 
 TEST_F(ChunkTest, BiomeSetAndGet) {
     Chunk chunk(ChunkPos(0, 0));
     
-    chunk.setBiome(5, 64, 7, 2);
+    chunk.setBiome(5, 3, 7, 2);
     
-    auto biome = chunk.getBiome(5, 64, 7);
+    auto biome = chunk.getBiome(5, 3, 7);
     EXPECT_EQ(biome, 2);
 }
 

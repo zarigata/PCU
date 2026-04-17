@@ -25,6 +25,11 @@ struct ChunkPos {
         return (static_cast<int64_t>(x) & 0xFFFFFFFFLL) | (static_cast<int64_t>(z) << 32);
     }
     
+    static constexpr int CHUNK_WIDTH = 16;
+    
+    int getLocalX(int worldX) const { return worldX - x * CHUNK_WIDTH; }
+    int getLocalZ(int worldZ) const { return worldZ - z * CHUNK_WIDTH; }
+    
     static ChunkPos fromHash(int64_t hash) {
         return ChunkPos(static_cast<int>(hash & 0xFFFFFFFFLL), 
                         static_cast<int>((hash >> 32) & 0xFFFFFFFFLL));
