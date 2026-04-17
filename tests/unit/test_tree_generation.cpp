@@ -382,6 +382,7 @@ TEST_F(TreeGenerationTest, NoTreeBelowSeaLevel) {
     settings.flatWorld = true;
     settings.generateStructures = true;
     settings.seaLevel = 62;
+    settings.terrainBaseHeight = 62.0f;
 
     WorldGenerator gen(settings);
     World world(static_cast<int64_t>(settings.seed));

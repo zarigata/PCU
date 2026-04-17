@@ -117,12 +117,16 @@ ChunkGenResult WorldGenerator::generateChunk(Chunk* chunk, World* world) {
             for (int z = 0; z < CHUNK_WIDTH; z++) {
                 int minY = std::max(0, settings.bedrockFloor);
                 
-                chunk->setBlock(x, minY, z,
-                    BlockRegistry::get().getDefaultState("poorcraftultra:bedrock"));
+                if (chunk->getBlock(x, minY, z).isAir()) {
+                    chunk->setBlock(x, minY, z,
+                        BlockRegistry::get().getDefaultState("poorcraftultra:bedrock"));
+                }
                 
                 for (int y = minY + 1; y < surfaceY; y++) {
-                    chunk->setBlock(x, y, z,
-                        BlockRegistry::get().getDefaultState("poorcraftultra:dirt"));
+                    if (chunk->getBlock(x, y, z).isAir()) {
+                        chunk->setBlock(x, y, z,
+                            BlockRegistry::get().getDefaultState("poorcraftultra:dirt"));
+                    }
                 }
                 
                 if (chunk->getBlock(x, surfaceY, z).isAir()) {
@@ -511,19 +515,16 @@ void WorldGenerator::generateTrees(Chunk* chunk, World* world, SeededRandom& chu
                 continue;
             }
             
-            // Find surface height
             int surfaceY = chunk->getHeight(HeightMap::Type::WorldSurface, x, z);
             if (surfaceY < settings.minHeight + 1 || surfaceY > settings.maxHeight - 12) {
                 continue;
             }
             
-            // Check surface block is grass or dirt
             BlockState surface = chunk->getBlock(x, surfaceY, z);
             if (surface != grassBlock && surface != dirtBlock) {
                 continue;
             }
             
-            // Check block above surface is air
             if (!chunk->getBlock(x, surfaceY + 1, z).isAir()) {
                 continue;
             }
