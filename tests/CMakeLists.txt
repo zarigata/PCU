@@ -13,6 +13,7 @@ set(TEST_SOURCES
     unit/test_anvil_save.cpp
     unit/test_world_gen_integration.cpp
     unit/test_command_summon.cpp
+    unit/test_command_setblock.cpp
 )
 
 # Create test executable

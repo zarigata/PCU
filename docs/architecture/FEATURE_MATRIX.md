@@ -749,7 +749,7 @@
 
 | Command | Status | Priority | Notes |
 |---------|--------|----------|-------|
-| /setblock | 📋 | High | Block placement |
+| /setblock | ✅ | High | Block placement |
 | /fill | 📋 | High | Area filling |
 | /clone | 📋 | Medium | Area copying |
 | /summon | ✅ | High | Entity spawning |

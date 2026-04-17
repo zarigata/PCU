@@ -321,6 +321,7 @@ void CommandManager::registerVanillaCommands() {
     registerCommand(Commands::createSeedCommand());
     registerCommand(Commands::createWorldBorderCommand());
     registerCommand(Commands::createSummonCommand());
+    registerCommand(Commands::createSetBlockCommand());
     
     VF_INFO("Registered {} commands", commands.size());
 }
@@ -397,7 +398,7 @@ std::unique_ptr<Command> createHelpCommand() {
     cmd->usage = "help [command]";
     cmd->aliases = {"?"};
     cmd->execute = [](CommandContext& ctx, const std::vector<std::string>& args) -> CommandResult {
-        ctx.sendSuccess("Available commands: /help, /gamemode, /tp, /give, /time, /weather, /kill, /heal, /clear, /list, /stop, /summon");
+        ctx.sendSuccess("Available commands: /help, /gamemode, /tp, /give, /time, /weather, /kill, /heal, /clear, /list, /stop, /summon, /setblock");
         return {true, "", 0};
     };
     return cmd;
@@ -789,7 +790,109 @@ std::unique_ptr<Command> createSummonCommand() {
     return cmd;
 }
 
-std::unique_ptr<Command> createSetBlockCommand() { return std::make_unique<Command>(); }
+std::unique_ptr<Command> createSetBlockCommand() {
+    auto cmd = std::make_unique<Command>();
+    cmd->name = "setblock";
+    cmd->description = "Changes a block to another block";
+    cmd->usage = "setblock <x> <y> <z> <block> [destroy|keep|replace]";
+    cmd->requiredPermission = 2;
+    cmd->arguments = {
+        {"x", ArgumentType::Integer, false, {}, "~"},
+        {"y", ArgumentType::Integer, false, {}, "~"},
+        {"z", ArgumentType::Integer, false, {}, "~"},
+        {"block", ArgumentType::String, false, {}, ""},
+        {"mode", ArgumentType::String, true, {"destroy", "keep", "replace"}, "replace"}
+    };
+
+    cmd->execute = [](CommandContext& ctx, const std::vector<std::string>& args) -> CommandResult {
+        if (args.size() < 4) {
+            return {false, "Usage: setblock <x> <y> <z> <block> [destroy|keep|replace]", 0};
+        }
+
+        if (!ctx.world) {
+            return {false, "No world context available", 0};
+        }
+
+        // Parse coordinates with ~ relative support
+        auto parseCoord = [](const std::string& s, int base) -> std::optional<int> {
+            if (s.empty()) return std::nullopt;
+            if (s[0] == '~') {
+                if (s.size() == 1) return base;
+                try { return base + std::stoi(s.substr(1)); } catch (...) { return std::nullopt; }
+            }
+            try { return std::stoi(s); } catch (...) { return std::nullopt; }
+        };
+
+        auto ox = parseCoord(args[0], static_cast<int>(ctx.position.x));
+        auto oy = parseCoord(args[1], static_cast<int>(ctx.position.y));
+        auto oz = parseCoord(args[2], static_cast<int>(ctx.position.z));
+
+        if (!ox || !oy || !oz) {
+            return {false, "Invalid position coordinates", 0};
+        }
+
+        int bx = *ox, by = *oy, bz = *oz;
+
+        // Resolve block name to BlockID
+        std::string blockName = args[3];
+        // Add minecraft: prefix if no namespace given
+        if (blockName.find(':') == std::string::npos) {
+            blockName = "minecraft:" + blockName;
+        }
+
+        BlockID blockId = BlockRegistry::get().getBlockId(blockName);
+        if (blockId == AIR_BLOCK && blockName != "minecraft:air") {
+            // Unknown block — return error
+            return {false, "Unknown block: " + args[3], 0};
+        }
+
+        BlockState newState(blockId);
+
+        // Parse mode
+        std::string mode = "replace";
+        if (args.size() >= 5) {
+            mode = args[4];
+            std::transform(mode.begin(), mode.end(), mode.begin(), ::tolower);
+        }
+
+        BlockState existing = ctx.world->getBlock(bx, by, bz);
+
+        if (mode == "keep") {
+            // Only place if the existing block is air
+            if (!existing.isAir()) {
+                ctx.sendSuccess("Block not placed (keep mode: non-air block at position)");
+                return {true, "", 0};
+            }
+        } else if (mode == "destroy") {
+            // Drop the existing block's loot before replacing
+            if (!existing.isAir()) {
+                VF_INFO("[setblock] Destroying block {} at ({}, {}, {})",
+                         static_cast<int>(existing.getBlockId()), bx, by, bz);
+            }
+        }
+        // mode == "replace" or fallthrough from destroy/keep: set the block
+
+        ctx.world->setBlock(bx, by, bz, newState);
+
+        ctx.sendSuccess("Block set to " + args[3] +
+            " at (" + std::to_string(bx) + ", " + std::to_string(by) + ", " + std::to_string(bz) + ")");
+        return {true, "", 1};
+    };
+
+    // Tab completion for block names and modes
+    cmd->tabComplete = [](const std::string& partial) -> std::vector<std::string> {
+        static const std::vector<std::string> modes = {"destroy", "keep", "replace"};
+        std::vector<std::string> results;
+        std::string lower = partial;
+        std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+        for (const auto& m : modes) {
+            if (m.find(lower) == 0) results.push_back(m);
+        }
+        return results;
+    };
+
+    return cmd;
+}
 std::unique_ptr<Command> createFillCommand() { return std::make_unique<Command>(); }
 std::unique_ptr<Command> createCloneCommand() { return std::make_unique<Command>(); }
 std::unique_ptr<Command> createOpCommand() { return std::make_unique<Command>(); }
