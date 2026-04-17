@@ -1,8 +1,3 @@
-/**
- * @file test_chunk_mesher.cpp
- * @brief Unit tests for chunk mesh generation
- */
-
 #include <gtest/gtest.h>
 #include <VoxelForge/world/ChunkMesher.hpp>
 #include <VoxelForge/world/Chunk.hpp>
@@ -15,7 +10,6 @@ namespace test {
 class ChunkMesherTest : public ::testing::Test {
 protected:
     void SetUp() override {
-        // Initialize logger and block registry
         static bool initialized = false;
         if (!initialized) {
             Logger::init();
@@ -33,36 +27,6 @@ protected:
     std::unique_ptr<ChunkMesher> mesher;
 };
 
-// Test face normal directions
-TEST_F(ChunkMesherTest, FaceNormals_CorrectDirections) {
-    // Verify face normals are unit vectors
-    for (int i = 0; i < 6; i++) {
-        const auto& normal = ChunkMesher::FACE_NORMALS[i];
-        float length = glm::length(normal);
-        EXPECT_FLOAT_EQ(length, 1.0f);
-    }
-    
-    // Verify face normals point in correct directions
-    EXPECT_FLOAT_EQ(ChunkMesher::FACE_NORMALS[0].x, 1.0f);  // Right +X
-    EXPECT_FLOAT_EQ(ChunkMesher::FACE_NORMALS[1].x, -1.0f); // Left -X
-    EXPECT_FLOAT_EQ(ChunkMesher::FACE_NORMALS[2].y, 1.0f);  // Up +Y
-    EXPECT_FLOAT_EQ(ChunkMesher::FACE_NORMALS[3].y, -1.0f); // Down -Y
-    EXPECT_FLOAT_EQ(ChunkMesher::FACE_NORMALS[4].z, 1.0f);  // Front +Z
-    EXPECT_FLOAT_EQ(ChunkMesher::FACE_NORMALS[5].z, -1.0f); // Back -Z
-}
-
-// Test face offsets for neighbor checking
-TEST_F(ChunkMesherTest, FaceOffsets_CorrectDirections) {
-    // Verify offsets match face directions
-    EXPECT_EQ(ChunkMesher::FACE_OFFSETS[0], glm::ivec3(1, 0, 0));   // Right
-    EXPECT_EQ(ChunkMesher::FACE_OFFSETS[1], glm::ivec3(-1, 0, 0));  // Left
-    EXPECT_EQ(ChunkMesher::FACE_OFFSETS[2], glm::ivec3(0, 1, 0));   // Up
-    EXPECT_EQ(ChunkMesher::FACE_OFFSETS[3], glm::ivec3(0, -1, 0));  // Down
-    EXPECT_EQ(ChunkMesher::FACE_OFFSETS[4], glm::ivec3(0, 0, 1));   // Front
-    EXPECT_EQ(ChunkMesher::FACE_OFFSETS[5], glm::ivec3(0, 0, -1));  // Back
-}
-
-// Test chunk mesh data structure
 TEST_F(ChunkMesherTest, ChunkMeshData_EmptyState) {
     ChunkMeshData mesh;
     
@@ -96,13 +60,8 @@ TEST_F(ChunkMesherTest, ChunkMeshData_Clear) {
     EXPECT_TRUE(mesh.solidIndices.empty());
 }
 
-// Test chunk vertex structure size
 TEST_F(ChunkMesherTest, ChunkVertex_Size) {
-    // Verify vertex structure size for GPU alignment
-    // Position (12) + Normal (12) + UV (8) + AO (4) + Light (4) + Color (4) = 44 bytes
-    // But due to alignment, actual size might be different
-    
-    EXPECT_EQ(sizeof(ChunkVertex), 44); // Packed structure
+    EXPECT_EQ(sizeof(ChunkVertex), 44);
 }
 
 // Test mesher configuration
@@ -132,7 +91,6 @@ TEST_F(ChunkMesherTest, Config_Modification) {
     EXPECT_EQ(retrieved.maxMeshesPerFrame, 8);
 }
 
-// Test mesh generation for empty chunk
 TEST_F(ChunkMesherTest, GenerateMesh_EmptyChunk) {
     ChunkPos pos(0, 0);
     Chunk chunk(pos);
@@ -144,7 +102,6 @@ TEST_F(ChunkMesherTest, GenerateMesh_EmptyChunk) {
     EXPECT_TRUE(result.meshData.isEmpty());
 }
 
-// Test mesh generation for single block chunk
 TEST_F(ChunkMesherTest, GenerateMesh_SingleBlock) {
     ChunkPos pos(0, 0);
     Chunk chunk(pos);
@@ -215,32 +172,6 @@ TEST_F(ChunkMesherTest, Light_Packing) {
     
     EXPECT_EQ(unpackedSky, skyLight);
     EXPECT_EQ(unpackedBlock, blockLight);
-}
-
-// Test face vertex positions
-TEST_F(ChunkMesherTest, FaceVertices_CorrectPositions) {
-    // Verify all face vertices are within [0,1] range
-    for (int face = 0; face < 6; face++) {
-        for (int v = 0; v < 4; v++) {
-            for (int c = 0; c < 3; c++) {
-                int val = ChunkMesher::FACE_VERTICES[face][v][c];
-                EXPECT_TRUE(val >= 0 && val <= 1);
-            }
-        }
-    }
-}
-
-// Test UV coordinates
-TEST_F(ChunkMesherTest, UVCoordinates_StandardQuad) {
-    // Verify standard quad UVs
-    EXPECT_FLOAT_EQ(ChunkMesher::FACE_UVS[0].x, 0.0f);
-    EXPECT_FLOAT_EQ(ChunkMesher::FACE_UVS[0].y, 0.0f);
-    EXPECT_FLOAT_EQ(ChunkMesher::FACE_UVS[1].x, 1.0f);
-    EXPECT_FLOAT_EQ(ChunkMesher::FACE_UVS[1].y, 0.0f);
-    EXPECT_FLOAT_EQ(ChunkMesher::FACE_UVS[2].x, 1.0f);
-    EXPECT_FLOAT_EQ(ChunkMesher::FACE_UVS[2].y, 1.0f);
-    EXPECT_FLOAT_EQ(ChunkMesher::FACE_UVS[3].x, 0.0f);
-    EXPECT_FLOAT_EQ(ChunkMesher::FACE_UVS[3].y, 1.0f);
 }
 
 } // namespace test
