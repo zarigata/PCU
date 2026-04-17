@@ -3,9 +3,12 @@
  * @brief Character controller implementation
  */
 
-#include "CharacterController.hpp"
-#include "PhysicsSystem.hpp"
+#include <VoxelForge/physics/CharacterController.hpp>
 #include <VoxelForge/core/Logger.hpp>
+
+#ifdef USE_PHYSX
+
+#include <VoxelForge/physics/PhysicsSystem.hpp>
 
 #include <PxPhysicsAPI.h>
 #include <characterkinematic/PxControllerManager.h>
@@ -29,11 +32,11 @@ void CharacterController::init(PhysicsSystem* system, const glm::vec3& pos,
     
     auto* manager = system->getPhysics()->getControllerManager();
     
-    PxCapsuleControllerDesc desc;
-    desc.position = PxExtendedVec3(pos.x, pos.y, pos.z);
+    CharacterControllerDesc desc;
+    desc.position = glm::vec3(pos.x, pos.y, pos.z);
     desc.height = settings.height - 2.0f * settings.radius;  // Cylinder part
     desc.radius = settings.radius;
-    desc.climbingMode = PxCapsuleClimbingMode::eEASY;
+    desc.climbingMode = CharacterClimbingMode::eEASY;
     desc.material = system->getDefaultMaterial();
     desc.stepOffset = settings.stepOffset;
     desc.slopeLimit = glm::radians(settings.slopeLimit);
@@ -82,7 +85,7 @@ void CharacterController::jump(float force) {
 
 void CharacterController::setPosition(const glm::vec3& pos) {
     if (controller) {
-        controller->setPosition(PxExtendedVec3(pos.x, pos.y, pos.z));
+        controller->setPosition(glm::vec3(pos.x, pos.y, pos.z));
     }
 }
 
@@ -197,16 +200,16 @@ void CharacterController::update(float deltaTime) {
     }
     
     // Move controller
-    PxVec3 disp(state.velocity.x * deltaTime, 
+    glm::vec3 disp(state.velocity.x * deltaTime, 
                 state.velocity.y * deltaTime, 
                 state.velocity.z * deltaTime);
     
-    PxControllerCollisionFlags flags = controller->move(disp, 0.001f, deltaTime, nullptr);
+    uint32_t flags = controller->move(disp, 0.001f, deltaTime, nullptr);
     
     // Update ground state
-    state.isGrounded = flags & PxControllerCollisionFlag::eCOLLISION_DOWN;
-    state.isTouchingCeiling = flags & PxControllerCollisionFlag::eCOLLISION_UP;
-    state.isTouchingWall = flags & PxControllerCollisionFlag::eCOLLISION_SIDES;
+    state.isGrounded = flags & 1;
+    state.isTouchingCeiling = flags & 2;
+    state.isTouchingWall = flags & 4;
     
     // Reset jump state when grounded
     if (state.isGrounded) {
@@ -229,7 +232,7 @@ void CharacterController::applyImpulse(const glm::vec3& impulse) {
 
 void CharacterController::teleport(const glm::vec3& pos) {
     if (controller) {
-        controller->setPosition(PxExtendedVec3(pos.x, pos.y, pos.z));
+        controller->setPosition(glm::vec3(pos.x, pos.y, pos.z));
         state.velocity = glm::vec3(0.0f);
     }
 }
@@ -238,13 +241,13 @@ bool CharacterController::checkGround(float maxDistance) {
     if (!controller) return false;
     
     // Cast ray downward
-    PxExtendedVec3 pos = controller->getPosition();
-    PxVec3 origin(static_cast<float>(pos.x), 
+    glm::vec3 pos = controller->getPosition();
+    glm::vec3 origin(static_cast<float>(pos.x), 
                   static_cast<float>(pos.y) - currentHeight / 2.0f, 
                   static_cast<float>(pos.z));
-    PxVec3 direction(0.0f, -1.0f, 0.0f);
+    glm::vec3 direction(0.0f, -1.0f, 0.0f);
     
-    PxRaycastBuffer hit;
+    RaycastBuffer hit;
     bool result = physicsSystem->getScene()->raycast(origin, direction, maxDistance, hit);
     
     if (result) {
@@ -355,3 +358,49 @@ void CharacterControllerManager::updateAll(float deltaTime) {
 }
 
 } // namespace VoxelForge
+
+#else
+
+namespace VoxelForge {
+
+CharacterController::CharacterController() : currentHeight(1.8f) {}
+CharacterController::~CharacterController() = default;
+void CharacterController::init(PhysicsSystem*, const glm::vec3&, const CharacterControllerSettings&) {}
+void CharacterController::cleanup() {}
+void CharacterController::move(const glm::vec3&, float) {}
+void CharacterController::jump() {}
+void CharacterController::jump(float) {}
+void CharacterController::setPosition(const glm::vec3&) {}
+glm::vec3 CharacterController::getPosition() const { return {}; }
+glm::vec3 CharacterController::getFootPosition() const { return {}; }
+void CharacterController::setVelocity(const glm::vec3& vel) { state.velocity = vel; }
+glm::vec3 CharacterController::getVelocity() const { return state.velocity; }
+void CharacterController::addVelocity(const glm::vec3& vel) { state.velocity += vel; }
+void CharacterController::setCrouch(bool) {}
+void CharacterController::toggleCrouch() {}
+void CharacterController::setSprint(bool) {}
+void CharacterController::toggleSprint() {}
+void CharacterController::resize(float) {}
+float CharacterController::getHeight() const { return currentHeight; }
+float CharacterController::getRadius() const { return settings.radius; }
+void CharacterController::updateSettings(const CharacterControllerSettings& s) { settings = s; }
+void CharacterController::setCollisionGroup(uint16_t) {}
+void CharacterController::setCollisionMask(uint16_t) {}
+void CharacterController::update(float) {}
+void CharacterController::applyForce(const glm::vec3&) {}
+void CharacterController::applyImpulse(const glm::vec3&) {}
+void CharacterController::teleport(const glm::vec3&) {}
+bool CharacterController::checkGround(float) { return false; }
+void CharacterController::applyKnockback(const glm::vec3&, float) {}
+
+CharacterControllerManager::CharacterControllerManager() = default;
+CharacterControllerManager::~CharacterControllerManager() = default;
+void CharacterControllerManager::init(PhysicsSystem*) {}
+void CharacterControllerManager::cleanup() {}
+CharacterController* CharacterControllerManager::createController(const glm::vec3&, float, float) { return nullptr; }
+void CharacterControllerManager::destroyController(CharacterController*) {}
+void CharacterControllerManager::updateAll(float) {}
+
+} // namespace VoxelForge
+
+#endif

@@ -3,8 +3,8 @@
  * @brief Collision detection and management implementation
  */
 
-#include "CollisionManager.hpp"
-#include "PhysicsSystem.hpp"
+#include "VoxelForge/physics/CollisionManager.hpp"
+#include "VoxelForge/physics/PhysicsSystem.hpp"
 #include <VoxelForge/core/Logger.hpp>
 #include <algorithm>
 #include <cmath>
@@ -32,7 +32,7 @@ void CollisionManager::init(PhysicsSystem* physics) {
     createLayer("Projectile", 0xFFFF);
     createLayer("Trigger", 0xFFFF);
     
-    Logger::info("CollisionManager initialized with {} layers", layers.size());
+    VF_INFO("CollisionManager initialized with {} layers", layers.size());
 }
 
 void CollisionManager::shutdown() {
@@ -139,11 +139,13 @@ bool CollisionManager::checkCollision(uint32_t entityA, uint32_t entityB) {
 std::vector<uint32_t> CollisionManager::getCollidingEntities(uint32_t entityId) {
     std::vector<uint32_t> result;
     
-    for (const auto& [pair, _] : activeCollisions) {
-        if (pair.first == entityId) {
-            result.push_back(pair.second);
-        } else if (pair.second == entityId) {
-            result.push_back(pair.first);
+    for (const auto& pr : activeCollisions) {
+        uint32_t a = pr.first;
+        uint32_t b = pr.second;
+        if (a == entityId) {
+            result.push_back(b);
+        } else if (b == entityId) {
+            result.push_back(a);
         }
     }
     

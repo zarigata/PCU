@@ -3,8 +3,11 @@
  * @brief PhysX-based physics system implementation
  */
 
-#include "PhysicsSystem.hpp"
-#include "CharacterController.hpp"
+#include <VoxelForge/physics/PhysicsSystem.hpp>
+
+#ifdef USE_PHYSX
+
+#include <VoxelForge/physics/CharacterController.hpp>
 #include <VoxelForge/world/Chunk.hpp>
 #include <VoxelForge/core/Logger.hpp>
 
@@ -701,3 +704,71 @@ PxRigidActor* StaticActor::getActor() const {
 }
 
 } // namespace VoxelForge
+
+#else
+
+#include <VoxelForge/core/Logger.hpp>
+
+namespace VoxelForge {
+
+PhysicsSystem::PhysicsSystem() = default;
+PhysicsSystem::~PhysicsSystem() = default;
+void PhysicsSystem::init(const PhysicsSettings&) { VF_WARN("PhysicsSystem::init() stub - PhysX not available"); }
+void PhysicsSystem::shutdown() {}
+void PhysicsSystem::simulate(float) {}
+void PhysicsSystem::fetchResults() {}
+void PhysicsSystem::step(float) {}
+std::unique_ptr<DynamicActor> PhysicsSystem::createDynamicActor(const glm::vec3&, const glm::vec3&, float) { return nullptr; }
+std::unique_ptr<StaticActor> PhysicsSystem::createStaticActor(const glm::vec3&, const glm::vec3&) { return nullptr; }
+void PhysicsSystem::addChunkCollider(Chunk*) {}
+void PhysicsSystem::removeChunkCollider(const glm::ivec3&) {}
+void PhysicsSystem::updateChunkCollider(Chunk*) {}
+RaycastHit PhysicsSystem::raycast(const glm::vec3&, const glm::vec3&, float, uint16_t) { return {}; }
+std::vector<RaycastHit> PhysicsSystem::raycastAll(const glm::vec3&, const glm::vec3&, float, uint16_t) { return {}; }
+bool PhysicsSystem::overlapSphere(const glm::vec3&, float, std::vector<uint32_t>&, uint16_t) { return false; }
+bool PhysicsSystem::overlapBox(const glm::vec3&, const glm::vec3&, std::vector<uint32_t>&, uint16_t) { return false; }
+CharacterController* PhysicsSystem::createCharacterController(const glm::vec3&, float, float) { return nullptr; }
+void PhysicsSystem::destroyCharacterController(CharacterController*) {}
+physx::PxMaterial* PhysicsSystem::createMaterial(const PhysicsMaterial&) { return nullptr; }
+void PhysicsSystem::setGravity(const glm::vec3&) {}
+glm::vec3 PhysicsSystem::getGravity() const { return {0, -9.81f, 0}; }
+void PhysicsSystem::setCollisionCallback(std::function<void(uint32_t, uint32_t, const CollisionInfo&)>) {}
+
+DynamicActor::DynamicActor() = default;
+DynamicActor::~DynamicActor() = default;
+void DynamicActor::init(PhysicsSystem*, const glm::vec3&, const glm::vec3&, float) {}
+void DynamicActor::cleanup() {}
+void DynamicActor::setPosition(const glm::vec3&) {}
+glm::vec3 DynamicActor::getPosition() const { return {}; }
+void DynamicActor::setRotation(const glm::quat&) {}
+glm::quat DynamicActor::getRotation() const { return glm::quat(1,0,0,0); }
+void DynamicActor::setLinearVelocity(const glm::vec3&) {}
+glm::vec3 DynamicActor::getLinearVelocity() const { return {}; }
+void DynamicActor::setAngularVelocity(const glm::vec3&) {}
+glm::vec3 DynamicActor::getAngularVelocity() const { return {}; }
+void DynamicActor::addForce(const glm::vec3&) {}
+void DynamicActor::addImpulse(const glm::vec3&) {}
+void DynamicActor::addTorque(const glm::vec3&) {}
+void DynamicActor::setGravityEnabled(bool) {}
+bool DynamicActor::isGravityEnabled() const { return true; }
+void DynamicActor::setCollisionGroup(CollisionGroup) {}
+CollisionGroup DynamicActor::getCollisionGroup() const { return CollisionGroup::None; }
+void DynamicActor::setCollisionMask(uint16_t) {}
+physx::PxRigidActor* DynamicActor::getActor() const { return nullptr; }
+
+StaticActor::StaticActor() = default;
+StaticActor::~StaticActor() = default;
+void StaticActor::init(PhysicsSystem*, const glm::vec3&, const glm::vec3&) {}
+void StaticActor::cleanup() {}
+void StaticActor::setPosition(const glm::vec3&) {}
+glm::vec3 StaticActor::getPosition() const { return {}; }
+void StaticActor::setRotation(const glm::quat&) {}
+glm::quat StaticActor::getRotation() const { return glm::quat(1,0,0,0); }
+void StaticActor::setCollisionGroup(CollisionGroup) {}
+CollisionGroup StaticActor::getCollisionGroup() const { return CollisionGroup::None; }
+void StaticActor::setCollisionMask(uint16_t) {}
+physx::PxRigidActor* StaticActor::getActor() const { return nullptr; }
+
+} // namespace VoxelForge
+
+#endif

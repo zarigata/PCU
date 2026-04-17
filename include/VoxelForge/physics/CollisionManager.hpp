@@ -6,7 +6,7 @@
 #pragma once
 
 #include <string>
-
+#include <unordered_map>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <vector>
@@ -103,6 +103,16 @@ struct CollisionCallbackInfo {
     bool isTrigger = false;
 };
 
+// Pair hash for unordered_set
+struct PairHash {
+    template<typename T1, typename T2>
+    size_t operator()(const std::pair<T1, T2>& p) const {
+        auto h1 = std::hash<T1>{}(p.first);
+        auto h2 = std::hash<T2>{}(p.second);
+        return h1 ^ (h2 << 1);
+    }
+};
+
 // Collision manager
 class CollisionManager {
 public:
@@ -148,9 +158,9 @@ public:
     };
     
     bool raycast(const glm::vec3& origin, const glm::vec3& direction, float maxDistance, 
-                 RaycastHit& hit, uint16_t layerMask = 0xFFFF);
+                  RaycastHit& hit, uint16_t layerMask = 0xFFFF);
     std::vector<RaycastHit> raycastAll(const glm::vec3& origin, const glm::vec3& direction,
-                                        float maxDistance, uint16_t layerMask = 0xFFFF);
+                                         float maxDistance, uint16_t layerMask = 0xFFFF);
     
     // Callbacks
     using CollisionCallback = std::function<void(const CollisionEvent&)>;
@@ -186,18 +196,9 @@ private:
     bool debugDrawEnabled = false;
 };
 
-// Pair hash for unordered_set
-struct PairHash {
-    template<typename T1, typename T2>
-    size_t operator()(const std::pair<T1, T2>& p) const {
-        auto h1 = std::hash<T1>{}(p.first);
-        auto h2 = std::hash<T2>{}(p.second);
-        return h1 ^ (h2 << 1);
-    }
-};
-
 // Collision utility functions
 namespace CollisionUtils {
+
 
 // Point in box
 bool pointInBox(const glm::vec3& point, const glm::vec3& boxMin, const glm::vec3& boxMax);
