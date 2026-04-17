@@ -12,31 +12,32 @@
 
 ## Overview
 
-VoxelForge is a **complete, open-source Minecraft clone** built in modern C++20/23 featuring:
-- Full Minecraft feature parity (blocks, items, entities, dimensions, etc.)
-- Integrated dual-layer modding system (Native C++ + Lua scripting)
-- High-performance Vulkan rendering
-- Multiplayer support
+VoxelForge is a C++20 voxel sandbox game aiming to become a Minecraft-like experience. Currently in **Phase 0: Build Rescue & Truth Establishment** — the project compiles but is not yet playable.
 
-## Current Status: 🚧 In Development
+## Current Phase: Phase 0 — Build Rescue
 
-| Component | Status | Progress |
-|-----------|--------|----------|
-| Core Systems | ✅ | 100% |
-| Window/Input | ✅ | 100% |
-| Event System | ✅ | 100% |
-| Memory Management | ✅ | 100% |
-| Camera System | ✅ | 100% |
-| Block Registry | ✅ | 100% |
-| Chunk System | ✅ | 100% |
-| World Generation | ✅ | 100% |
-| Vulkan Renderer | ✅ | 100% |
-| Entity System | ✅ | 100% |
-| Physics | ✅ | 100% |
-| Audio | ✅ | 100% |
-| Networking | ✅ | 100% |
-| Modding API | ✅ | 100% |
-| Game Systems | ✅ | 100% |
+The project was previously documented as "100% complete" across all subsystems. An honest audit (2026-04-17) revealed this was inaccurate. We are now establishing a truthful baseline before adding features.
+
+**Audit documents:** [`docs/status/BUILD_TRUTH.md`](docs/status/BUILD_TRUTH.md) | [`docs/status/SUBSYSTEM_MATRIX.md`](docs/status/SUBSYSTEM_MATRIX.md) | [`docs/status/STUB_INVENTORY.md`](docs/status/STUB_INVENTORY.md) | [`docs/status/RUNTIME_DEPENDENCIES.md`](docs/status/RUNTIME_DEPENDENCIES.md)
+
+## Subsystem Reality
+
+| Subsystem | Status | Notes |
+|-----------|--------|-------|
+| Core (Logger, Timer, Memory) | 🟢 Implemented | Tested, functional |
+| ECS | 🟢 Implemented | 16 tests passing |
+| Utils (Noise, Random, NBT, Compression) | 🟢 Implemented | Core utilities work |
+| Window/Input | 🔴 Stubbed | All event dispatch is TODO |
+| World Generation | 🟡 Partial | Scaffolding exists; features/caves/save TODO |
+| Chunk System | 🟡 Partial | Data structures exist; save/load TODO |
+| Vulkan Renderer | 🔴 Broken | 4 core components excluded from build |
+| Physics | 🔴 Stubbed | PhysX not present; compile-time stub |
+| Audio | 🔴 Stubbed | FMOD not present; compile-time stub |
+| Networking | 🟡 Scaffolding | Files exist; internal stubs |
+| Scripting (Lua) | 🔴 Stubbed | LuaEngine is stub |
+| Modding | 🟡 Scaffolding | Loader/registry files exist; internal stubs |
+| Game Loop | 🔴 Stubbed | World init, rendering, movement all TODO |
+| Save/Load | 🔴 TODO | AnvilLoader chunk save is TODO |
 
 ## Quick Links
 
@@ -48,15 +49,17 @@ VoxelForge is a **complete, open-source Minecraft clone** built in modern C++20/
 
 ## Technical Stack
 
-| Component | Technology |
-|-----------|------------|
-| Language | C++20/23 |
-| Renderer | Vulkan 1.3 |
-| Physics | NVIDIA PhysX 5.x |
-| Audio | FMOD 2.02+ |
-| Networking | ENet |
-| Scripting | Lua 5.4 / LuaJIT |
-| Build | CMake 3.26+ |
+| Component | Technology | Status |
+|-----------|------------|--------|
+| Language | C++20 | Active |
+| Renderer | Vulkan 1.3 | Partial (4 components excluded) |
+| Window | GLFW 3.3.8 | Active |
+| Math | GLM 1.0.1 | Active |
+| Networking | ENet 1.3.17 | Scaffolding |
+| Scripting | Lua 5.4 / sol2 | Stubbed |
+| Physics | Custom (PhysX planned) | Stubbed |
+| Audio | Custom (FMOD planned) | Stubbed |
+| Build | CMake 3.26+ | Active |
 
 ## Building
 
@@ -111,85 +114,17 @@ VoxelForge/
 └── docs/                   # Documentation
 ```
 
-## Implemented Features
+## Vertical Slice Status
 
-### Core Systems ✅
-- **Logger** - spdlog-based logging with file rotation
-- **Timer** - High-resolution timing and FPS counter
-- **Memory** - Arena allocators for performance
-- **ECS** - Custom Entity Component System
+NOT YET ACHIEVED. The game cannot currently:
+- Launch to a menu
+- Create or load a world
+- Accept player input (event dispatch is TODO)
+- Render anything (4 Vulkan components excluded from build)
+- Save or load progress
+- Play for 20 minutes without crashing
 
-### Platform ✅
-- **Window** - GLFW window management
-- **Input** - Full keyboard/mouse input handling
-- **Events** - Type-safe event bus
-
-### Utilities ✅
-- **Noise** - Perlin, Simplex, Voronoi noise
-- **Random** - XorShift128+ PRNG
-- **NBT** - Named Binary Tag serialization
-- **Compression** - Zstandard streaming compression
-- **Profiler** - Performance profiling system
-
-### World ✅
-- **BlockRegistry** - 200+ vanilla blocks
-- **Block States** - Property system for variants
-- **Chunk System** - Paletted storage, light data
-- **WorldGenerator** - Multi-octave noise generation
-- **BiomeRegistry** - Multiple biomes
-- **DimensionRegistry** - Overworld, Nether, End
-- **LightEngine** - Sky and block lighting
-
-### Rendering ✅
-- **VulkanContext** - Full Vulkan 1.3 setup
-- **ChunkRenderer** - Optimized chunk meshing
-- **EntityRenderer** - Entity rendering
-- **ParticleRenderer** - Particle system
-- **SkyRenderer** - Sky, sun, moon, stars
-- **ShadowRenderer** - Cascade shadow maps
-- **PostProcessor** - Bloom, FXAA, color grading
-- **TextureAtlas** - Texture management
-- **ShaderManager** - GLSL to SPIRV compilation
-
-### Physics ✅
-- **PhysicsSystem** - PhysX integration
-- **CharacterController** - Player movement
-- **CollisionManager** - Collision detection
-
-### Audio ✅
-- **AudioSystem** - FMOD integration
-- **SoundManager** - Game-specific sounds
-- **Reverb/Effects** - Audio processing
-
-### Networking ✅
-- **NetworkManager** - ENet wrapper
-- **Server** - Dedicated server support
-- **Client** - Client connection handling
-- **Packet System** - Binary serialization
-
-### Modding ✅
-- **ModLoader** - Native + Lua mod loading
-- **ModContext** - Per-mod API access
-- **ModRegistry** - Content registration
-
-### Game Systems ✅
-- **Inventory** - Player inventory
-- **CraftingSystem** - Shaped/shapeless recipes
-- **RecipeRegistry** - Recipe management
-- **CommandManager** - Console commands
-- **AchievementSystem** - Advancements
-- **Statistics** - Player stats tracking
-## Statistics
-
-| Metric | Current | Target |
-|--------|---------|--------|
-| Lines of Code | 57,000+ | 200,000+ |
-| Source Files | 93 | - |
-| Commits | 20+ | - |
-| Releases | 12 | - |
-| Block Types | 200+ | 800+ |
-| Item Types | 50+ | 600+ |
-| Entity Types | 20+ | 70+ |
+See [`docs/status/STUB_INVENTORY.md`](docs/status/STUB_INVENTORY.md) for the full list of blocking stubs.
 
 ## Contributing
 

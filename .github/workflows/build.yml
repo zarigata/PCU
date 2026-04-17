@@ -183,7 +183,7 @@ jobs:
           retention-days: 30
 
   build-macos-arm:
-    runs-on: macos-latest-latest
+    runs-on: macos-latest
     name: Build macOS Apple Silicon
     
     steps:
