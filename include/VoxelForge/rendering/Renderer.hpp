@@ -108,6 +108,7 @@ public:
     void drawText(const char* text, float x, float y, uint32_t color, float scale = 1.0f);
     void drawDebugOverlay(float fps, float frameTime, int chunks, int drawCalls, float pitch, float yaw);
     void resetUIBatch();
+    void drawClouds(Camera* camera, float gameTime);
 
     // UI rendering (host-visible buffers, dedicated UI pipeline)
     void initUIRendering();

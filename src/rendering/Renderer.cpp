@@ -1816,4 +1816,107 @@ void Renderer::drawDebugOverlay(float fps, float frameTime, int chunks, int draw
     drawText(buf, 4.0f, 4.0f, 0xFFFFFFFF, 1.5f);
 }
 
+static uint32_t packCloudColor(uint8_t a) {
+    return 0xFF | (0xFF << 8) | (0xFF << 16) | ((uint32_t)a << 24);
+}
+
+void Renderer::drawClouds(Camera* camera, float gameTime) {
+    if (!uiPipelineReady || !uiVertexMapped || !uiIndexMapped) return;
+    auto& cmd = commandBuffers[currentImageIndex];
+
+    struct UIVert { float x, y, z; uint32_t color; };
+
+    constexpr int GRID = 32;
+    constexpr float CLOUD_Y = 160.0f;
+    constexpr float TILE = 16.0f;
+    constexpr float DRIFT_SPEED = 2.0f;
+
+    float drift = std::fmod(gameTime * DRIFT_SPEED, TILE);
+
+    glm::vec3 camPos = camera->getPosition();
+    int baseCX = (int)floor((camPos.x - GRID * TILE * 0.5f + drift) / TILE);
+    int baseCZ = (int)floor((camPos.z - GRID * TILE * 0.5f) / TILE);
+
+    constexpr int MAX_CLOUD_VERTS = 4096;
+    constexpr int MAX_CLOUD_INDICES = 6144;
+    UIVert verts[MAX_CLOUD_VERTS];
+    uint32_t indices[MAX_CLOUD_INDICES];
+    uint32_t v = 0, idx = 0;
+
+    auto addQuad = [&](float x0, float y0, float z0,
+                       float x1, float y1, float z1,
+                       float x2, float y2, float z2,
+                       float x3, float y3, float z3, uint32_t col) {
+        if (v + 4 > MAX_CLOUD_VERTS || idx + 6 > MAX_CLOUD_INDICES) return;
+        uint32_t base = v;
+        verts[v++] = {x0, y0, z0, col};
+        verts[v++] = {x1, y1, z1, col};
+        verts[v++] = {x2, y2, z2, col};
+        verts[v++] = {x3, y3, z3, col};
+        indices[idx++] = base; indices[idx++] = base+1; indices[idx++] = base+2;
+        indices[idx++] = base; indices[idx++] = base+2; indices[idx++] = base+3;
+    };
+
+    for (int gz = 0; gz < GRID; gz++) {
+        for (int gx = 0; gx < GRID; gx++) {
+            int cx = baseCX + gx;
+            int cz = baseCZ + gz;
+
+            unsigned int h = (unsigned int)(cx * 374761393 + cz * 668265263);
+            h = (h ^ (h >> 13)) * 1274126177;
+            h = h ^ (h >> 16);
+            if ((h & 7) < 3) continue;
+
+            uint8_t alpha = (uint8_t)(140 + (h & 63));
+            uint32_t col = packCloudColor(alpha);
+
+            float x = cx * TILE - drift;
+            float z = cz * TILE;
+            float thickness = 2.0f;
+
+            addQuad(x, CLOUD_Y + thickness, z,
+                    x + TILE, CLOUD_Y + thickness, z,
+                    x + TILE, CLOUD_Y + thickness, z + TILE,
+                    x, CLOUD_Y + thickness, z + TILE, col);
+            addQuad(x, CLOUD_Y, z + TILE,
+                    x + TILE, CLOUD_Y, z + TILE,
+                    x + TILE, CLOUD_Y, z,
+                    x, CLOUD_Y, z, packCloudColor((uint8_t)(alpha * 0.7f)));
+            addQuad(x, CLOUD_Y, z,
+                    x + TILE, CLOUD_Y, z,
+                    x + TILE, CLOUD_Y + thickness, z,
+                    x, CLOUD_Y + thickness, z, packCloudColor((uint8_t)(alpha * 0.85f)));
+            addQuad(x + TILE, CLOUD_Y, z,
+                    x + TILE, CLOUD_Y, z + TILE,
+                    x + TILE, CLOUD_Y + thickness, z + TILE,
+                    x + TILE, CLOUD_Y + thickness, z, packCloudColor((uint8_t)(alpha * 0.85f)));
+            addQuad(x, CLOUD_Y, z + TILE,
+                    x, CLOUD_Y, z,
+                    x, CLOUD_Y + thickness, z,
+                    x, CLOUD_Y + thickness, z + TILE, packCloudColor((uint8_t)(alpha * 0.75f)));
+            addQuad(x, CLOUD_Y, z,
+                    x + TILE, CLOUD_Y, z,
+                    x + TILE, CLOUD_Y, z + TILE,
+                    x, CLOUD_Y, z + TILE, packCloudColor((uint8_t)(alpha * 0.6f)));
+        }
+    }
+
+    if (v == 0) return;
+
+    auto* dstV = reinterpret_cast<UIVert*>((char*)uiVertexMapped + uiBatchV * sizeof(UIVert));
+    auto* dstI = (uint32_t*)uiIndexMapped + uiBatchI;
+    memcpy(dstV, verts, v * sizeof(UIVert));
+    memcpy(dstI, indices, idx * sizeof(uint32_t));
+
+    cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, uiPipeline);
+    glm::mat4 vp = camera->getViewProjectionMatrix();
+    cmd.pushConstants(uiPipelineLayout, vk::ShaderStageFlagBits::eVertex, 0, sizeof(glm::mat4), &vp);
+    vk::DeviceSize voff = uiBatchV * sizeof(UIVert);
+    cmd.bindVertexBuffers(0, 1, &uiVertexBuffer, &voff);
+    cmd.bindIndexBuffer(uiIndexBuffer, 0, vk::IndexType::eUint32);
+    cmd.drawIndexed(idx, 1, uiBatchI, 0, 0);
+    uiBatchV += v;
+    uiBatchI += idx;
+}
+
 } // namespace VoxelForge

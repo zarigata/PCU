@@ -164,6 +164,7 @@ void Game::onRender() {
         if (world) {
             renderer.renderWorldChunks(world.get(), &camera);
         }
+        renderer.drawClouds(&camera, gameTime);
         renderer.resetUIBatch();
         if (!cursorCaptured) {
             renderer.drawClickToPlay();
