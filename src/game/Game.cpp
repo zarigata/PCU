@@ -31,9 +31,18 @@ void Game::onInit() {
     VF_CORE_INFO("World created with seed 0");
     loadWorld();
     
+    world->updateChunks(glm::vec3(0.0f));
     int spawnHeight = world->getHeight(0, 0);
-    playerPos = glm::vec3(0.0f, static_cast<float>(spawnHeight + 3), 0.0f);
-    VF_CORE_INFO("Spawn height: {} (terrain surface), player at y={:.1f}", spawnHeight, playerPos.y);
+    float spawnY = static_cast<float>(spawnHeight + 5);
+    
+    auto blockBelow = world->getBlock(0, spawnHeight, 0);
+    auto blockAtSpawn = world->getBlock(0, static_cast<int>(spawnY), 0);
+    VF_CORE_INFO("Spawn: terrainSurface={}, spawnY={:.0f}, blockAtSurface={} solid={}, blockAtSpawn={} solid={}",
+                 spawnHeight, spawnY,
+                 blockBelow.getBlockId(), blockBelow.isSolid(),
+                 blockAtSpawn.getBlockId(), blockAtSpawn.isSolid());
+    
+    playerPos = glm::vec3(0.0f, spawnY, 0.0f);
     
     camera.setPerspective(settings.fov,
                           static_cast<float>(getWindow().getWidth()) / static_cast<float>(getWindow().getHeight()),
@@ -198,7 +207,8 @@ void Game::processInput(float deltaTime) {
         
         glm::vec3 forward = camera.getForward();
         forward.y = 0.0f;
-        forward = glm::normalize(forward);
+        if (glm::length(forward) > 0.001f) forward = glm::normalize(forward);
+        else forward = glm::vec3(1.0f, 0.0f, 0.0f);
         glm::vec3 right = glm::normalize(glm::cross(forward, glm::vec3(0.0f, 1.0f, 0.0f)));
         
         glm::vec3 inputDir(0.0f);
@@ -232,8 +242,8 @@ void Game::processInput(float deltaTime) {
     
     auto mouseDelta = input.getMouseDelta();
     if (glm::length(mouseDelta) > 0.0f) {
-        playerYaw -= mouseDelta.x * settings.mouseSensitivity;
-        playerPitch += mouseDelta.y * settings.mouseSensitivity;
+        playerYaw += mouseDelta.x * settings.mouseSensitivity;
+        playerPitch -= mouseDelta.y * settings.mouseSensitivity;
         playerPitch = std::clamp(playerPitch, -89.0f, 89.0f);
     }
     
@@ -434,7 +444,11 @@ void Game::resolveCollisions(glm::vec3& pos, const glm::vec3& delta) {
     if (checkCollision(newPos)) {
         if (delta.y < 0.0f) {
             onGround = true;
-            newPos.y = (float)ceil(pos.y + delta.y);
+            float testY = floor(newPos.y);
+            newPos.y = testY + 1.0f;
+            while (checkCollision(newPos) && newPos.y < pos.y + 2.0f) {
+                newPos.y += 1.0f;
+            }
             if (checkCollision(newPos)) {
                 newPos.y = pos.y;
             }
