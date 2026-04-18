@@ -6,11 +6,14 @@
 #include <VoxelForge/world/BlockRegistry.hpp>
 #include <VoxelForge/world/Chunk.hpp>
 #include <VoxelForge/world/World.hpp>
+#include <GLFW/glfw3.h>
 #include <cmath>
 #include <algorithm>
 #include <fstream>
 #include <filesystem>
 #include <ctime>
+#include <thread>
+#include <chrono>
 
 namespace VoxelForge {
 
@@ -59,9 +62,10 @@ void Game::onInit() {
         VF_ERROR("Game will run without rendering");
     }
     
-    getWindow().disableCursor();
-    
-    VF_CORE_INFO("Game initialized");
+    glfwSetInputMode(getWindow().getGLFWWindow(), GLFW_STICKY_KEYS, GLFW_TRUE);
+    glfwSetInputMode(getWindow().getGLFWWindow(), GLFW_STICKY_MOUSE_BUTTONS, GLFW_TRUE);
+    glfwFocusWindow(getWindow().getGLFWWindow());
+    VF_CORE_INFO("Game initialized — click to capture cursor");
 }
 
 void Game::onShutdown() {
@@ -133,6 +137,11 @@ void Game::onUpdate(float deltaTime) {
     if (ecsWorld) {
         ecsWorld->updateSystems(deltaTime);
     }
+    
+    if (rendererInitialized) {
+        renderer.getSettings().renderDistance = settings.renderDistance;
+        renderer.getSettings().enableVsync = settings.vsync;
+    }
 }
 
 void Game::onRender() {
@@ -155,12 +164,25 @@ void Game::onRender() {
         if (world) {
             renderer.renderWorldChunks(world.get(), &camera);
         }
-        if (!paused) {
+        renderer.resetUIBatch();
+        if (!cursorCaptured) {
+            renderer.drawClickToPlay();
+        } else if (!paused) {
             renderer.drawCrosshair();
             renderer.drawHotbar(selectedSlot, hotbarBlocks);
         } else {
-            renderer.drawPauseMenu(pauseMenuSelection, settings.mouseSensitivity,
-                                    settings.invertMouseY, settings.invertMouseX, flyMode);
+            UIMenuState menu;
+            menu.selected = pauseMenuSelection;
+            menu.hovered = hoveredMenuItem;
+            menu.fov = settings.fov;
+            menu.sensitivity = settings.mouseSensitivity;
+            menu.renderDistance = settings.renderDistance;
+            menu.maxFPS = settings.maxFPS;
+            menu.invertY = settings.invertMouseY;
+            menu.invertX = settings.invertMouseX;
+            menu.vsync = settings.vsync;
+            menu.flyMode = flyMode;
+            renderer.drawPauseMenu(menu);
         }
         auto& rstats = renderer.getStats();
         renderer.drawDebugOverlay(currentFPS, (currentFPS > 0.0f) ? 1.0f/currentFPS : 0.0f,
@@ -172,54 +194,150 @@ void Game::onRender() {
 }
 
 void Game::processInput(float deltaTime) {
-    auto& input = getInput();
+    GLFWwindow* win = getWindow().getGLFWWindow();
     
-    if (input.isKeyJustPressed(Key::Escape)) {
-        togglePause();
-        if (paused) {
-            pauseMenuSelection = 0;
-            getWindow().showCursor();
-        } else {
-            getWindow().disableCursor();
-        }
-    }
-    
-    if (paused) {
-        constexpr int MENU_ITEMS = 5;
-        if (input.isKeyJustPressed(Key::Up)) {
-            pauseMenuSelection = (pauseMenuSelection - 1 + MENU_ITEMS) % MENU_ITEMS;
-        }
-        if (input.isKeyJustPressed(Key::Down)) {
-            pauseMenuSelection = (pauseMenuSelection + 1) % MENU_ITEMS;
-        }
-        if (input.isKeyJustPressed(Key::Left)) {
-            if (pauseMenuSelection == 1) {
-                settings.mouseSensitivity = std::max(0.01f, settings.mouseSensitivity - 0.02f);
-            }
-        }
-        if (input.isKeyJustPressed(Key::Right)) {
-            if (pauseMenuSelection == 1) {
-                settings.mouseSensitivity = std::min(0.5f, settings.mouseSensitivity + 0.02f);
-            }
-        }
-        if (input.isKeyJustPressed(Key::Enter)) {
-            switch (pauseMenuSelection) {
-                case 0: togglePause(); getWindow().disableCursor(); break;
-                case 2: settings.invertMouseY = !settings.invertMouseY; break;
-                case 3: settings.invertMouseX = !settings.invertMouseX; break;
-                case 4: flyMode = !flyMode; playerVelocity = glm::vec3(0.0f); onGround = false; break;
-            }
+    if (!cursorCaptured) {
+        if (glfwGetMouseButton(win, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+            cursorCaptured = true;
+            glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+            int ww, wh;
+            glfwGetWindowSize(win, &ww, &wh);
+            glfwSetCursorPos(win, ww / 2.0, wh / 2.0);
         }
         return;
     }
     
-    if (input.isKeyJustPressed(Key::F)) {
+    bool escPressed = glfwGetKey(win, GLFW_KEY_ESCAPE) == GLFW_PRESS;
+    static bool escWasPressed = false;
+    if (escPressed && !escWasPressed) {
+        togglePause();
+        if (paused) {
+            pauseMenuSelection = 0;
+            hoveredMenuItem = -1;
+            menuDragging = false;
+            glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        } else {
+            glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+            int ww, wh;
+            glfwGetWindowSize(win, &ww, &wh);
+            glfwSetCursorPos(win, ww / 2.0, wh / 2.0);
+        }
+    }
+    escWasPressed = escPressed;
+    
+    if (paused) {
+        constexpr int MENU_COUNT = 9;
+        constexpr float MENU_ITEM_Y = 0.58f;
+        constexpr float MENU_ITEM_H = 0.058f;
+        constexpr float MENU_ITEM_GAP = 0.008f;
+        constexpr float MENU_ITEM_W = 0.55f;
+        
+        double mx, my;
+        glfwGetCursorPos(win, &mx, &my);
+        int ww, wh;
+        glfwGetWindowSize(win, &ww, &wh);
+        float ndcX = ((float)mx / (float)ww) * 2.0f - 1.0f;
+        float ndcY = 1.0f - ((float)my / (float)wh) * 2.0f;
+        
+        hoveredMenuItem = -1;
+        for (int i = 0; i < MENU_COUNT; i++) {
+            float y = MENU_ITEM_Y - i * (MENU_ITEM_H + MENU_ITEM_GAP);
+            if (ndcX >= -MENU_ITEM_W && ndcX <= MENU_ITEM_W &&
+                ndcY >= (y - MENU_ITEM_H) && ndcY <= y) {
+                hoveredMenuItem = i;
+                break;
+            }
+        }
+        
+        bool leftHeld = glfwGetMouseButton(win, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS;
+        static bool leftWasHeld = false;
+        bool leftJust = leftHeld && !leftWasHeld;
+        leftWasHeld = leftHeld;
+        
+        if (leftJust && hoveredMenuItem >= 0) {
+            pauseMenuSelection = hoveredMenuItem;
+            switch (hoveredMenuItem) {
+                case 0: togglePause(); glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+                    { int ww, wh; glfwGetWindowSize(win, &ww, &wh); glfwSetCursorPos(win, ww / 2.0, wh / 2.0); }
+                    break;
+                case 5: settings.invertMouseY = !settings.invertMouseY; break;
+                case 6: settings.invertMouseX = !settings.invertMouseX; break;
+                case 7: settings.vsync = !settings.vsync; break;
+                case 8: flyMode = !flyMode; playerVelocity = glm::vec3(0.0f); onGround = false; break;
+                default: menuDragging = true; menuDragItem = hoveredMenuItem; break;
+            }
+        }
+        
+        if (!leftHeld) {
+            menuDragging = false;
+            menuDragItem = -1;
+        }
+        
+        if (menuDragging && menuDragItem >= 1 && menuDragItem <= 4) {
+            float sliderVal = (ndcX + MENU_ITEM_W) / (2.0f * MENU_ITEM_W);
+            sliderVal = std::clamp(sliderVal, 0.0f, 1.0f);
+            switch (menuDragItem) {
+                case 1: settings.fov = 30.0f + sliderVal * 90.0f; break;
+                case 2: settings.renderDistance = 2 + (int)(sliderVal * 14.0f); break;
+                case 3: settings.maxFPS = 30 + (int)(sliderVal * 270.0f); break;
+                case 4: settings.mouseSensitivity = 0.01f + sliderVal * 0.99f; break;
+            }
+        }
+        
+        static bool upWas = false, downWas = false, leftWas = false, rightWas = false, enterWas = false;
+        bool upNow = glfwGetKey(win, GLFW_KEY_UP) == GLFW_PRESS;
+        bool downNow = glfwGetKey(win, GLFW_KEY_DOWN) == GLFW_PRESS;
+        bool leftNow = glfwGetKey(win, GLFW_KEY_LEFT) == GLFW_PRESS;
+        bool rightNow = glfwGetKey(win, GLFW_KEY_RIGHT) == GLFW_PRESS;
+        bool enterNow = glfwGetKey(win, GLFW_KEY_ENTER) == GLFW_PRESS;
+        
+        if (upNow && !upWas) pauseMenuSelection = (pauseMenuSelection - 1 + MENU_COUNT) % MENU_COUNT;
+        if (downNow && !downWas) pauseMenuSelection = (pauseMenuSelection + 1) % MENU_COUNT;
+        
+        auto toggleSetting = [&](int sel) {
+            switch (sel) {
+                case 5: settings.invertMouseY = !settings.invertMouseY; break;
+                case 6: settings.invertMouseX = !settings.invertMouseX; break;
+                case 7: settings.vsync = !settings.vsync; break;
+                case 8: flyMode = !flyMode; playerVelocity = glm::vec3(0.0f); onGround = false; break;
+            }
+        };
+        auto adjustSlider = [&](int sel, float dir) {
+            switch (sel) {
+                case 1: settings.fov = std::clamp(settings.fov + dir * 5.0f, 30.0f, 120.0f); break;
+                case 2: settings.renderDistance = std::clamp(settings.renderDistance + (int)dir, 2, 16); break;
+                case 3: settings.maxFPS = std::clamp(settings.maxFPS + (int)(dir * 10), 30, 300); break;
+                case 4: settings.mouseSensitivity = std::clamp(settings.mouseSensitivity + dir * 0.02f, 0.01f, 1.0f); break;
+            }
+        };
+        
+        if (leftNow && !leftWas) { adjustSlider(pauseMenuSelection, -1.0f); toggleSetting(pauseMenuSelection); }
+        if (rightNow && !rightWas) { adjustSlider(pauseMenuSelection, 1.0f); toggleSetting(pauseMenuSelection); }
+        if (enterNow && !enterWas) {
+            if (pauseMenuSelection == 0) {
+                togglePause();
+                glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+                int ww, wh; glfwGetWindowSize(win, &ww, &wh); glfwSetCursorPos(win, ww / 2.0, wh / 2.0);
+            }
+            else toggleSetting(pauseMenuSelection);
+        }
+        
+        upWas = upNow; downWas = downNow; leftWas = leftNow; rightWas = rightNow; enterWas = enterNow;
+        return;
+    }
+    
+    static bool fWasPressed = false;
+    bool fNow = glfwGetKey(win, GLFW_KEY_F) == GLFW_PRESS;
+    if (fNow && !fWasPressed) {
         flyMode = !flyMode;
         playerVelocity = glm::vec3(0.0f);
         onGround = false;
     }
+    fWasPressed = fNow;
     
-    if (input.isKeyJustPressed(301)) {
+    static bool f12WasPressed = false;
+    bool f12Now = glfwGetKey(win, GLFW_KEY_F12) == GLFW_PRESS;
+    if (f12Now && !f12WasPressed) {
         auto now = std::time(nullptr);
         auto tm = std::localtime(&now);
         char buf[64];
@@ -229,11 +347,19 @@ void Game::processInput(float deltaTime) {
         std::string path = dir + "/" + std::string(buf) + ".png";
         renderer.takeScreenshot(path);
     }
+    f12WasPressed = f12Now;
     
-    static bool loggedFirstInput = false;
+    bool keyW = glfwGetKey(win, GLFW_KEY_W) == GLFW_PRESS;
+    bool keyS = glfwGetKey(win, GLFW_KEY_S) == GLFW_PRESS;
+    bool keyA = glfwGetKey(win, GLFW_KEY_A) == GLFW_PRESS;
+    bool keyD = glfwGetKey(win, GLFW_KEY_D) == GLFW_PRESS;
+    bool keySpace = glfwGetKey(win, GLFW_KEY_SPACE) == GLFW_PRESS;
+    bool keyShift = glfwGetKey(win, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS;
+    bool keyCtrl = glfwGetKey(win, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS;
+    
     if (flyMode) {
         float speed = 10.0f * deltaTime;
-        if (input.isActionPressed("sprint")) speed *= 2.0f;
+        if (keyCtrl) speed *= 2.0f;
         
         glm::vec3 forward = camera.getForward();
         forward.y = 0.0f;
@@ -241,25 +367,19 @@ void Game::processInput(float deltaTime) {
         glm::vec3 right = glm::normalize(glm::cross(forward, glm::vec3(0.0f, 1.0f, 0.0f)));
         
         glm::vec3 movedir(0.0f);
-        if (input.isActionPressed("forward"))  { movedir += forward; }
-        if (input.isActionPressed("backward")) { movedir -= forward; }
-        if (input.isActionPressed("left"))     { movedir -= right; }
-        if (input.isActionPressed("right"))    { movedir += right; }
-        if (input.isActionPressed("jump"))     { movedir.y += 1.0f; }
-        if (input.isActionPressed("sneak"))    { movedir.y -= 1.0f; }
+        if (keyW) { movedir += forward; }
+        if (keyS) { movedir -= forward; }
+        if (keyA) { movedir -= right; }
+        if (keyD) { movedir += right; }
+        if (keySpace) { movedir.y += 1.0f; }
+        if (keyShift) { movedir.y -= 1.0f; }
         
         if (glm::length(movedir) > 0.0f) {
-            if (!loggedFirstInput) {
-                VF_CORE_INFO("First movement input detected! flyMode");
-                loggedFirstInput = true;
-            }
             playerPos += glm::normalize(movedir) * speed;
         }
-        
-        camera.setPosition(playerPos + glm::vec3(0.0f, PLAYER_HEIGHT * 0.85f, 0.0f));
     } else {
         float moveSpeed = 4.317f * deltaTime;
-        if (input.isActionPressed("sprint")) moveSpeed = 5.612f * deltaTime;
+        if (keyCtrl) moveSpeed = 5.612f * deltaTime;
         
         glm::vec3 forward = camera.getForward();
         forward.y = 0.0f;
@@ -268,10 +388,10 @@ void Game::processInput(float deltaTime) {
         glm::vec3 right = glm::normalize(glm::cross(forward, glm::vec3(0.0f, 1.0f, 0.0f)));
         
         glm::vec3 inputDir(0.0f);
-        if (input.isActionPressed("forward"))  inputDir += forward;
-        if (input.isActionPressed("backward")) inputDir -= forward;
-        if (input.isActionPressed("left"))     inputDir -= right;
-        if (input.isActionPressed("right"))    inputDir += right;
+        if (keyW) inputDir += forward;
+        if (keyS) inputDir -= forward;
+        if (keyA) inputDir -= right;
+        if (keyD) inputDir += right;
         
         if (glm::length(inputDir) > 0.0f) {
             inputDir = glm::normalize(inputDir);
@@ -279,7 +399,7 @@ void Game::processInput(float deltaTime) {
         
         glm::vec3 delta = inputDir * moveSpeed;
         
-        if (onGround && input.isActionPressed("jump")) {
+        if (onGround && keySpace) {
             playerVelocity.y = JUMP_VELOCITY;
             onGround = false;
         }
@@ -296,10 +416,11 @@ void Game::processInput(float deltaTime) {
         }
     }
     
+    auto& input = getInput();
     auto mouseDelta = input.getMouseDelta();
     if (glm::length(mouseDelta) > 0.0f) {
-    float xMul = settings.invertMouseX ? -1.0f : 1.0f;
-    float yMul = settings.invertMouseY ? 1.0f : -1.0f;
+        float xMul = settings.invertMouseX ? -1.0f : 1.0f;
+        float yMul = settings.invertMouseY ? 1.0f : -1.0f;
         playerYaw += mouseDelta.x * settings.mouseSensitivity * xMul;
         playerPitch += mouseDelta.y * settings.mouseSensitivity * yMul;
         playerPitch = std::clamp(playerPitch, -89.0f, 89.0f);
@@ -309,9 +430,10 @@ void Game::processInput(float deltaTime) {
     camera.setRotation(playerPitch, playerYaw);
     
     for (int i = 0; i < 9; i++) {
-        if (input.isKeyJustPressed(49 + i)) {
-            selectedSlot = i;
-        }
+        static bool numWas[9] = {};
+        bool numNow = glfwGetKey(win, GLFW_KEY_1 + i) == GLFW_PRESS;
+        if (numNow && !numWas[i]) selectedSlot = i;
+        numWas[i] = numNow;
     }
     
     auto scrollDelta = input.getScrollDelta();
@@ -322,6 +444,12 @@ void Game::processInput(float deltaTime) {
     }
     
     handleBlockInteraction();
+    
+    // Re-center cursor every frame to keep it trapped inside the window.
+    // This avoids GLFW_CURSOR_DISABLED which hangs on some X11 setups.
+    int ww, wh;
+    glfwGetWindowSize(win, &ww, &wh);
+    glfwSetCursorPos(win, ww / 2.0, wh / 2.0);
 }
 
 void Game::updateEntities(float deltaTime) {

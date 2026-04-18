@@ -27,7 +27,7 @@ struct GameSettings {
     bool particlesEnabled = true;
     bool cloudsEnabled = true;
     float fov = 70.0f;
-    float mouseSensitivity = 0.1f;
+    float mouseSensitivity = 0.3f;
     bool invertMouseY = false;
     bool invertMouseX = false;
     bool vsync = true;
@@ -99,6 +99,7 @@ private:
     bool rendererInitialized = false;
     
     bool paused = false;
+    bool cursorCaptured = false;
     GameMode gameMode = GameMode::Creative;
     GameSettings settings;
     
@@ -129,6 +130,9 @@ private:
     float fpsUpdateTimer = 0.0f;
     
     int pauseMenuSelection = 0;
+    int hoveredMenuItem = -1;
+    bool menuDragging = false;
+    int menuDragItem = -1;
 };
 
 // Game instance access

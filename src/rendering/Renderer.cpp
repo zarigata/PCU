@@ -1457,6 +1457,11 @@ void Renderer::cleanupUIRendering() {
     VF_INFO("UI rendering resources cleaned up");
 }
 
+void Renderer::resetUIBatch() {
+    uiBatchV = 0;
+    uiBatchI = 0;
+}
+
 void Renderer::drawCrosshair() {
     if (!uiPipelineReady || !uiVertexMapped || !uiIndexMapped) return;
     auto& cmd = commandBuffers[currentImageIndex];
@@ -1485,16 +1490,21 @@ void Renderer::drawCrosshair() {
     addRect(-thickness, -size, thickness, -thickness, white);
     addRect(-thickness, thickness, thickness, size, white);
     
-    memcpy(uiVertexMapped, verts, v * sizeof(UIVert));
-    memcpy(uiIndexMapped, indices, idx * sizeof(uint32_t));
+    auto* dstVerts = reinterpret_cast<UIVert*>((char*)uiVertexMapped + uiBatchV * sizeof(UIVert));
+    auto* dstIdx = (uint32_t*)uiIndexMapped + uiBatchI;
+    memcpy(dstVerts, verts, v * sizeof(UIVert));
+    memcpy(dstIdx, indices, idx * sizeof(uint32_t));
     
     cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, uiPipeline);
-    glm::mat4 identity(1.0f);
-    cmd.pushConstants(uiPipelineLayout, vk::ShaderStageFlagBits::eVertex, 0, sizeof(glm::mat4), &identity);
-    vk::DeviceSize off = 0;
-    cmd.bindVertexBuffers(0, 1, &uiVertexBuffer, &off);
+    glm::mat4 uiMvp(1.0f);
+    uiMvp[1][1] = -1.0f;
+    cmd.pushConstants(uiPipelineLayout, vk::ShaderStageFlagBits::eVertex, 0, sizeof(glm::mat4), &uiMvp);
+    vk::DeviceSize voff = uiBatchV * sizeof(UIVert);
+    cmd.bindVertexBuffers(0, 1, &uiVertexBuffer, &voff);
     cmd.bindIndexBuffer(uiIndexBuffer, 0, vk::IndexType::eUint32);
-    cmd.drawIndexed(idx, 1, 0, 0, 0);
+    cmd.drawIndexed(idx, 1, uiBatchI, 0, 0);
+    uiBatchV += v;
+    uiBatchI += idx;
 }
 
 void Renderer::drawHotbar(int selectedSlot, const std::array<uint32_t, 9>& hotbarBlocks) {
@@ -1536,32 +1546,84 @@ void Renderer::drawHotbar(int selectedSlot, const std::array<uint32_t, 9>& hotba
         }
     }
     
-    memcpy(uiVertexMapped, verts, v * sizeof(UIVert));
-    memcpy(uiIndexMapped, indices, idx * sizeof(uint32_t));
+    auto* dstVerts = reinterpret_cast<UIVert*>((char*)uiVertexMapped + uiBatchV * sizeof(UIVert));
+    auto* dstIdx = (uint32_t*)uiIndexMapped + uiBatchI;
+    memcpy(dstVerts, verts, v * sizeof(UIVert));
+    memcpy(dstIdx, indices, idx * sizeof(uint32_t));
     
     cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, uiPipeline);
-    glm::mat4 identity(1.0f);
-    cmd.pushConstants(uiPipelineLayout, vk::ShaderStageFlagBits::eVertex, 0, sizeof(glm::mat4), &identity);
-    vk::DeviceSize off = 0;
-    cmd.bindVertexBuffers(0, 1, &uiVertexBuffer, &off);
+    glm::mat4 uiMvp(1.0f);
+    uiMvp[1][1] = -1.0f;
+    cmd.pushConstants(uiPipelineLayout, vk::ShaderStageFlagBits::eVertex, 0, sizeof(glm::mat4), &uiMvp);
+    vk::DeviceSize voff = uiBatchV * sizeof(UIVert);
+    cmd.bindVertexBuffers(0, 1, &uiVertexBuffer, &voff);
     cmd.bindIndexBuffer(uiIndexBuffer, 0, vk::IndexType::eUint32);
-    cmd.drawIndexed(idx, 1, 0, 0, 0);
+    cmd.drawIndexed(idx, 1, uiBatchI, 0, 0);
+    uiBatchV += v;
+    uiBatchI += idx;
 }
 
-void Renderer::drawPauseMenu(int selection, float sensitivity, bool invertY, bool invertX, bool flyMode) {
+void Renderer::drawClickToPlay() {
+    if (!uiPipelineReady || !uiVertexMapped || !uiIndexMapped) return;
+    
+    struct UIVert { float x, y, z; uint32_t color; };
+    auto& cmd = commandBuffers[currentImageIndex];
+    
+    UIVert verts[64];
+    uint32_t indices[96];
+    uint32_t v = 0, idx = 0;
+    
+    auto addRect = [&](float x0, float y0, float x1, float y1, uint32_t col) {
+        if (v + 4 > 64 || idx + 6 > 96) return;
+        uint32_t base = v;
+        verts[v++] = {x0, y0, 0.0f, col};
+        verts[v++] = {x1, y0, 0.0f, col};
+        verts[v++] = {x1, y1, 0.0f, col};
+        verts[v++] = {x0, y1, 0.0f, col};
+        indices[idx++] = base; indices[idx++] = base+1; indices[idx++] = base+2;
+        indices[idx++] = base; indices[idx++] = base+2; indices[idx++] = base+3;
+    };
+    
+    addRect(-1.0f, -1.0f, 1.0f, 1.0f, 0x88000000);
+    addRect(-0.35f, -0.08f, 0.35f, 0.08f, 0xDD202030);
+    
+    auto* dstV = reinterpret_cast<UIVert*>((char*)uiVertexMapped + uiBatchV * sizeof(UIVert));
+    auto* dstI = (uint32_t*)uiIndexMapped + uiBatchI;
+    memcpy(dstV, verts, v * sizeof(UIVert));
+    memcpy(dstI, indices, idx * sizeof(uint32_t));
+    
+    cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, uiPipeline);
+    glm::mat4 uiMvp(1.0f);
+    uiMvp[1][1] = -1.0f;
+    cmd.pushConstants(uiPipelineLayout, vk::ShaderStageFlagBits::eVertex, 0, sizeof(glm::mat4), &uiMvp);
+    vk::DeviceSize voff = uiBatchV * sizeof(UIVert);
+    cmd.bindVertexBuffers(0, 1, &uiVertexBuffer, &voff);
+    cmd.bindIndexBuffer(uiIndexBuffer, 0, vk::IndexType::eUint32);
+    cmd.drawIndexed(idx, 1, uiBatchI, 0, 0);
+    uiBatchV += v;
+    uiBatchI += idx;
+    
+    float pxW = (float)swapchainExtent.width;
+    float pxH = (float)swapchainExtent.height;
+    float textX = (-0.28f + 1.0f) * pxW / (2.0f * 2.0f);
+    float textY = (1.0f - 0.03f) * pxH / (2.0f * 2.0f);
+    drawText("CLICK TO PLAY", textX, textY, 0xFFFFFFFF, 2.0f);
+}
+
+void Renderer::drawPauseMenu(const UIMenuState& menu) {
     if (!uiPipelineReady || !uiVertexMapped || !uiIndexMapped) return;
     auto& cmd = commandBuffers[currentImageIndex];
     
     struct UIVert { float x, y, z; uint32_t color; };
     
-    const int MAX_MENU_VERTS = 512;
-    const int MAX_MENU_INDICES = 768;
-    UIVert verts[MAX_MENU_VERTS];
-    uint32_t indices[MAX_MENU_INDICES];
+    constexpr int MAX_VERTS = 1024;
+    constexpr int MAX_INDICES = 1536;
+    UIVert verts[MAX_VERTS];
+    uint32_t indices[MAX_INDICES];
     uint32_t v = 0, idx = 0;
     
     auto addRect = [&](float x0, float y0, float x1, float y1, uint32_t col) {
-        if (v + 4 > MAX_MENU_VERTS || idx + 6 > MAX_MENU_INDICES) return;
+        if (v + 4 > MAX_VERTS || idx + 6 > MAX_INDICES) return;
         uint32_t base = v;
         verts[v++] = {x0, y0, 0.0f, col};
         verts[v++] = {x1, y0, 0.0f, col};
@@ -1572,98 +1634,122 @@ void Renderer::drawPauseMenu(int selection, float sensitivity, bool invertY, boo
     };
     
     uint32_t bgDim = 0xCC000000;
-    uint32_t panelBg = 0xDD202030;
-    uint32_t selectedBg = 0xFFe94560;
-    uint32_t normalBg = 0xFF16213e;
+    uint32_t panelBg = 0xDD181828;
+    uint32_t selBg = 0xFFe94560;
+    uint32_t hovBg = 0xFF2a2a4a;
+    uint32_t normBg = 0xFF16213e;
     uint32_t barBg = 0xFF0f3460;
     uint32_t barFill = 0xFFe94560;
-    uint32_t onColor = 0xFF4ecca3;
-    uint32_t offColor = 0xFF6c757d;
-    uint32_t textColor = 0xFFFFFFFF;
+    uint32_t onCol = 0xFF4ecca3;
+    uint32_t offCol = 0xFF6c757d;
     
     float pxW = (float)swapchainExtent.width;
     float pxH = (float)swapchainExtent.height;
     
     addRect(-1.0f, -1.0f, 1.0f, 1.0f, bgDim);
     
-    float panelW = 0.7f;
-    float panelH = 0.75f;
+    float panelW = 0.65f;
+    float panelH = 0.85f;
     addRect(-panelW, -panelH, panelW, panelH, panelBg);
     
-    float itemY = 0.55f;
-    float itemH = 0.09f;
-    float itemW = 0.6f;
-    float gap = 0.02f;
+    constexpr float itemY = 0.58f;
+    constexpr float itemH = 0.058f;
+    constexpr float gap = 0.008f;
+    constexpr float itemW = 0.55f;
+    constexpr int MENU_COUNT = 9;
     
     struct MenuItem {
         const char* label;
-        int type; // 0=action, 1=slider, 2=toggle
-        float value;
+        int type;
+        float valNorm;
         bool on;
     };
     
-    MenuItem items[] = {
-        {"RESUME", 0, 0, false},
-        {"MOUSE SENSITIVITY", 1, sensitivity, false},
-        {"INVERT MOUSE Y", 2, 0, invertY},
-        {"INVERT MOUSE X", 2, 0, invertX},
-        {"TOGGLE FLY MODE", 0, 0, flyMode},
+    MenuItem items[MENU_COUNT] = {
+        {"RESUME",           0, 0,    false},
+        {"FOV",              1, (menu.fov - 30.0f) / 90.0f, false},
+        {"RENDER DISTANCE",  1, (float)(menu.renderDistance - 2) / 14.0f, false},
+        {"MAX FPS",          1, (float)(menu.maxFPS - 30) / 270.0f, false},
+        {"SENSITIVITY",      1, (menu.sensitivity - 0.01f) / 0.99f, false},
+        {"INVERT Y",         2, 0, menu.invertY},
+        {"INVERT X",         2, 0, menu.invertX},
+        {"VSYNC",            2, 0, menu.vsync},
+        {"FLY MODE",         2, 0, menu.flyMode},
     };
-    int itemCount = 5;
     
-    for (int i = 0; i < itemCount; i++) {
+    for (int i = 0; i < MENU_COUNT; i++) {
         float y = itemY - i * (itemH + gap);
-        uint32_t bg = (i == selection) ? selectedBg : normalBg;
+        uint32_t bg;
+        if (i == menu.hovered) bg = hovBg;
+        else if (i == menu.selected) bg = selBg;
+        else bg = normBg;
         addRect(-itemW, y - itemH, itemW, y, bg);
         
         if (items[i].type == 1) {
-            float barMargin = 0.05f;
+            float barM = 0.05f;
             float barH = itemH * 0.3f;
             float barY = y - itemH * 0.65f;
-            addRect(-itemW + barMargin, barY - barH, itemW - barMargin, barY, barBg);
-            float fillW = (itemW - barMargin) * 2.0f * items[i].value;
-            addRect(-itemW + barMargin, barY - barH, -itemW + barMargin + fillW, barY, barFill);
+            addRect(-itemW + barM, barY - barH, itemW - barM, barY, barBg);
+            float fillW = (itemW - barM) * 2.0f * items[i].valNorm;
+            addRect(-itemW + barM, barY - barH, -itemW + barM + fillW, barY, barFill);
         } else if (items[i].type == 2) {
-            float indSize = itemH * 0.3f;
-            float indX = itemW - 0.08f;
+            float indS = itemH * 0.3f;
+            float indX = itemW - 0.06f;
             float indY = y - itemH * 0.5f;
-            addRect(indX - indSize, indY - indSize, indX + indSize, indY + indSize,
-                    items[i].on ? onColor : offColor);
+            addRect(indX - indS, indY - indS, indX + indS, indY + indS,
+                    items[i].on ? onCol : offCol);
         }
     }
     
-    memcpy(uiVertexMapped, verts, v * sizeof(UIVert));
-    memcpy(uiIndexMapped, indices, idx * sizeof(uint32_t));
+    auto* dstV = reinterpret_cast<UIVert*>((char*)uiVertexMapped + uiBatchV * sizeof(UIVert));
+    auto* dstI = (uint32_t*)uiIndexMapped + uiBatchI;
+    memcpy(dstV, verts, v * sizeof(UIVert));
+    memcpy(dstI, indices, idx * sizeof(uint32_t));
     
     cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, uiPipeline);
-    glm::mat4 identity(1.0f);
-    cmd.pushConstants(uiPipelineLayout, vk::ShaderStageFlagBits::eVertex, 0, sizeof(glm::mat4), &identity);
-    vk::DeviceSize off = 0;
-    cmd.bindVertexBuffers(0, 1, &uiVertexBuffer, &off);
+    glm::mat4 uiMvp(1.0f);
+    uiMvp[1][1] = -1.0f;
+    cmd.pushConstants(uiPipelineLayout, vk::ShaderStageFlagBits::eVertex, 0, sizeof(glm::mat4), &uiMvp);
+    vk::DeviceSize voff = uiBatchV * sizeof(UIVert);
+    cmd.bindVertexBuffers(0, 1, &uiVertexBuffer, &voff);
     cmd.bindIndexBuffer(uiIndexBuffer, 0, vk::IndexType::eUint32);
-    cmd.drawIndexed(idx, 1, 0, 0, 0);
+    cmd.drawIndexed(idx, 1, uiBatchI, 0, 0);
+    uiBatchV += v;
+    uiBatchI += idx;
     
-    drawText("PAUSED", pxW * 0.5f - 54.0f, pxH * 0.18f, 0xFFFFFFFF, 3.0f);
-    for (int i = 0; i < itemCount; i++) {
+    auto ndcPx = [&](float ndcX, float s) -> float {
+        return (ndcX + 1.0f) * pxW / (2.0f * s);
+    };
+    auto ndcPy = [&](float ndcY, float s) -> float {
+        return (1.0f - ndcY) * pxH / (2.0f * s);
+    };
+    
+    float titleY = itemY + itemH + gap + 0.03f;
+    drawText("SETTINGS", ndcPx(-0.12f, 2.5f), ndcPy(titleY, 2.5f), 0xFFFFFFFF, 2.5f);
+    
+    for (int i = 0; i < MENU_COUNT; i++) {
         float y = itemY - i * (itemH + gap);
-        float pxY = (1.0f - y + itemH * 0.3f) * pxH * 0.5f;
-        float pxX = (-itemW + 0.03f) * pxW * 0.5f + pxW * 0.5f;
-        uint32_t col = (i == selection) ? 0xFFFFFFFF : 0xFFCCCCCC;
-        drawText(items[i].label, pxX, pxY, col, 1.5f);
+        float tNdcY = y - itemH * 0.38f;
+        float tNdcX = -itemW + 0.03f;
+        uint32_t col = (i == menu.selected || i == menu.hovered) ? 0xFFFFFFFF : 0xFFCCCCCC;
+        drawText(items[i].label, ndcPx(tNdcX, 1.2f), ndcPy(tNdcY, 1.2f), col, 1.2f);
         
         char valBuf[32];
         if (items[i].type == 1) {
-            snprintf(valBuf, sizeof(valBuf), "%.2f", items[i].value);
-            float valX = (itemW - 0.15f) * pxW * 0.5f + pxW * 0.5f;
-            drawText(valBuf, valX, pxY, 0xFFCCCCCC, 1.3f);
+            switch (i) {
+                case 1: snprintf(valBuf, sizeof(valBuf), "%.0f", menu.fov); break;
+                case 2: snprintf(valBuf, sizeof(valBuf), "%d", menu.renderDistance); break;
+                case 3: snprintf(valBuf, sizeof(valBuf), "%d", menu.maxFPS); break;
+                case 4: snprintf(valBuf, sizeof(valBuf), "%.2f", menu.sensitivity); break;
+                default: valBuf[0] = '\0'; break;
+            }
+            float valNdcX = itemW - 0.2f;
+            drawText(valBuf, ndcPx(valNdcX, 1.1f), ndcPy(tNdcY, 1.1f), 0xFFCCCCCC, 1.1f);
         } else if (items[i].type == 2) {
-            drawText(items[i].on ? "ON" : "OFF",
-                     (itemW - 0.08f) * pxW * 0.5f + pxW * 0.5f - 12.0f, pxY,
-                     items[i].on ? onColor : offColor, 1.3f);
-        } else if (i == 4) {
-            drawText(flyMode ? "FLY" : "WALK",
-                     (itemW - 0.08f) * pxW * 0.5f + pxW * 0.5f - 16.0f, pxY,
-                     flyMode ? onColor : offColor, 1.3f);
+            float indNdcX = itemW - 0.1f;
+            const char* toggleStr = items[i].on ? "ON" : "OFF";
+            drawText(toggleStr, ndcPx(indNdcX, 1.1f), ndcPy(tNdcY, 1.1f),
+                     items[i].on ? onCol : offCol, 1.1f);
         }
     }
 }
@@ -1681,16 +1767,16 @@ void Renderer::drawText(const char* text, float x, float y, uint32_t color, floa
     auto* src = reinterpret_cast<EasyVert*>(qbuffer);
     auto& cmd = commandBuffers[currentImageIndex];
     
-    uint32_t v = 0, idx = 0;
     int totalVerts = num_quads * 4;
     int totalIndices = num_quads * 6;
     
-    auto* verts = static_cast<EasyVert*>(uiVertexMapped);
-    auto* indices = static_cast<uint32_t*>(uiIndexMapped);
+    auto* verts = reinterpret_cast<EasyVert*>((char*)uiVertexMapped + uiBatchV * sizeof(EasyVert));
+    auto* indices = (uint32_t*)uiIndexMapped + uiBatchI;
     
     float scaleX = scale * 2.0f / (float)swapchainExtent.width;
     float scaleY = scale * 2.0f / (float)swapchainExtent.height;
     
+    uint32_t v = 0, idx = 0;
     for (int q = 0; q < num_quads; q++) {
         uint32_t base = v;
         for (int i = 0; i < 4; i++) {
@@ -1710,12 +1796,15 @@ void Renderer::drawText(const char* text, float x, float y, uint32_t color, floa
     }
     
     cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, uiPipeline);
-    glm::mat4 identity(1.0f);
-    cmd.pushConstants(uiPipelineLayout, vk::ShaderStageFlagBits::eVertex, 0, sizeof(glm::mat4), &identity);
-    vk::DeviceSize off = 0;
-    cmd.bindVertexBuffers(0, 1, &uiVertexBuffer, &off);
+    glm::mat4 uiMvp(1.0f);
+    uiMvp[1][1] = -1.0f;
+    cmd.pushConstants(uiPipelineLayout, vk::ShaderStageFlagBits::eVertex, 0, sizeof(glm::mat4), &uiMvp);
+    vk::DeviceSize voff = uiBatchV * sizeof(EasyVert);
+    cmd.bindVertexBuffers(0, 1, &uiVertexBuffer, &voff);
     cmd.bindIndexBuffer(uiIndexBuffer, 0, vk::IndexType::eUint32);
-    cmd.drawIndexed(idx, 1, 0, 0, 0);
+    cmd.drawIndexed(idx, 1, uiBatchI, 0, 0);
+    uiBatchV += v;
+    uiBatchI += idx;
 }
 
 void Renderer::drawDebugOverlay(float fps, float frameTime, int chunks, int drawCalls, float pitch, float yaw) {

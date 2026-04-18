@@ -62,6 +62,19 @@ struct RenderSettings {
     int maxChunksPerFrame = 4;
 };
 
+struct UIMenuState {
+    int selected = 0;
+    int hovered = -1;
+    float fov = 70.0f;
+    float sensitivity = 0.3f;
+    int renderDistance = 6;
+    int maxFPS = 60;
+    bool invertY = false;
+    bool invertX = false;
+    bool vsync = true;
+    bool flyMode = true;
+};
+
 class Renderer {
 public:
     Renderer();
@@ -90,9 +103,11 @@ public:
     void invalidateChunkMesh(int chunkX, int chunkZ);
     void drawCrosshair();
     void drawHotbar(int selectedSlot, const std::array<uint32_t, 9>& hotbarBlocks);
-    void drawPauseMenu(int selection, float sensitivity, bool invertY, bool invertX, bool flyMode);
+    void drawPauseMenu(const UIMenuState& menu);
+    void drawClickToPlay();
     void drawText(const char* text, float x, float y, uint32_t color, float scale = 1.0f);
     void drawDebugOverlay(float fps, float frameTime, int chunks, int drawCalls, float pitch, float yaw);
+    void resetUIBatch();
 
     // UI rendering (host-visible buffers, dedicated UI pipeline)
     void initUIRendering();
@@ -211,10 +226,12 @@ private:
     vk::DeviceMemory uiVertexMemory = VK_NULL_HANDLE;
     vk::Buffer uiIndexBuffer = VK_NULL_HANDLE;
     vk::DeviceMemory uiIndexMemory = VK_NULL_HANDLE;
-    vk::DeviceSize uiVertexBufferSize = 64 * 1024; // 64KB
-    vk::DeviceSize uiIndexBufferSize = 64 * 1024;  // 64KB
+    vk::DeviceSize uiVertexBufferSize = 256 * 1024;
+    vk::DeviceSize uiIndexBufferSize = 256 * 1024;
     void* uiVertexMapped = nullptr;
     void* uiIndexMapped = nullptr;
+    uint32_t uiBatchV = 0;
+    uint32_t uiBatchI = 0;
     bool uiPipelineReady = false;
     
     // Frame data

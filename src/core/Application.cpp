@@ -8,6 +8,7 @@
 #include <VoxelForge/core/Logger.hpp>
 #include <VoxelForge/core/Memory.hpp>
 #include <VoxelForge/engine/EventSystem.hpp>
+#include <GLFW/glfw3.h>
 #include <iostream>
 
 namespace VoxelForge {
@@ -64,42 +65,32 @@ void Application::run() {
     running = true;
     VF_CORE_INFO("Starting main loop");
     
-    lastFrameTime = Timer::getCurrentTime();
+    lastFrameTime = (float)glfwGetTime();
     
     while (running) {
-        // Calculate delta time
-        float currentTime = Timer::getCurrentTime();
+        float currentTime = (float)glfwGetTime();
         deltaTime = currentTime - lastFrameTime;
         lastFrameTime = currentTime;
         
-        // Cap delta time to prevent spiral of death
         if (deltaTime > 0.1f) deltaTime = 0.1f;
         
-        // Update FPS counter
         fpsCounter.frame();
         
-        // Update input
         if (input) {
             input->update();
         }
         
-        // Check for window close
         if (window && window->shouldClose()) {
             running = false;
             break;
         }
         
-        // Update
         onUpdate(deltaTime);
         
-        // Render
         if (window) {
             onRender();
-            // Window swap buffers would go here for OpenGL
-            // Vulkan rendering doesn't need this
         }
         
-        // Reset temp memory arena each frame
         Memory::resetTempArena();
     }
     
