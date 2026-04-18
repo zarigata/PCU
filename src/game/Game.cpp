@@ -283,8 +283,8 @@ void Game::processInput(float deltaTime) {
     
     auto mouseDelta = input.getMouseDelta();
     if (glm::length(mouseDelta) > 0.0f) {
-        float xMul = settings.invertMouseX ? -1.0f : 1.0f;
-        float yMul = settings.invertMouseY ? 1.0f : -1.0f;
+    float xMul = settings.invertMouseX ? -1.0f : 1.0f;
+    float yMul = settings.invertMouseY ? -1.0f : 1.0f;
         playerYaw += mouseDelta.x * settings.mouseSensitivity * xMul;
         playerPitch += mouseDelta.y * settings.mouseSensitivity * yMul;
         playerPitch = std::clamp(playerPitch, -89.0f, 89.0f);

@@ -147,9 +147,13 @@ glm::mat4 Camera::getViewMatrix() const {
 
 glm::mat4 Camera::getProjectionMatrix() const {
     if (projectionType == ProjectionType::Perspective) {
-        return glm::perspective(glm::radians(fov), aspectRatio, nearPlane, farPlane);
+        auto proj = glm::perspective(glm::radians(fov), aspectRatio, nearPlane, farPlane);
+        proj[1][1] *= -1.0f;
+        return proj;
     } else {
-        return glm::ortho(orthoLeft, orthoRight, orthoBottom, orthoTop, nearPlane, farPlane);
+        auto proj = glm::ortho(orthoLeft, orthoRight, orthoBottom, orthoTop, nearPlane, farPlane);
+        proj[1][1] *= -1.0f;
+        return proj;
     }
 }
 
@@ -160,8 +164,10 @@ void Camera::updateViewMatrix() {
 void Camera::updateProjectionMatrix() {
     if (projectionType == ProjectionType::Perspective) {
         projectionMatrix = glm::perspective(glm::radians(fov), aspectRatio, nearPlane, farPlane);
+        projectionMatrix[1][1] *= -1.0f;
     } else {
         projectionMatrix = glm::ortho(orthoLeft, orthoRight, orthoBottom, orthoTop, nearPlane, farPlane);
+        projectionMatrix[1][1] *= -1.0f;
     }
     
     updateFrustum();
