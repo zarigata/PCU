@@ -47,3 +47,10 @@ CTestTestfile.cmake
 *.prof
 gmon.out
 callgrind.out.*
+build_test/
+build_test_fixed/
+build_test_fixed_2/
+build_test_fixed_3/
+build_test_fixed_4/
+build_test_fixed_5/
+build_truth_audit/
