@@ -460,6 +460,10 @@ void Renderer::beginFrame() {
     commandBuffers[currentImageIndex].beginRenderPass(
         &renderPassInfo, vk::SubpassContents::eInline);
     
+    vk::Viewport vp{0.0f, 0.0f, (float)swapchainExtent.width, (float)swapchainExtent.height, 0.0f, 1.0f};
+    commandBuffers[currentImageIndex].setViewport(0, 1, &vp);
+    commandBuffers[currentImageIndex].setScissor(0, 1, &renderPassInfo.renderArea);
+    
     // Reset stats
     stats = RenderStats{};
 }
