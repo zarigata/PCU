@@ -120,6 +120,7 @@ private:
     void createSwapChain();
     void recreateSwapChain();
     void createRenderPass();
+    void createDepthResources();
     void createFramebuffers();
     void createCommandBuffers();
     void createSyncObjects();
