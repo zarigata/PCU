@@ -1,8 +1,3 @@
-/**
- * @file Game.cpp
- * @brief Game implementation
- */
-
 #include <VoxelForge/game/Game.hpp>
 #include <VoxelForge/core/Logger.hpp>
 #include <VoxelForge/core/Input.hpp>
@@ -21,21 +16,39 @@ Game::~Game() {
 void Game::onInit() {
     VF_CORE_INFO("Initializing game...");
     
-    // Initialize block registry with vanilla blocks
     BlockRegistry::get().registerVanillaBlocks();
     VF_CORE_INFO("Block registry: {} blocks registered", BlockRegistry::get().getBlockCount());
     
-    // Initialize ECS world
     ecsWorld = std::make_unique<ECSWorld>();
     
-    // TODO: Initialize world
-    // world = std::make_unique<World>(0);  // seed = 0
+    world = std::make_unique<World>(0);
+    VF_CORE_INFO("World created with seed 0");
+    
+    camera.setPerspective(settings.fov,
+                          static_cast<float>(getWindow().getWidth()) / static_cast<float>(getWindow().getHeight()),
+                          0.1f, 1000.0f);
+    camera.setPosition(playerPos);
+    
+    try {
+        renderer.init(getWindow().getGLFWWindow());
+        rendererInitialized = true;
+        VF_CORE_INFO("Renderer initialized");
+    } catch (const std::exception& e) {
+        VF_ERROR("Failed to initialize renderer: {}", e.what());
+        VF_ERROR("Game will run without rendering");
+    }
+    
+    getWindow().disableCursor();
     
     VF_CORE_INFO("Game initialized");
 }
 
 void Game::onShutdown() {
     VF_CORE_INFO("Shutting down game...");
+    
+    if (rendererInitialized) {
+        renderer.shutdown();
+    }
     
     world.reset();
     ecsWorld.reset();
@@ -48,52 +61,56 @@ void Game::onUpdate(float deltaTime) {
         return;
     }
     
-    // Update day/night cycle time on the world if available
-    // The GameSettings struct does not own dayTime; time is tracked by World/dayTime.
     if (world) {
-        world->setDayTime(world->getDayTime() + deltaTime);
-    }
-    
-    // Check for day/night cycle advancement (every 20 minutes = 12000 ticks)
-    if (world) {
-        float cycleProgress = getDayProgress();
-        if (cycleProgress >= 1.0f) {
-            resetDayNightCycle();
-        }
+        world->setDayTime(world->getDayTime() + deltaTime * 100.0f);
+        world->updateChunks(playerPos);
     }
     
     gameTime += deltaTime;
     
-    // Game tick (20 TPS)
     static float tickAccumulator = 0.0f;
     tickAccumulator += deltaTime;
     
     while (tickAccumulator >= 0.05f) {
-        // Game tick
         updateEntities(0.05f);
         updateWorld(0.05f);
         tickCount++;
         tickAccumulator -= 0.05f;
     }
     
-    // Process input
     processInput(deltaTime);
     
-    // Update ECS systems
     if (ecsWorld) {
         ecsWorld->updateSystems(deltaTime);
     }
 }
 
 void Game::onRender() {
-    // TODO: Vulkan rendering
-    // For now, just clear to sky blue
+    if (!rendererInitialized) return;
+    
+    float dayTime = world ? world->getDayTime() : 0.0f;
+    float t = std::fmod(dayTime, 24000.0f) / 24000.0f;
+    float skyR = 0.53f, skyG = 0.81f, skyB = 0.98f;
+    if (t > 0.5f) {
+        float night = (t - 0.5f) * 2.0f;
+        if (night > 1.0f) night = 2.0f - night;
+        skyR = 0.53f * (1.0f - night * 0.9f);
+        skyG = 0.81f * (1.0f - night * 0.9f);
+        skyB = 0.98f * (1.0f - night * 0.7f);
+    }
+    
+    try {
+        renderer.setClearColor(skyR, skyG, skyB);
+        renderer.beginFrame();
+        renderer.endFrame();
+    } catch (const std::exception& e) {
+        VF_ERROR("Render error: {}", e.what());
+    }
 }
 
 void Game::processInput(float deltaTime) {
     auto& input = getInput();
     
-    // Toggle pause
     if (input.isKeyJustPressed(Key::Escape)) {
         togglePause();
         if (paused) {
@@ -105,93 +122,58 @@ void Game::processInput(float deltaTime) {
     
     if (paused) return;
     
-    // TODO: Player movement
-    // float speed = 5.0f * deltaTime;
-    // 
-    // if (input.isActionPressed("sprint")) speed *= 1.5f;
-    // 
-    // if (input.isActionPressed("forward"))  player.move(0, 0, -speed);
-    // if (input.isActionPressed("backward")) player.move(0, 0, speed);
-    // if (input.isActionPressed("left"))     player.move(-speed, 0, 0);
-    // if (input.isActionPressed("right"))    player.move(speed, 0, 0);
-    // if (input.isActionPressed("jump"))     player.jump();
-    // if (input.isActionPressed("sneak"))    player.sneak();
+    float speed = 10.0f * deltaTime;
+    if (input.isActionPressed("sprint")) speed *= 2.0f;
     
-    // Mouse look
+    glm::vec3 forward = camera.getForward();
+    forward.y = 0.0f;
+    forward = glm::normalize(forward);
+    glm::vec3 right = glm::normalize(glm::cross(forward, glm::vec3(0.0f, 1.0f, 0.0f)));
+    
+    if (input.isActionPressed("forward"))  playerPos += forward * speed;
+    if (input.isActionPressed("backward")) playerPos -= forward * speed;
+    if (input.isActionPressed("left"))     playerPos -= right * speed;
+    if (input.isActionPressed("right"))    playerPos += right * speed;
+    if (input.isActionPressed("jump"))     playerPos.y += speed;
+    if (input.isActionPressed("sneak"))    playerPos.y -= speed;
+    
     auto mouseDelta = input.getMouseDelta();
     if (glm::length(mouseDelta) > 0.0f) {
-        // TODO: Apply to camera
-        // camera.rotate(mouseDelta.x * settings.mouseSensitivity,
-        //               mouseDelta.y * settings.mouseSensitivity);
+        playerYaw -= mouseDelta.x * settings.mouseSensitivity;
+        playerPitch -= mouseDelta.y * settings.mouseSensitivity;
+        playerPitch = std::clamp(playerPitch, -89.0f, 89.0f);
     }
+    
+    camera.setPosition(playerPos);
+    camera.setRotation(playerPitch, playerYaw);
 }
 
 void Game::updateEntities(float deltaTime) {
-    // Update all entities
-    // This is handled by ECS systems
 }
 
 void Game::updateWorld(float deltaTime) {
-    if (world) {
-        // world->tick();
-    }
 }
 
 float Game::getDayProgress() const {
     if (!world) return 0.0f;
-    
-    // Calculate progress through current day (0.0 = dawn, 1.0 = full day)
-    // Based on SkyRenderer's time of day: Dawn=0-6000, Day=6000-12000, Dusk=12000-18000, Night=18000-24000
-    // Normalize to 0.0-1.0 range
     float dayTime = world->getDayTime();
-    float normalizedTime = std::fmod(dayTime, 24000.0f) / 24000.0f;
-    
-    // Map phases to progress:
-    // 0.0 - 0.25: Dawn
-    // 0.25 - 0.75: Day
-    // 0.75 - 1.0: Dusk
-    // 1.0+: Night
-    
-    if (normalizedTime < 0.25f) {
-        return normalizedTime / 0.25f;  // 0.0 to 1.0 during dawn
-    } else if (normalizedTime < 0.75f) {
-        return 0.25f + (normalizedTime - 0.25f) / 0.5f;  // 0.25 to 1.0 during day
-    } else if (normalizedTime < 1.0f) {
-        return 0.75f + (normalizedTime - 0.75f) / 0.25f;  // 0.75 to 1.0 during dusk
-    }
-    // Night phase - can go beyond 1.0 but clamped later
-    return std::min(1.0f, normalizedTime - 1.0f);  // Night starts at 1.0 and goes to 2.0
+    return std::fmod(dayTime, 24000.0f) / 24000.0f;
 }
 
 void Game::advanceDayNightCycle() {
     if (!world) return;
-    
-    // Advance to next day/night phase by adding one cycle duration
     float dayTime = world->getDayTime() + settings.dayNightCycleDuration;
-    
-    // Normalize to keep within 0-24000 range
-    while (dayTime >= 24000.0f) {
-        dayTime -= 24000.0f;
-    }
-    
+    while (dayTime >= 24000.0f) dayTime -= 24000.0f;
     world->setDayTime(dayTime);
-    
-    // Cycle: Day -> Night -> Day...
-    VF_INFO("Day/Night cycle advanced: new time = {}", dayTime);
 }
 
 void Game::resetDayNightCycle() {
     if (!world) return;
-    
-    // Reset to dawn (start of day)
     world->setDayTime(0.0f);
-    VF_INFO("Day/Night cycle reset to dawn");
 }
 
 bool Game::isDay() const {
-    if (!world) return true; // Default to day if no world
-    
-    // Use world's isDay() method
+    if (!world) return true;
     return world->isDay();
 }
 

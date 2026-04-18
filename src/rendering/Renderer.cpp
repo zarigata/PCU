@@ -267,37 +267,28 @@ void Renderer::createRenderPass() {
     colorRef.attachment = 0;
     colorRef.layout = vk::ImageLayout::eColorAttachmentOptimal;
     
-    // Depth attachment reference
-    vk::AttachmentReference depthRef{};
-    depthRef.attachment = 1;
-    depthRef.layout = vk::ImageLayout::eDepthStencilAttachmentOptimal;
-    
     // Subpass
     vk::SubpassDescription subpass{};
     subpass.pipelineBindPoint = vk::PipelineBindPoint::eGraphics;
     subpass.colorAttachmentCount = 1;
     subpass.pColorAttachments = &colorRef;
-    subpass.pDepthStencilAttachment = &depthRef;
     
     // Subpass dependency
     vk::SubpassDependency dependency{};
     dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
     dependency.dstSubpass = 0;
-    dependency.srcStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput | 
-                              vk::PipelineStageFlagBits::eEarlyFragmentTests;
+    dependency.srcStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput;
     dependency.srcAccessMask = vk::AccessFlags{};
-    dependency.dstStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput | 
-                              vk::PipelineStageFlagBits::eEarlyFragmentTests;
-    dependency.dstAccessMask = vk::AccessFlagBits::eColorAttachmentWrite | 
-                               vk::AccessFlagBits::eDepthStencilAttachmentWrite;
+    dependency.dstStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput;
+    dependency.dstAccessMask = vk::AccessFlagBits::eColorAttachmentWrite;
     
     // Create render pass
-    std::array<vk::AttachmentDescription, 2> attachments = {colorAttachment, depthAttachment};
+    vk::AttachmentDescription attachments[] = {colorAttachment};
     
     vk::RenderPassCreateInfo createInfo{};
     createInfo.sType = vk::StructureType::eRenderPassCreateInfo;
-    createInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
-    createInfo.pAttachments = attachments.data();
+    createInfo.attachmentCount = 1;
+    createInfo.pAttachments = attachments;
     createInfo.subpassCount = 1;
     createInfo.pSubpasses = &subpass;
     createInfo.dependencyCount = 1;
@@ -318,16 +309,13 @@ void Renderer::createFramebuffers() {
     framebuffers.resize(swapchainImageViews.size());
     
     for (size_t i = 0; i < swapchainImageViews.size(); i++) {
-        std::array<vk::ImageView, 2> attachments = {
-            swapchainImageViews[i],
-            depthImageView // Will need to create depth image
-        };
+        vk::ImageView attachments[] = {swapchainImageViews[i]};
         
         vk::FramebufferCreateInfo createInfo{};
         createInfo.sType = vk::StructureType::eFramebufferCreateInfo;
         createInfo.renderPass = renderPass;
-        createInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
-        createInfo.pAttachments = attachments.data();
+        createInfo.attachmentCount = 1;
+        createInfo.pAttachments = attachments;
         createInfo.width = swapchainExtent.width;
         createInfo.height = swapchainExtent.height;
         createInfo.layers = 1;
@@ -404,6 +392,10 @@ void Renderer::createSyncObjects() {
     VF_INFO("Synchronization objects created");
 }
 
+void Renderer::setClearColor(float r, float g, float b, float a) {
+    clearColorValue = {r, g, b, a};
+}
+
 void Renderer::beginFrame() {
     VF_PROFILE_FUNCTION();
     
@@ -451,12 +443,11 @@ void Renderer::beginFrame() {
     renderPassInfo.renderArea.extent = swapchainExtent;
     
     // Clear values
-    std::array<vk::ClearValue, 2> clearValues{};
-    clearValues[0].color = vk::ClearColorValue{0.0f, 0.0f, 0.2f, 1.0f}; // Sky blue-ish
-    clearValues[1].depthStencil = vk::ClearDepthStencilValue{1.0f, 0};
+    vk::ClearValue clearValue{};
+    clearValue.color = vk::ClearColorValue{clearColorValue[0], clearColorValue[1], clearColorValue[2], clearColorValue[3]};
     
-    renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
-    renderPassInfo.pClearValues = clearValues.data();
+    renderPassInfo.clearValueCount = 1;
+    renderPassInfo.pClearValues = &clearValue;
     
     commandBuffers[currentImageIndex].beginRenderPass(
         &renderPassInfo, vk::SubpassContents::eInline);

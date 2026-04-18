@@ -7,7 +7,9 @@
 
 #include <VoxelForge/core/Application.hpp>
 #include <VoxelForge/core/ECS.hpp>
-#include <VoxelForge/rendering/SkyRenderer.hpp>
+#include <VoxelForge/rendering/Renderer.hpp>
+#include <VoxelForge/rendering/Camera.hpp>
+#include <glm/glm.hpp>
 #include <memory>
 
 namespace VoxelForge {
@@ -81,12 +83,19 @@ private:
     std::unique_ptr<World> world;
     std::unique_ptr<ECSWorld> ecsWorld;
     
+    Renderer renderer;
+    Camera camera;
+    glm::vec3 playerPos = glm::vec3(0.0f, 80.0f, 0.0f);
+    float playerYaw = 0.0f;
+    float playerPitch = 0.0f;
+    bool rendererInitialized = false;
+    
     bool paused = false;
-    GameMode gameMode = GameMode::Survival;
+    GameMode gameMode = GameMode::Creative;
     GameSettings settings;
     
     float gameTime = 0.0f;
-    i64 tickCount = 0;
+    int64_t tickCount = 0;
 };
 
 // Game instance access

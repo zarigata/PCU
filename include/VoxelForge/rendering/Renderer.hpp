@@ -6,6 +6,7 @@
 #pragma once
 
 #include <string>
+#include <array>
 
 #include <VoxelForge/rendering/VulkanContext.hpp>
 #include <VoxelForge/rendering/Camera.hpp>
@@ -73,6 +74,9 @@ public:
     void beginFrame();
     void endFrame();
     void render(World* world, Camera* camera);
+    
+    // Clear color (sky)
+    void setClearColor(float r, float g, float b, float a = 1.0f);
     
     // Resize
     void onResize(int width, int height);
@@ -152,6 +156,8 @@ private:
     // Stats and settings
     RenderStats stats;
     RenderSettings settings;
+    
+    std::array<float, 4> clearColorValue = {0.0f, 0.0f, 0.2f, 1.0f};
     
     // Frame data
     static constexpr int MAX_FRAMES_IN_FLIGHT = 2;

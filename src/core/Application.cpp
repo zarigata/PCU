@@ -41,9 +41,6 @@ Application::Application(const ApplicationProps& props) {
         input->init(window->getGLFWWindow());
     }
     
-    // Call derived init
-    onInit();
-    
     VF_CORE_INFO("Application initialized");
 }
 
@@ -63,6 +60,7 @@ Application::~Application() {
 }
 
 void Application::run() {
+    onInit();
     running = true;
     VF_CORE_INFO("Starting main loop");
     
