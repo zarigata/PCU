@@ -98,6 +98,9 @@ void Game::onUpdate(float deltaTime) {
         onGround = false;
     }
     
+    float aspect = getWindow().getAspectRatio();
+    camera.setPerspective(settings.fov, aspect, 0.1f, 1000.0f);
+    
     if (rendererInitialized && world) {
         renderer.generateAndUploadChunks(world.get(), playerPos);
     }
@@ -431,11 +434,24 @@ void Game::handleBlockInteraction() {
         if (placePos.y >= -64 && placePos.y < 320) {
             uint32_t blockId = hotbarBlocks[selectedSlot];
             if (blockId != 0) {
-                auto blockState = BlockRegistry::get().getDefaultState(blockId);
-                world->setBlock(placePos.x, placePos.y, placePos.z, blockState);
-                int cx = (int)floor((float)placePos.x / 16.0f);
-                int cz = (int)floor((float)placePos.z / 16.0f);
-                renderer.invalidateChunkMesh(cx, cz);
+                float hw = PLAYER_WIDTH * 0.5f;
+                bool overlapsPlayer =
+                    placePos.x + 1 > playerPos.x - hw && placePos.x < playerPos.x + hw &&
+                    placePos.y + 1 > playerPos.y && placePos.y < playerPos.y + PLAYER_HEIGHT &&
+                    placePos.z + 1 > playerPos.z - hw && placePos.z < playerPos.z + hw;
+                if (!overlapsPlayer) {
+                    auto blockState = BlockRegistry::get().getDefaultState(blockId);
+                    world->setBlock(placePos.x, placePos.y, placePos.z, blockState);
+                    int cx = (int)floor((float)placePos.x / 16.0f);
+                    int cz = (int)floor((float)placePos.z / 16.0f);
+                    renderer.invalidateChunkMesh(cx, cz);
+                    if (hitNormal.x != 0 && (placePos.x & 15) == (hitNormal.x > 0 ? 0 : 15)) {
+                        renderer.invalidateChunkMesh(cx - hitNormal.x, cz);
+                    }
+                    if (hitNormal.z != 0 && (placePos.z & 15) == (hitNormal.z > 0 ? 0 : 15)) {
+                        renderer.invalidateChunkMesh(cx, cz - hitNormal.z);
+                    }
+                }
             }
         }
     }
