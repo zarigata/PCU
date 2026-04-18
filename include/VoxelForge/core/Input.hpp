@@ -155,6 +155,8 @@ public:
     // Scroll
     glm::vec2 getScrollDelta() const { return current.scrollDelta; }
     
+    void clearMouseDelta() { current.mouseDelta = glm::vec2(0.0f); }
+    
     // Typed characters
     const std::vector<uint32_t>& getTypedCharacters() const { return current.typedCharacters; }
     

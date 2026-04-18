@@ -1915,16 +1915,22 @@ void Renderer::drawClouds(Camera* camera, float gameTime) {
 
     struct UIVert { float x, y, z; uint32_t color; };
 
-    constexpr int GRID = 32;
-    constexpr float CLOUD_Y = 160.0f;
-    constexpr float TILE = 16.0f;
-    constexpr float DRIFT_SPEED = 2.0f;
+    constexpr int GRID = 24;
+    constexpr float CLOUD_Y = 180.0f;
+    constexpr float TILE = 12.0f;
+    constexpr float DRIFT_SPEED = 1.5f;
 
     float drift = std::fmod(gameTime * DRIFT_SPEED, TILE);
 
     glm::vec3 camPos = camera->getPosition();
-    int baseCX = (int)floor((camPos.x - GRID * TILE * 0.5f + drift) / TILE);
-    int baseCZ = (int)floor((camPos.z - GRID * TILE * 0.5f) / TILE);
+    float halfGrid = GRID * TILE * 0.5f;
+    float originX = camPos.x - halfGrid;
+    float originZ = camPos.z - halfGrid;
+
+    int baseCX = (int)floor(originX / TILE);
+    int baseCZ = (int)floor(originZ / TILE);
+    float offX = originX - baseCX * TILE;
+    float offZ = originZ - baseCZ * TILE;
 
     constexpr int MAX_CLOUD_VERTS = 4096;
     constexpr int MAX_CLOUD_INDICES = 6144;
@@ -1951,16 +1957,16 @@ void Renderer::drawClouds(Camera* camera, float gameTime) {
             int cx = baseCX + gx;
             int cz = baseCZ + gz;
 
-            unsigned int h = (unsigned int)(cx * 374761393 + cz * 668265263);
-            h = (h ^ (h >> 13)) * 1274126177;
+            unsigned int h = (unsigned int)(cx * 374761393u + cz * 668265263u);
+            h = (h ^ (h >> 13)) * 1274126177u;
             h = h ^ (h >> 16);
             if ((h & 7) < 3) continue;
 
             uint8_t alpha = (uint8_t)(140 + (h & 63));
             uint32_t col = packCloudColor(alpha);
 
-            float x = cx * TILE - drift;
-            float z = cz * TILE;
+            float x = (gx * TILE) - offX - drift;
+            float z = (gz * TILE) - offZ;
             float thickness = 2.0f;
 
             addQuad(x, CLOUD_Y + thickness, z,

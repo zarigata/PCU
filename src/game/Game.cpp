@@ -359,8 +359,20 @@ void Game::processInput(float deltaTime) {
     bool keyCtrl = glfwGetKey(win, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS;
     
     if (flyMode) {
-        float speed = 10.0f * deltaTime;
-        if (keyCtrl) speed *= 2.0f;
+        constexpr float FLY_BASE_SPEED = 10.0f;
+        constexpr float FLY_MAX_MULT = 5.0f;
+        constexpr float FLY_ACCEL = 4.0f;
+        constexpr float FLY_DECEL = 8.0f;
+
+        if (keyShift && (keyW || keyS || keyA || keyD || keySpace || keyCtrl)) {
+            flySpeedMult += FLY_ACCEL * deltaTime;
+            if (flySpeedMult > FLY_MAX_MULT) flySpeedMult = FLY_MAX_MULT;
+        } else {
+            flySpeedMult -= FLY_DECEL * deltaTime;
+            if (flySpeedMult < 1.0f) flySpeedMult = 1.0f;
+        }
+
+        float speed = FLY_BASE_SPEED * flySpeedMult * deltaTime;
         
         glm::vec3 forward = camera.getForward();
         forward.y = 0.0f;
@@ -373,14 +385,14 @@ void Game::processInput(float deltaTime) {
         if (keyA) { movedir -= right; }
         if (keyD) { movedir += right; }
         if (keySpace) { movedir.y += 1.0f; }
-        if (keyShift) { movedir.y -= 1.0f; }
+        if (keyCtrl) { movedir.y -= 1.0f; }
         
         if (glm::length(movedir) > 0.0f) {
             playerPos += glm::normalize(movedir) * speed;
         }
     } else {
         float moveSpeed = 4.317f * deltaTime;
-        if (keyCtrl) moveSpeed = 5.612f * deltaTime;
+        if (keyShift) moveSpeed = 5.612f * deltaTime;
         
         glm::vec3 forward = camera.getForward();
         forward.y = 0.0f;
@@ -446,11 +458,10 @@ void Game::processInput(float deltaTime) {
     
     handleBlockInteraction();
     
-    // Re-center cursor every frame to keep it trapped inside the window.
-    // This avoids GLFW_CURSOR_DISABLED which hangs on some X11 setups.
     int ww, wh;
     glfwGetWindowSize(win, &ww, &wh);
     glfwSetCursorPos(win, ww / 2.0, wh / 2.0);
+    input.clearMouseDelta();
 }
 
 void Game::updateEntities(float deltaTime) {

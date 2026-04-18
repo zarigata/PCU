@@ -114,6 +114,7 @@ private:
     glm::vec3 playerVelocity = glm::vec3(0.0f);
     bool onGround = false;
     bool flyMode = true;
+    float flySpeedMult = 1.0f;
     
     static constexpr float PLAYER_WIDTH = 0.6f;
     static constexpr float PLAYER_HEIGHT = 1.8f;
