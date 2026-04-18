@@ -940,13 +940,12 @@ static uint32_t blockColor(uint32_t blockId, int face) {
     }
 }
 
-void Renderer::generateAndUploadChunks(World* world) {
+void Renderer::generateAndUploadChunks(World* world, const glm::vec3& cameraPos) {
     if (!world || !chunkPipelineReady) return;
     
-    auto playerPos = glm::vec3(0, 80, 0);
     int rd = settings.renderDistance;
-    int cx = (int)floor(playerPos.x / 16.0f);
-    int cz = (int)floor(playerPos.z / 16.0f);
+    int cx = (int)floor(cameraPos.x / 16.0f);
+    int cz = (int)floor(cameraPos.z / 16.0f);
     
     int uploaded = 0;
     
@@ -1034,6 +1033,197 @@ void Renderer::renderWorldChunks(World* world, Camera* camera) {
         stats.chunksRendered++;
         stats.drawCalls++;
     }
+}
+
+void Renderer::invalidateChunkMesh(int chunkX, int chunkZ) {
+    uint64_t key = posKey(chunkX, 0, chunkZ);
+    auto it = chunkMeshes.find(key);
+    if (it == chunkMeshes.end()) return;
+    
+    auto dev = context->getDevice();
+    if (it->second.vertexBuffer) dev.destroyBuffer(it->second.vertexBuffer);
+    if (it->second.vertexMemory) dev.freeMemory(it->second.vertexMemory);
+    if (it->second.indexBuffer) dev.destroyBuffer(it->second.indexBuffer);
+    if (it->second.indexMemory) dev.freeMemory(it->second.indexMemory);
+    chunkMeshes.erase(it);
+}
+
+void Renderer::drawCrosshair() {
+    if (!context) return;
+    auto& cmd = commandBuffers[currentImageIndex];
+    
+    float size = 0.015f;
+    float thickness = 0.003f;
+    
+    struct UIVert { float x, y, z; uint32_t color; };
+    uint32_t white = 0xFFFFFFFF;
+    
+    std::vector<UIVert> verts;
+    std::vector<uint32_t> indices;
+    
+    auto addRect = [&](float x0, float y0, float x1, float y1, uint32_t col) {
+        uint32_t base = (uint32_t)verts.size();
+        verts.push_back({x0, y0, 0.0f, col});
+        verts.push_back({x1, y0, 0.0f, col});
+        verts.push_back({x1, y1, 0.0f, col});
+        verts.push_back({x0, y1, 0.0f, col});
+        indices.insert(indices.end(), {base, base+1, base+2, base, base+2, base+3});
+    };
+    
+    addRect(-size, -thickness, size, thickness, white);
+    addRect(-thickness, -size, thickness, -thickness, white);
+    addRect(-thickness, thickness, thickness, size, white);
+    
+    vk::DeviceSize vsize = verts.size() * sizeof(UIVert);
+    vk::DeviceSize isize = indices.size() * sizeof(uint32_t);
+    
+    vk::Buffer stagingBuf;
+    vk::DeviceMemory stagingMem;
+    createChunkBuffer(vsize + isize,
+        vk::BufferUsageFlagBits::eTransferSrc,
+        vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
+        stagingBuf, stagingMem);
+    
+    void* data = context->getDevice().mapMemory(stagingMem, 0, vsize + isize);
+    memcpy(data, verts.data(), vsize);
+    memcpy((char*)data + vsize, indices.data(), isize);
+    context->getDevice().unmapMemory(stagingMem);
+    
+    vk::Buffer vb, ib;
+    vk::DeviceMemory vm, im;
+    createChunkBuffer(vsize,
+        vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst,
+        vk::MemoryPropertyFlagBits::eDeviceLocal, vb, vm);
+    createChunkBuffer(isize,
+        vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst,
+        vk::MemoryPropertyFlagBits::eDeviceLocal, ib, im);
+    
+    auto dev = context->getDevice();
+    vk::CommandBufferAllocateInfo allocInfo{};
+    allocInfo.commandPool = commandPool;
+    allocInfo.level = vk::CommandBufferLevel::ePrimary;
+    allocInfo.commandBufferCount = 1;
+    auto tmpCmd = dev.allocateCommandBuffers(allocInfo)[0];
+    tmpCmd.begin(vk::CommandBufferBeginInfo{vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
+    tmpCmd.copyBuffer(stagingBuf, vb, vk::BufferCopy{0, 0, vsize});
+    tmpCmd.copyBuffer(stagingBuf, ib, vk::BufferCopy{vsize, 0, isize});
+    tmpCmd.end();
+    vk::SubmitInfo uiSubmit{};
+    uiSubmit.commandBufferCount = 1;
+    uiSubmit.pCommandBuffers = &tmpCmd;
+    context->getGraphicsQueue().submit(1, &uiSubmit, VK_NULL_HANDLE);
+    context->getGraphicsQueue().waitIdle();
+    dev.freeCommandBuffers(commandPool, 1, &tmpCmd);
+    dev.destroyBuffer(stagingBuf);
+    dev.freeMemory(stagingMem);
+    
+    cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, chunkPipeline);
+    glm::mat4 identity(1.0f);
+    cmd.pushConstants(chunkPipelineLayout, vk::ShaderStageFlagBits::eVertex, 0, sizeof(glm::mat4), &identity);
+    vk::DeviceSize off = 0;
+    cmd.bindVertexBuffers(0, 1, &vb, &off);
+    cmd.bindIndexBuffer(ib, 0, vk::IndexType::eUint32);
+    cmd.drawIndexed((uint32_t)indices.size(), 1, 0, 0, 0);
+    
+    dev.destroyBuffer(vb);
+    dev.freeMemory(vm);
+    dev.destroyBuffer(ib);
+    dev.freeMemory(im);
+}
+
+void Renderer::drawHotbar(int selectedSlot, const std::array<uint32_t, 9>& hotbarBlocks) {
+    if (!context) return;
+    auto& cmd = commandBuffers[currentImageIndex];
+    
+    float aspectRatio = (float)swapchainExtent.width / (float)swapchainExtent.height;
+    float slotSize = 0.04f;
+    float padding = 0.004f;
+    float totalWidth = 9.0f * slotSize + 8.0f * padding;
+    float startX = -totalWidth * 0.5f;
+    float startY = -0.95f;
+    
+    struct UIVert { float x, y, z; uint32_t color; };
+    std::vector<UIVert> verts;
+    std::vector<uint32_t> indices;
+    
+    auto addRect = [&](float x0, float y0, float x1, float y1, uint32_t col) {
+        uint32_t base = (uint32_t)verts.size();
+        verts.push_back({x0, y0, 0.0f, col});
+        verts.push_back({x1, y0, 0.0f, col});
+        verts.push_back({x1, y1, 0.0f, col});
+        verts.push_back({x0, y1, 0.0f, col});
+        indices.insert(indices.end(), {base, base+1, base+2, base, base+2, base+3});
+    };
+    
+    for (int i = 0; i < 9; i++) {
+        float x = startX + i * (slotSize + padding);
+        uint32_t slotBg = (i == selectedSlot) ? 0xCCFFFFFF : 0x88000000;
+        addRect(x, startY, x + slotSize, startY + slotSize, slotBg);
+        
+        if (hotbarBlocks[i] != 0) {
+            uint32_t blockCol = blockColor(hotbarBlocks[i], 4);
+            blockCol = (blockCol & 0x00FFFFFF) | 0xDD000000;
+            float inset = slotSize * 0.15f;
+            addRect(x + inset, startY + inset, x + slotSize - inset, startY + slotSize - inset, blockCol);
+        }
+    }
+    
+    vk::DeviceSize vsize = verts.size() * sizeof(UIVert);
+    vk::DeviceSize isize = indices.size() * sizeof(uint32_t);
+    
+    vk::Buffer stagingBuf;
+    vk::DeviceMemory stagingMem;
+    createChunkBuffer(vsize + isize,
+        vk::BufferUsageFlagBits::eTransferSrc,
+        vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
+        stagingBuf, stagingMem);
+    
+    void* data = context->getDevice().mapMemory(stagingMem, 0, vsize + isize);
+    memcpy(data, verts.data(), vsize);
+    memcpy((char*)data + vsize, indices.data(), isize);
+    context->getDevice().unmapMemory(stagingMem);
+    
+    vk::Buffer vb, ib;
+    vk::DeviceMemory vm, im;
+    createChunkBuffer(vsize,
+        vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst,
+        vk::MemoryPropertyFlagBits::eDeviceLocal, vb, vm);
+    createChunkBuffer(isize,
+        vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst,
+        vk::MemoryPropertyFlagBits::eDeviceLocal, ib, im);
+    
+    auto dev = context->getDevice();
+    vk::CommandBufferAllocateInfo allocInfo{};
+    allocInfo.commandPool = commandPool;
+    allocInfo.level = vk::CommandBufferLevel::ePrimary;
+    allocInfo.commandBufferCount = 1;
+    auto tmpCmd = dev.allocateCommandBuffers(allocInfo)[0];
+    tmpCmd.begin(vk::CommandBufferBeginInfo{vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
+    tmpCmd.copyBuffer(stagingBuf, vb, vk::BufferCopy{0, 0, vsize});
+    tmpCmd.copyBuffer(stagingBuf, ib, vk::BufferCopy{vsize, 0, isize});
+    tmpCmd.end();
+    vk::SubmitInfo uiSubmit{};
+    uiSubmit.commandBufferCount = 1;
+    uiSubmit.pCommandBuffers = &tmpCmd;
+    context->getGraphicsQueue().submit(1, &uiSubmit, VK_NULL_HANDLE);
+    context->getGraphicsQueue().waitIdle();
+    dev.freeCommandBuffers(commandPool, 1, &tmpCmd);
+    dev.destroyBuffer(stagingBuf);
+    dev.freeMemory(stagingMem);
+    
+    cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, chunkPipeline);
+    glm::mat4 identity(1.0f);
+    cmd.pushConstants(chunkPipelineLayout, vk::ShaderStageFlagBits::eVertex, 0, sizeof(glm::mat4), &identity);
+    
+    vk::DeviceSize off = 0;
+    cmd.bindVertexBuffers(0, 1, &vb, &off);
+    cmd.bindIndexBuffer(ib, 0, vk::IndexType::eUint32);
+    cmd.drawIndexed((uint32_t)indices.size(), 1, 0, 0, 0);
+    
+    dev.destroyBuffer(vb);
+    dev.freeMemory(vm);
+    dev.destroyBuffer(ib);
+    dev.freeMemory(im);
 }
 
 } // namespace VoxelForge

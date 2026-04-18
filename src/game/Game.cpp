@@ -4,6 +4,9 @@
 #include <VoxelForge/core/Timer.hpp>
 #include <VoxelForge/world/Block.hpp>
 #include <VoxelForge/world/World.hpp>
+#include <VoxelForge/world/BlockRegistry.hpp>
+#include <cmath>
+#include <algorithm>
 
 namespace VoxelForge {
 
@@ -69,7 +72,7 @@ void Game::onUpdate(float deltaTime) {
     }
     
     if (rendererInitialized && world) {
-        renderer.generateAndUploadChunks(world.get());
+        renderer.generateAndUploadChunks(world.get(), playerPos);
     }
     
     gameTime += deltaTime;
@@ -110,6 +113,11 @@ void Game::onRender() {
         renderer.beginFrame();
         if (world) {
             renderer.renderWorldChunks(world.get(), &camera);
+        }
+        if (!paused) {
+            // TODO: UI rendering needs its own pipeline/buffers to avoid GPU fault
+            // renderer.drawCrosshair();
+            // renderer.drawHotbar(selectedSlot, hotbarBlocks);
         }
         renderer.endFrame();
     } catch (const std::exception& e) {
@@ -155,6 +163,14 @@ void Game::processInput(float deltaTime) {
     
     camera.setPosition(playerPos);
     camera.setRotation(playerPitch, playerYaw);
+    
+    for (int i = 0; i < 9; i++) {
+        if (input.isKeyJustPressed(49 + i)) {
+            selectedSlot = i;
+        }
+    }
+    
+    handleBlockInteraction();
 }
 
 void Game::updateEntities(float deltaTime) {
@@ -188,6 +204,111 @@ bool Game::isDay() const {
 
 bool Game::isNight() const {
     return !isDay();
+}
+
+glm::ivec3 Game::raycastBlocks(const glm::vec3& origin, const glm::vec3& direction, float maxDist, glm::ivec3& hitNormal) {
+    glm::vec3 pos = origin;
+    glm::vec3 dir = glm::normalize(direction);
+    
+    int x = (int)floor(pos.x);
+    int y = (int)floor(pos.y);
+    int z = (int)floor(pos.z);
+    
+    int stepX = dir.x > 0 ? 1 : (dir.x < 0 ? -1 : 0);
+    int stepY = dir.y > 0 ? 1 : (dir.y < 0 ? -1 : 0);
+    int stepZ = dir.z > 0 ? 1 : (dir.z < 0 ? -1 : 0);
+    
+    float tMaxX = (dir.x != 0) ? ((dir.x > 0 ? (x + 1 - pos.x) : (pos.x - x)) / fabs(dir.x)) : 1e30f;
+    float tMaxY = (dir.y != 0) ? ((dir.y > 0 ? (y + 1 - pos.y) : (pos.y - y)) / fabs(dir.y)) : 1e30f;
+    float tMaxZ = (dir.z != 0) ? ((dir.z > 0 ? (z + 1 - pos.z) : (pos.z - z)) / fabs(dir.z)) : 1e30f;
+    
+    float tDeltaX = (dir.x != 0) ? fabs(1.0f / dir.x) : 1e30f;
+    float tDeltaY = (dir.y != 0) ? fabs(1.0f / dir.y) : 1e30f;
+    float tDeltaZ = (dir.z != 0) ? fabs(1.0f / dir.z) : 1e30f;
+    
+    hitNormal = glm::ivec3(0, 0, 0);
+    float dist = 0.0f;
+    
+    for (int i = 0; i < 200 && dist < maxDist; i++) {
+        if (world) {
+            auto block = world->getBlock(x, y, z);
+            if (!block.isAir()) {
+                return glm::ivec3(x, y, z);
+            }
+        }
+        
+        if (tMaxX < tMaxY) {
+            if (tMaxX < tMaxZ) {
+                dist = tMaxX;
+                x += stepX;
+                tMaxX += tDeltaX;
+                hitNormal = glm::ivec3(-stepX, 0, 0);
+            } else {
+                dist = tMaxZ;
+                z += stepZ;
+                tMaxZ += tDeltaZ;
+                hitNormal = glm::ivec3(0, 0, -stepZ);
+            }
+        } else {
+            if (tMaxY < tMaxZ) {
+                dist = tMaxY;
+                y += stepY;
+                tMaxY += tDeltaY;
+                hitNormal = glm::ivec3(0, -stepY, 0);
+            } else {
+                dist = tMaxZ;
+                z += stepZ;
+                tMaxZ += tDeltaZ;
+                hitNormal = glm::ivec3(0, 0, -stepZ);
+            }
+        }
+    }
+    
+    return glm::ivec3(INT_MAX, INT_MAX, INT_MAX);
+}
+
+void Game::handleBlockInteraction() {
+    if (!world || paused) return;
+    
+    auto& input = getInput();
+    
+    bool leftDown = input.isMouseButtonPressed(0);
+    bool rightDown = input.isMouseButtonPressed(1);
+    
+    glm::ivec3 hitNormal;
+    glm::ivec3 hitBlock = raycastBlocks(camera.getPosition(), camera.getForward(), 6.0f, hitNormal);
+    
+    if (hitBlock.x == INT_MAX) return;
+    
+    if (leftDown && !leftMousePressed) {
+        world->setBlock(hitBlock.x, hitBlock.y, hitBlock.z, BlockState());
+        int cx = (int)floor((float)hitBlock.x / 16.0f);
+        int cz = (int)floor((float)hitBlock.z / 16.0f);
+        renderer.invalidateChunkMesh(cx, cz);
+        if (hitNormal.x != 0 && (hitBlock.x & 15) == (hitNormal.x > 0 ? 0 : 15)) {
+            renderer.invalidateChunkMesh(cx - hitNormal.x, cz);
+        }
+        if (hitNormal.z != 0 && (hitBlock.z & 15) == (hitNormal.z > 0 ? 0 : 15)) {
+            renderer.invalidateChunkMesh(cx, cz - hitNormal.z);
+        }
+    }
+    
+    if (rightDown && !rightMousePressed) {
+        glm::ivec3 placePos = hitBlock + hitNormal;
+        if (placePos.y >= -64 && placePos.y < 320) {
+            uint32_t blockId = hotbarBlocks[selectedSlot];
+            if (blockId != 0) {
+                auto blockState = BlockRegistry::get().getDefaultState(blockId);
+                world->setBlock(placePos.x, placePos.y, placePos.z, blockState);
+                int cx = (int)floor((float)placePos.x / 16.0f);
+                int cz = (int)floor((float)placePos.z / 16.0f);
+                renderer.invalidateChunkMesh(cx, cz);
+            }
+        }
+    }
+    
+    leftMousePressed = leftDown;
+    rightMousePressed = rightDown;
 }
 
 float Game::getDayTime() const {

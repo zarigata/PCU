@@ -85,7 +85,10 @@ public:
     void initChunkRendering();
     void cleanupChunkRendering();
     void renderWorldChunks(World* world, Camera* camera);
-    void generateAndUploadChunks(World* world);
+    void generateAndUploadChunks(World* world, const glm::vec3& cameraPos);
+    void invalidateChunkMesh(int chunkX, int chunkZ);
+    void drawCrosshair();
+    void drawHotbar(int selectedSlot, const std::array<uint32_t, 9>& hotbarBlocks);
     
     // Resize
     void onResize(int width, int height);

@@ -11,6 +11,7 @@
 #include <VoxelForge/rendering/Camera.hpp>
 #include <glm/glm.hpp>
 #include <memory>
+#include <array>
 
 namespace VoxelForge {
 
@@ -79,6 +80,8 @@ private:
     void processInput(float deltaTime);
     void updateEntities(float deltaTime);
     void updateWorld(float deltaTime);
+    void handleBlockInteraction();
+    glm::ivec3 raycastBlocks(const glm::vec3& origin, const glm::vec3& direction, float maxDist, glm::ivec3& hitNormal);
     
     std::unique_ptr<World> world;
     std::unique_ptr<ECSWorld> ecsWorld;
@@ -96,6 +99,11 @@ private:
     
     float gameTime = 0.0f;
     int64_t tickCount = 0;
+    
+    std::array<uint32_t, 9> hotbarBlocks = {{1,2,3,4,5,6,13,14,19}};
+    int selectedSlot = 0;
+    bool leftMousePressed = false;
+    bool rightMousePressed = false;
 };
 
 // Game instance access
