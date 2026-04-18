@@ -91,6 +91,13 @@ void Game::onUpdate(float deltaTime) {
         world->updateChunks(playerPos);
     }
     
+    if (playerPos.y < -64.0f) {
+        int surfaceY = world ? world->getHeight((int)playerPos.x, (int)playerPos.z) : 80;
+        playerPos.y = static_cast<float>(surfaceY + 5);
+        playerVelocity = glm::vec3(0.0f);
+        onGround = false;
+    }
+    
     if (rendererInitialized && world) {
         renderer.generateAndUploadChunks(world.get(), playerPos);
     }
@@ -287,6 +294,13 @@ void Game::processInput(float deltaTime) {
         if (input.isKeyJustPressed(49 + i)) {
             selectedSlot = i;
         }
+    }
+    
+    auto scrollDelta = input.getScrollDelta();
+    if (scrollDelta.y > 0.0f) {
+        selectedSlot = (selectedSlot - 1 + 9) % 9;
+    } else if (scrollDelta.y < 0.0f) {
+        selectedSlot = (selectedSlot + 1) % 9;
     }
     
     handleBlockInteraction();
