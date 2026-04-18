@@ -990,22 +990,37 @@ void Renderer::initChunkRendering() {
         #version 450
         layout(location=0) in vec3 inPos;
         layout(location=1) in uint inColor;
-        layout(push_constant) uniform PC { mat4 mvp; };
+        layout(push_constant) uniform PC {
+            mat4 mvp;
+            vec4 fogColor;
+            vec4 fogDist;
+        };
         layout(location=0) out vec4 vColor;
+        layout(location=1) out float vFog;
         void main() {
             gl_Position = mvp * vec4(inPos, 1.0);
             float r = float(inColor & 0xFFu) / 255.0;
             float g = float((inColor >> 8u) & 0xFFu) / 255.0;
             float b = float((inColor >> 16u) & 0xFFu) / 255.0;
             vColor = vec4(r, g, b, 1.0);
+            float d = gl_Position.w;
+            vFog = clamp((d - fogDist.x) / (fogDist.y - fogDist.x), 0.0, 1.0);
         }
     )";
     
     const char* fragSrc = R"(
         #version 450
         layout(location=0) in vec4 vColor;
+        layout(location=1) in float vFog;
+        layout(push_constant) uniform PC {
+            mat4 mvp;
+            vec4 fogColor;
+            vec4 fogDist;
+        };
         layout(location=0) out vec4 outColor;
-        void main() { outColor = vColor; }
+        void main() {
+            outColor = mix(vColor, fogColor, vFog * vFog);
+        }
     )";
     
     chunkVertShader = compileShader(vertSrc, EShLangVertex);
@@ -1034,7 +1049,7 @@ void Renderer::initChunkRendering() {
     builder.setColorBlendAttachment(
         vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG |
         vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA);
-    builder.addPushConstantRange(vk::ShaderStageFlagBits::eVertex, 0, sizeof(glm::mat4));
+    builder.addPushConstantRange(vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment, 0, 96);
     builder.setRenderPass(renderPass, 0);
     
     auto pipeline = builder.build();
@@ -1368,24 +1383,29 @@ void Renderer::generateAndUploadChunks(World* world, const glm::vec3& cameraPos)
         VF_INFO("Chunk mesh pass: uploaded={} skipped={} empty={} total={}",
                 uploaded, skipped, emptyMesh, (int)chunkMeshes.size());
     }
+
+    evictDistantMeshes(cameraPos);
 }
 
-void Renderer::renderWorldChunks(World* world, Camera* camera) {
+void Renderer::renderWorldChunks(World* world, Camera* camera, float fogR, float fogG, float fogB) {
     if (!chunkPipelineReady || chunkMeshes.empty()) return;
-    
-    static bool firstRenderLog = true;
     
     auto& cmd = commandBuffers[currentImageIndex];
     cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, chunkPipeline);
     
     glm::mat4 vp = camera->getViewProjectionMatrix();
-    
-    if (firstRenderLog) {
-        auto pos = camera->getPosition();
-        VF_INFO("First chunk render: cam=({:.1f},{:.1f},{:.1f}) meshes={}", pos.x, pos.y, pos.z, chunkMeshes.size());
-        firstRenderLog = false;
-    }
-    
+
+    float nearPlane = 0.1f;
+    float farPlane = (float)(settings.renderDistance * 16) * 1.414f;
+    float fogStart = farPlane * 0.55f;
+    float fogEnd = farPlane * 0.95f;
+
+    struct PushData {
+        glm::mat4 mvp;
+        glm::vec4 fogColor;
+        glm::vec4 fogDist;
+    };
+
     for (auto& [key, mesh] : chunkMeshes) {
         if (!mesh.valid || mesh.indexCount == 0) continue;
         
@@ -1393,7 +1413,13 @@ void Renderer::renderWorldChunks(World* world, Camera* camera) {
         glm::mat4 model = glm::translate(glm::mat4(1.0f), offset);
         glm::mat4 mvp = vp * model;
         
-        cmd.pushConstants(chunkPipelineLayout, vk::ShaderStageFlagBits::eVertex, 0, sizeof(glm::mat4), &mvp);
+        PushData pc;
+        pc.mvp = mvp;
+        pc.fogColor = glm::vec4(fogR, fogG, fogB, 1.0f);
+        pc.fogDist = glm::vec4(fogStart, fogEnd, 0.0f, 0.0f);
+        cmd.pushConstants(chunkPipelineLayout,
+                          vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment,
+                          0, sizeof(PushData), &pc);
         
         vk::DeviceSize offset_v = 0;
         cmd.bindVertexBuffers(0, 1, &mesh.vertexBuffer, &offset_v);
@@ -1402,6 +1428,34 @@ void Renderer::renderWorldChunks(World* world, Camera* camera) {
         
         stats.chunksRendered++;
         stats.drawCalls++;
+    }
+}
+
+void Renderer::evictDistantMeshes(const glm::vec3& cameraPos) {
+    if (!context) return;
+    auto dev = context->getDevice();
+
+    int cx = (int)floor(cameraPos.x / 16.0f);
+    int cz = (int)floor(cameraPos.z / 16.0f);
+    int evictDist = settings.renderDistance + 3;
+
+    std::vector<uint64_t> toEvict;
+    for (auto& [key, mesh] : chunkMeshes) {
+        int dx = mesh.chunkPos.x - cx;
+        int dz = mesh.chunkPos.z - cz;
+        if (dx * dx + dz * dz > evictDist * evictDist) {
+            toEvict.push_back(key);
+        }
+    }
+
+    for (auto key : toEvict) {
+        auto it = chunkMeshes.find(key);
+        if (it == chunkMeshes.end()) continue;
+        if (it->second.vertexBuffer) dev.destroyBuffer(it->second.vertexBuffer);
+        if (it->second.vertexMemory) dev.freeMemory(it->second.vertexMemory);
+        if (it->second.indexBuffer) dev.destroyBuffer(it->second.indexBuffer);
+        if (it->second.indexMemory) dev.freeMemory(it->second.indexMemory);
+        chunkMeshes.erase(it);
     }
 }
 

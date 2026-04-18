@@ -104,7 +104,8 @@ void Game::onUpdate(float deltaTime) {
     }
     
     float aspect = getWindow().getAspectRatio();
-    camera.setPerspective(settings.fov, aspect, 0.1f, 1000.0f);
+    float farPlane = (float)(settings.renderDistance * 16) * 1.5f;
+    camera.setPerspective(settings.fov, aspect, 0.1f, farPlane);
     
     if (rendererInitialized && world) {
         renderer.generateAndUploadChunks(world.get(), playerPos);
@@ -162,7 +163,7 @@ void Game::onRender() {
         renderer.setClearColor(skyR, skyG, skyB);
         renderer.beginFrame();
         if (world) {
-            renderer.renderWorldChunks(world.get(), &camera);
+            renderer.renderWorldChunks(world.get(), &camera, skyR, skyG, skyB);
         }
         renderer.drawClouds(&camera, gameTime);
         renderer.resetUIBatch();
