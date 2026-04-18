@@ -817,9 +817,14 @@ void Renderer::initChunkRendering() {
     } else {
         VF_ERROR("Failed to create chunk rendering pipeline");
     }
+
+    // Initialize UI rendering resources once chunk rendering is ready
+    initUIRendering();
 }
 
 void Renderer::cleanupChunkRendering() {
+    // Cleanup UI resources first to ensure no GPU usage during chunk teardown
+    cleanupUIRendering();
     if (!context) return;
     auto dev = context->getDevice();
     
@@ -1048,8 +1053,136 @@ void Renderer::invalidateChunkMesh(int chunkX, int chunkZ) {
     chunkMeshes.erase(it);
 }
 
-void Renderer::drawCrosshair() {
+void Renderer::initUIRendering() {
+    if (!context || !chunkPipelineReady) return;
+    
+    auto dev = context->getDevice();
+    
+    const char* uiVertSrc = R"(
+        #version 450
+        layout(location=0) in vec3 inPos;
+        layout(location=1) in uint inColor;
+        layout(push_constant) uniform PC { mat4 mvp; };
+        layout(location=0) out vec4 vColor;
+        void main() {
+            gl_Position = mvp * vec4(inPos, 1.0);
+            float r = float(inColor & 0xFFu) / 255.0;
+            float g = float((inColor >> 8u) & 0xFFu) / 255.0;
+            float b = float((inColor >> 16u) & 0xFFu) / 255.0;
+            float a = float((inColor >> 24u) & 0xFFu) / 255.0;
+            vColor = vec4(r, g, b, a);
+        }
+    )";
+    
+    const char* uiFragSrc = R"(
+        #version 450
+        layout(location=0) in vec4 vColor;
+        layout(location=0) out vec4 outColor;
+        void main() { outColor = vColor; }
+    )";
+    
+    uiVertShader = compileShader(uiVertSrc, EShLangVertex);
+    uiFragShader = compileShader(uiFragSrc, EShLangFragment);
+    
+    if (!uiVertShader || !uiFragShader) {
+        VF_ERROR("Failed to compile UI shaders");
+        return;
+    }
+    
+    VulkanPipelineBuilder builder(dev);
+    builder.setShaders(uiVertShader, uiFragShader);
+    
+    vk::VertexInputBindingDescription binding{0, 16, vk::VertexInputRate::eVertex};
+    std::vector<vk::VertexInputAttributeDescription> attrs = {
+        {0, 0, vk::Format::eR32G32B32Sfloat, 0},
+        {1, 0, vk::Format::eR32Uint, 12}
+    };
+    builder.setVertexInput(binding, attrs);
+    builder.setInputTopology(vk::PrimitiveTopology::eTriangleList);
+    builder.setViewport(0, 0, (float)swapchainExtent.width, (float)swapchainExtent.height);
+    builder.setScissor(0, 0, swapchainExtent.width, swapchainExtent.height);
+    builder.setRasterizer(vk::PolygonMode::eFill, vk::CullModeFlagBits::eNone, vk::FrontFace::eCounterClockwise);
+    builder.setMultisampling(vk::SampleCountFlagBits::e1);
+    builder.setDepthStencil(false, false, vk::CompareOp::eLess);
+    // Alpha blending: src * srcAlpha + dst * (1 - srcAlpha)
+    builder.setColorBlendAttachment(
+        vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG |
+        vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA,
+        true,
+        vk::BlendFactor::eSrcAlpha, vk::BlendFactor::eOneMinusSrcAlpha, vk::BlendOp::eAdd,
+        vk::BlendFactor::eOne, vk::BlendFactor::eZero, vk::BlendOp::eAdd);
+    builder.addPushConstantRange(vk::ShaderStageFlagBits::eVertex, 0, sizeof(glm::mat4));
+    builder.setRenderPass(renderPass, 0);
+    
+    auto pipeline = builder.build();
+    if (pipeline) {
+        uiPipeline = pipeline.release();
+        uiPipelineLayout = builder.getPipelineLayout();
+        uiPipelineReady = true;
+        VF_INFO("UI rendering pipeline created (alpha blending enabled)");
+    } else {
+        VF_ERROR("Failed to create UI rendering pipeline");
+        return;
+    }
+    
+    vk::BufferCreateInfo vbInfo{};
+    vbInfo.size = uiVertexBufferSize;
+    vbInfo.usage = vk::BufferUsageFlagBits::eVertexBuffer;
+    vbInfo.sharingMode = vk::SharingMode::eExclusive;
+    uiVertexBuffer = dev.createBuffer(vbInfo);
+    
+    auto vbMemReqs = dev.getBufferMemoryRequirements(uiVertexBuffer);
+    vk::MemoryAllocateInfo vbAlloc{};
+    vbAlloc.allocationSize = vbMemReqs.size;
+    vbAlloc.memoryTypeIndex = context->findMemoryType(
+        vbMemReqs.memoryTypeBits,
+        vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent);
+    uiVertexMemory = dev.allocateMemory(vbAlloc);
+    dev.bindBufferMemory(uiVertexBuffer, uiVertexMemory, 0);
+    uiVertexMapped = dev.mapMemory(uiVertexMemory, 0, uiVertexBufferSize);
+    
+    vk::BufferCreateInfo ibInfo{};
+    ibInfo.size = uiIndexBufferSize;
+    ibInfo.usage = vk::BufferUsageFlagBits::eIndexBuffer;
+    ibInfo.sharingMode = vk::SharingMode::eExclusive;
+    uiIndexBuffer = dev.createBuffer(ibInfo);
+    
+    auto ibMemReqs = dev.getBufferMemoryRequirements(uiIndexBuffer);
+    vk::MemoryAllocateInfo ibAlloc{};
+    ibAlloc.allocationSize = ibMemReqs.size;
+    ibAlloc.memoryTypeIndex = context->findMemoryType(
+        ibMemReqs.memoryTypeBits,
+        vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent);
+    uiIndexMemory = dev.allocateMemory(ibAlloc);
+    dev.bindBufferMemory(uiIndexBuffer, uiIndexMemory, 0);
+    uiIndexMapped = dev.mapMemory(uiIndexMemory, 0, uiIndexBufferSize);
+    
+    VF_INFO("UI host-visible buffers allocated and mapped (64KB each)");
+}
+
+void Renderer::cleanupUIRendering() {
     if (!context) return;
+    auto dev = context->getDevice();
+    
+    if (uiVertexMapped) { dev.unmapMemory(uiVertexMemory); uiVertexMapped = nullptr; }
+    if (uiIndexMapped)  { dev.unmapMemory(uiIndexMemory); uiIndexMapped = nullptr; }
+    
+    if (uiVertexBuffer) { dev.destroyBuffer(uiVertexBuffer); uiVertexBuffer = VK_NULL_HANDLE; }
+    if (uiVertexMemory) { dev.freeMemory(uiVertexMemory); uiVertexMemory = VK_NULL_HANDLE; }
+    if (uiIndexBuffer)  { dev.destroyBuffer(uiIndexBuffer); uiIndexBuffer = VK_NULL_HANDLE; }
+    if (uiIndexMemory)  { dev.freeMemory(uiIndexMemory); uiIndexMemory = VK_NULL_HANDLE; }
+    
+    if (uiPipeline)      { dev.destroyPipeline(uiPipeline); uiPipeline = VK_NULL_HANDLE; }
+    if (uiPipelineLayout){ dev.destroyPipelineLayout(uiPipelineLayout); uiPipelineLayout = VK_NULL_HANDLE; }
+    if (uiVertShader)    { dev.destroyShaderModule(uiVertShader); uiVertShader = VK_NULL_HANDLE; }
+    if (uiFragShader)    { dev.destroyShaderModule(uiFragShader); uiFragShader = VK_NULL_HANDLE; }
+    
+    uiPipelineReady = false;
+    VF_INFO("UI rendering resources cleaned up");
+}
+
+void Renderer::drawCrosshair() {
+    if (!uiPipelineReady || !uiVertexMapped || !uiIndexMapped) return;
     auto& cmd = commandBuffers[currentImageIndex];
     
     float size = 0.015f;
@@ -1058,84 +1191,40 @@ void Renderer::drawCrosshair() {
     struct UIVert { float x, y, z; uint32_t color; };
     uint32_t white = 0xFFFFFFFF;
     
-    std::vector<UIVert> verts;
-    std::vector<uint32_t> indices;
+    UIVert verts[12];
+    uint32_t indices[18];
+    uint32_t v = 0, idx = 0;
     
     auto addRect = [&](float x0, float y0, float x1, float y1, uint32_t col) {
-        uint32_t base = (uint32_t)verts.size();
-        verts.push_back({x0, y0, 0.0f, col});
-        verts.push_back({x1, y0, 0.0f, col});
-        verts.push_back({x1, y1, 0.0f, col});
-        verts.push_back({x0, y1, 0.0f, col});
-        indices.insert(indices.end(), {base, base+1, base+2, base, base+2, base+3});
+        uint32_t base = v;
+        verts[v++] = {x0, y0, 0.0f, col};
+        verts[v++] = {x1, y0, 0.0f, col};
+        verts[v++] = {x1, y1, 0.0f, col};
+        verts[v++] = {x0, y1, 0.0f, col};
+        indices[idx++] = base; indices[idx++] = base+1; indices[idx++] = base+2;
+        indices[idx++] = base; indices[idx++] = base+2; indices[idx++] = base+3;
     };
     
     addRect(-size, -thickness, size, thickness, white);
     addRect(-thickness, -size, thickness, -thickness, white);
     addRect(-thickness, thickness, thickness, size, white);
     
-    vk::DeviceSize vsize = verts.size() * sizeof(UIVert);
-    vk::DeviceSize isize = indices.size() * sizeof(uint32_t);
+    memcpy(uiVertexMapped, verts, v * sizeof(UIVert));
+    memcpy(uiIndexMapped, indices, idx * sizeof(uint32_t));
     
-    vk::Buffer stagingBuf;
-    vk::DeviceMemory stagingMem;
-    createChunkBuffer(vsize + isize,
-        vk::BufferUsageFlagBits::eTransferSrc,
-        vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
-        stagingBuf, stagingMem);
-    
-    void* data = context->getDevice().mapMemory(stagingMem, 0, vsize + isize);
-    memcpy(data, verts.data(), vsize);
-    memcpy((char*)data + vsize, indices.data(), isize);
-    context->getDevice().unmapMemory(stagingMem);
-    
-    vk::Buffer vb, ib;
-    vk::DeviceMemory vm, im;
-    createChunkBuffer(vsize,
-        vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst,
-        vk::MemoryPropertyFlagBits::eDeviceLocal, vb, vm);
-    createChunkBuffer(isize,
-        vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst,
-        vk::MemoryPropertyFlagBits::eDeviceLocal, ib, im);
-    
-    auto dev = context->getDevice();
-    vk::CommandBufferAllocateInfo allocInfo{};
-    allocInfo.commandPool = commandPool;
-    allocInfo.level = vk::CommandBufferLevel::ePrimary;
-    allocInfo.commandBufferCount = 1;
-    auto tmpCmd = dev.allocateCommandBuffers(allocInfo)[0];
-    tmpCmd.begin(vk::CommandBufferBeginInfo{vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
-    tmpCmd.copyBuffer(stagingBuf, vb, vk::BufferCopy{0, 0, vsize});
-    tmpCmd.copyBuffer(stagingBuf, ib, vk::BufferCopy{vsize, 0, isize});
-    tmpCmd.end();
-    vk::SubmitInfo uiSubmit{};
-    uiSubmit.commandBufferCount = 1;
-    uiSubmit.pCommandBuffers = &tmpCmd;
-    context->getGraphicsQueue().submit(1, &uiSubmit, VK_NULL_HANDLE);
-    context->getGraphicsQueue().waitIdle();
-    dev.freeCommandBuffers(commandPool, 1, &tmpCmd);
-    dev.destroyBuffer(stagingBuf);
-    dev.freeMemory(stagingMem);
-    
-    cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, chunkPipeline);
+    cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, uiPipeline);
     glm::mat4 identity(1.0f);
-    cmd.pushConstants(chunkPipelineLayout, vk::ShaderStageFlagBits::eVertex, 0, sizeof(glm::mat4), &identity);
+    cmd.pushConstants(uiPipelineLayout, vk::ShaderStageFlagBits::eVertex, 0, sizeof(glm::mat4), &identity);
     vk::DeviceSize off = 0;
-    cmd.bindVertexBuffers(0, 1, &vb, &off);
-    cmd.bindIndexBuffer(ib, 0, vk::IndexType::eUint32);
-    cmd.drawIndexed((uint32_t)indices.size(), 1, 0, 0, 0);
-    
-    dev.destroyBuffer(vb);
-    dev.freeMemory(vm);
-    dev.destroyBuffer(ib);
-    dev.freeMemory(im);
+    cmd.bindVertexBuffers(0, 1, &uiVertexBuffer, &off);
+    cmd.bindIndexBuffer(uiIndexBuffer, 0, vk::IndexType::eUint32);
+    cmd.drawIndexed(idx, 1, 0, 0, 0);
 }
 
 void Renderer::drawHotbar(int selectedSlot, const std::array<uint32_t, 9>& hotbarBlocks) {
-    if (!context) return;
+    if (!uiPipelineReady || !uiVertexMapped || !uiIndexMapped) return;
     auto& cmd = commandBuffers[currentImageIndex];
     
-    float aspectRatio = (float)swapchainExtent.width / (float)swapchainExtent.height;
     float slotSize = 0.04f;
     float padding = 0.004f;
     float totalWidth = 9.0f * slotSize + 8.0f * padding;
@@ -1143,16 +1232,19 @@ void Renderer::drawHotbar(int selectedSlot, const std::array<uint32_t, 9>& hotba
     float startY = -0.95f;
     
     struct UIVert { float x, y, z; uint32_t color; };
-    std::vector<UIVert> verts;
-    std::vector<uint32_t> indices;
+    
+    UIVert verts[72];
+    uint32_t indices[108];
+    uint32_t v = 0, idx = 0;
     
     auto addRect = [&](float x0, float y0, float x1, float y1, uint32_t col) {
-        uint32_t base = (uint32_t)verts.size();
-        verts.push_back({x0, y0, 0.0f, col});
-        verts.push_back({x1, y0, 0.0f, col});
-        verts.push_back({x1, y1, 0.0f, col});
-        verts.push_back({x0, y1, 0.0f, col});
-        indices.insert(indices.end(), {base, base+1, base+2, base, base+2, base+3});
+        uint32_t base = v;
+        verts[v++] = {x0, y0, 0.0f, col};
+        verts[v++] = {x1, y0, 0.0f, col};
+        verts[v++] = {x1, y1, 0.0f, col};
+        verts[v++] = {x0, y1, 0.0f, col};
+        indices[idx++] = base; indices[idx++] = base+1; indices[idx++] = base+2;
+        indices[idx++] = base; indices[idx++] = base+2; indices[idx++] = base+3;
     };
     
     for (int i = 0; i < 9; i++) {
@@ -1168,62 +1260,16 @@ void Renderer::drawHotbar(int selectedSlot, const std::array<uint32_t, 9>& hotba
         }
     }
     
-    vk::DeviceSize vsize = verts.size() * sizeof(UIVert);
-    vk::DeviceSize isize = indices.size() * sizeof(uint32_t);
+    memcpy(uiVertexMapped, verts, v * sizeof(UIVert));
+    memcpy(uiIndexMapped, indices, idx * sizeof(uint32_t));
     
-    vk::Buffer stagingBuf;
-    vk::DeviceMemory stagingMem;
-    createChunkBuffer(vsize + isize,
-        vk::BufferUsageFlagBits::eTransferSrc,
-        vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
-        stagingBuf, stagingMem);
-    
-    void* data = context->getDevice().mapMemory(stagingMem, 0, vsize + isize);
-    memcpy(data, verts.data(), vsize);
-    memcpy((char*)data + vsize, indices.data(), isize);
-    context->getDevice().unmapMemory(stagingMem);
-    
-    vk::Buffer vb, ib;
-    vk::DeviceMemory vm, im;
-    createChunkBuffer(vsize,
-        vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst,
-        vk::MemoryPropertyFlagBits::eDeviceLocal, vb, vm);
-    createChunkBuffer(isize,
-        vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst,
-        vk::MemoryPropertyFlagBits::eDeviceLocal, ib, im);
-    
-    auto dev = context->getDevice();
-    vk::CommandBufferAllocateInfo allocInfo{};
-    allocInfo.commandPool = commandPool;
-    allocInfo.level = vk::CommandBufferLevel::ePrimary;
-    allocInfo.commandBufferCount = 1;
-    auto tmpCmd = dev.allocateCommandBuffers(allocInfo)[0];
-    tmpCmd.begin(vk::CommandBufferBeginInfo{vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
-    tmpCmd.copyBuffer(stagingBuf, vb, vk::BufferCopy{0, 0, vsize});
-    tmpCmd.copyBuffer(stagingBuf, ib, vk::BufferCopy{vsize, 0, isize});
-    tmpCmd.end();
-    vk::SubmitInfo uiSubmit{};
-    uiSubmit.commandBufferCount = 1;
-    uiSubmit.pCommandBuffers = &tmpCmd;
-    context->getGraphicsQueue().submit(1, &uiSubmit, VK_NULL_HANDLE);
-    context->getGraphicsQueue().waitIdle();
-    dev.freeCommandBuffers(commandPool, 1, &tmpCmd);
-    dev.destroyBuffer(stagingBuf);
-    dev.freeMemory(stagingMem);
-    
-    cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, chunkPipeline);
+    cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, uiPipeline);
     glm::mat4 identity(1.0f);
-    cmd.pushConstants(chunkPipelineLayout, vk::ShaderStageFlagBits::eVertex, 0, sizeof(glm::mat4), &identity);
-    
+    cmd.pushConstants(uiPipelineLayout, vk::ShaderStageFlagBits::eVertex, 0, sizeof(glm::mat4), &identity);
     vk::DeviceSize off = 0;
-    cmd.bindVertexBuffers(0, 1, &vb, &off);
-    cmd.bindIndexBuffer(ib, 0, vk::IndexType::eUint32);
-    cmd.drawIndexed((uint32_t)indices.size(), 1, 0, 0, 0);
-    
-    dev.destroyBuffer(vb);
-    dev.freeMemory(vm);
-    dev.destroyBuffer(ib);
-    dev.freeMemory(im);
+    cmd.bindVertexBuffers(0, 1, &uiVertexBuffer, &off);
+    cmd.bindIndexBuffer(uiIndexBuffer, 0, vk::IndexType::eUint32);
+    cmd.drawIndexed(idx, 1, 0, 0, 0);
 }
 
 } // namespace VoxelForge

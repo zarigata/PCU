@@ -115,9 +115,8 @@ void Game::onRender() {
             renderer.renderWorldChunks(world.get(), &camera);
         }
         if (!paused) {
-            // TODO: UI rendering needs its own pipeline/buffers to avoid GPU fault
-            // renderer.drawCrosshair();
-            // renderer.drawHotbar(selectedSlot, hotbarBlocks);
+            renderer.drawCrosshair();
+            renderer.drawHotbar(selectedSlot, hotbarBlocks);
         }
         renderer.endFrame();
     } catch (const std::exception& e) {

@@ -89,6 +89,10 @@ public:
     void invalidateChunkMesh(int chunkX, int chunkZ);
     void drawCrosshair();
     void drawHotbar(int selectedSlot, const std::array<uint32_t, 9>& hotbarBlocks);
+
+    // UI rendering (host-visible buffers, dedicated UI pipeline)
+    void initUIRendering();
+    void cleanupUIRendering();
     
     // Resize
     void onResize(int width, int height);
@@ -192,6 +196,21 @@ private:
     void createChunkBuffer(vk::DeviceSize size, vk::BufferUsageFlags usage, vk::MemoryPropertyFlags props, vk::Buffer& buf, vk::DeviceMemory& mem);
     void uploadChunkMesh(const glm::ivec3& pos, const std::vector<float>& verts, const std::vector<uint32_t>& indices);
     static uint64_t posKey(int x, int y, int z);
+
+    // UI rendering resources (host-visible, persistent buffers + UI pipeline)
+    vk::Pipeline uiPipeline = VK_NULL_HANDLE;
+    vk::PipelineLayout uiPipelineLayout = VK_NULL_HANDLE;
+    vk::ShaderModule uiVertShader = VK_NULL_HANDLE;
+    vk::ShaderModule uiFragShader = VK_NULL_HANDLE;
+    vk::Buffer uiVertexBuffer = VK_NULL_HANDLE;
+    vk::DeviceMemory uiVertexMemory = VK_NULL_HANDLE;
+    vk::Buffer uiIndexBuffer = VK_NULL_HANDLE;
+    vk::DeviceMemory uiIndexMemory = VK_NULL_HANDLE;
+    vk::DeviceSize uiVertexBufferSize = 64 * 1024; // 64KB
+    vk::DeviceSize uiIndexBufferSize = 64 * 1024;  // 64KB
+    void* uiVertexMapped = nullptr;
+    void* uiIndexMapped = nullptr;
+    bool uiPipelineReady = false;
     
     // Frame data
     static constexpr int MAX_FRAMES_IN_FLIGHT = 2;
