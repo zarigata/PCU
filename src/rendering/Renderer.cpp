@@ -970,7 +970,16 @@ void Renderer::generateAndUploadChunks(World* world, const glm::vec3& cameraPos)
     int cx = (int)floor(cameraPos.x / 16.0f);
     int cz = (int)floor(cameraPos.z / 16.0f);
     
+    static bool firstLog = true;
+    if (firstLog) {
+        VF_INFO("Chunk mesh gen: cameraPos=({:.1f},{:.1f},{:.1f}) cx={} cz={} rd={}",
+                cameraPos.x, cameraPos.y, cameraPos.z, cx, cz, rd);
+        firstLog = false;
+    }
+    
     int uploaded = 0;
+    int skipped = 0;
+    int emptyMesh = 0;
     
     for (int dz = -rd; dz <= rd && uploaded < settings.maxChunksPerFrame; dz++) {
         for (int dx = -rd; dx <= rd && uploaded < settings.maxChunksPerFrame; dx++) {
@@ -979,22 +988,23 @@ void Renderer::generateAndUploadChunks(World* world, const glm::vec3& cameraPos)
             if (chunkMeshes.count(key)) continue;
             
             auto* chunk = world->getChunk(cpos);
-            if (!chunk) continue;
+            if (!chunk) { skipped++; continue; }
         
         std::vector<float> vertices;
         std::vector<uint32_t> indices;
         
-        for (int y = 0; y < 128; y++) {
+        for (int y = CHUNK_MIN_Y; y < CHUNK_MIN_Y + CHUNK_HEIGHT; y++) {
             for (int z = 0; z < 16; z++) {
                 for (int x = 0; x < 16; x++) {
                     auto block = chunk->getBlock(x, y, z);
                     if (block.isAir()) continue;
                     
                     uint32_t bid = block.getBlockId();
-                    float fx = (float)x, fy = (float)(y - 64), fz = (float)z;
+                    float fx = (float)x, fy = (float)y, fz = (float)z;
                     
                     auto checkNeighbor = [&](int nx, int ny, int nz) -> bool {
-                        if (nx < 0 || nx >= 16 || nz < 0 || nz >= 16 || ny < 0 || ny >= 384) return true;
+                        if (nx < 0 || nx >= 16 || nz < 0 || nz >= 16) return true;
+                        if (ny < CHUNK_MIN_Y || ny >= CHUNK_MIN_Y + CHUNK_HEIGHT) return true;
                         auto nb = chunk->getBlock(nx, ny, nz);
                         return nb.isAir();
                     };
@@ -1026,23 +1036,42 @@ void Renderer::generateAndUploadChunks(World* world, const glm::vec3& cameraPos)
         if (!vertices.empty()) {
             uploadChunkMesh(glm::ivec3(cpos.x, 0, cpos.z), vertices, indices);
             uploaded++;
+            if (uploaded <= 4) {
+                VF_INFO("Uploaded chunk ({},{}) : {} verts, {} indices",
+                        cpos.x, cpos.z, vertices.size()/4, indices.size());
+            }
+        } else {
+            emptyMesh++;
         }
         }
+    }
+    
+    if (uploaded > 0 || (skipped > 0 && skipped <= 5)) {
+        VF_INFO("Chunk mesh pass: uploaded={} skipped={} empty={} total={}",
+                uploaded, skipped, emptyMesh, (int)chunkMeshes.size());
     }
 }
 
 void Renderer::renderWorldChunks(World* world, Camera* camera) {
     if (!chunkPipelineReady || chunkMeshes.empty()) return;
     
+    static bool firstRenderLog = true;
+    
     auto& cmd = commandBuffers[currentImageIndex];
     cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, chunkPipeline);
     
     glm::mat4 vp = camera->getViewProjectionMatrix();
     
+    if (firstRenderLog) {
+        auto pos = camera->getPosition();
+        VF_INFO("First chunk render: cam=({:.1f},{:.1f},{:.1f}) meshes={}", pos.x, pos.y, pos.z, chunkMeshes.size());
+        firstRenderLog = false;
+    }
+    
     for (auto& [key, mesh] : chunkMeshes) {
         if (!mesh.valid || mesh.indexCount == 0) continue;
         
-        glm::vec3 offset(mesh.chunkPos.x * 16.0f, (mesh.chunkPos.y * 16.0f) - 64.0f, mesh.chunkPos.z * 16.0f);
+        glm::vec3 offset(mesh.chunkPos.x * 16.0f, 0.0f, mesh.chunkPos.z * 16.0f);
         glm::mat4 model = glm::translate(glm::mat4(1.0f), offset);
         glm::mat4 mvp = vp * model;
         

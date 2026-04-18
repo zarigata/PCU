@@ -31,6 +31,10 @@ void Game::onInit() {
     VF_CORE_INFO("World created with seed 0");
     loadWorld();
     
+    int spawnHeight = world->getHeight(0, 0);
+    playerPos.y = static_cast<float>(spawnHeight + 2);
+    VF_CORE_INFO("Spawn height: {} (terrain surface), player at y={:.1f}", spawnHeight, playerPos.y);
+    
     camera.setPerspective(settings.fov,
                           static_cast<float>(getWindow().getWidth()) / static_cast<float>(getWindow().getHeight()),
                           0.1f, 1000.0f);
