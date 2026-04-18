@@ -201,7 +201,7 @@ vk::UniquePipeline VulkanPipelineBuilder::build(vk::PipelineCache cache) {
     
     // Create graphics pipeline
     vk::GraphicsPipelineCreateInfo pipelineInfo{};
-    pipelineInfo.sType = vk::StructureType::ePipelineGraphicsPipelineCreateInfo;
+    pipelineInfo.sType = vk::StructureType::eGraphicsPipelineCreateInfo;
     pipelineInfo.stageCount = static_cast<uint32_t>(shaderStages_.size());
     pipelineInfo.pStages = shaderStages_.data();
     pipelineInfo.pVertexInputState = &vertexInput;

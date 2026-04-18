@@ -237,7 +237,7 @@ add_library(VoxelForge_Engine STATIC
     src/rendering/VulkanContext.cpp
     src/rendering/VulkanDevice.cpp
     src/rendering/VulkanSwapchain.cpp
-    # src/rendering/VulkanPipeline.cpp  # TODO: missing headers
+    src/rendering/VulkanPipeline.cpp
     src/rendering/VulkanCommandBuffer.cpp
     src/rendering/VulkanBuffer.cpp
     # src/rendering/VulkanImage.cpp  # TODO: missing headers
