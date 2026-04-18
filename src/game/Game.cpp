@@ -134,13 +134,16 @@ void Game::onUpdate(float deltaTime) {
 
         int uploadBytes = 0;
         int uploadedCount = 0;
-        if (!pendingUploads_.empty()) {
+        int batchMax = std::min(2, (int)pendingUploads_.size());
+        if (batchMax > 0) {
             diag.beginSection("upload");
-            renderer.submitUploadBatch({pendingUploads_.begin(), pendingUploads_.begin() + 1});
-            uploadBytes = (int)(pendingUploads_[0].vertices.size() * sizeof(float) +
-                                pendingUploads_[0].indices.size() * sizeof(uint32_t));
-            uploadedCount = 1;
-            pendingUploads_.erase(pendingUploads_.begin());
+            renderer.submitUploadBatch({pendingUploads_.begin(), pendingUploads_.begin() + batchMax});
+            for (int i = 0; i < batchMax; i++) {
+                uploadBytes += (int)(pendingUploads_[i].vertices.size() * sizeof(float) +
+                                    pendingUploads_[i].indices.size() * sizeof(uint32_t));
+            }
+            uploadedCount = batchMax;
+            pendingUploads_.erase(pendingUploads_.begin(), pendingUploads_.begin() + batchMax);
             diag.endSection("upload");
         }
 
@@ -644,14 +647,12 @@ void Game::handleBlockInteraction() {
         int cz = (int)floor((float)hitBlock.z / 16.0f);
         renderer.invalidateChunkMesh(cx, cz);
         asyncWorker_.forgetMesh(cx, cz);
-        if (hitNormal.x != 0 && (hitBlock.x & 15) == (hitNormal.x > 0 ? 0 : 15)) {
-            renderer.invalidateChunkMesh(cx - hitNormal.x, cz);
-            asyncWorker_.forgetMesh(cx - hitNormal.x, cz);
-        }
-        if (hitNormal.z != 0 && (hitBlock.z & 15) == (hitNormal.z > 0 ? 0 : 15)) {
-            renderer.invalidateChunkMesh(cx, cz - hitNormal.z);
-            asyncWorker_.forgetMesh(cx, cz - hitNormal.z);
-        }
+        int localX = hitBlock.x & 15;
+        int localZ = hitBlock.z & 15;
+        if (localX == 0) { renderer.invalidateChunkMesh(cx - 1, cz); asyncWorker_.forgetMesh(cx - 1, cz); }
+        if (localX == 15) { renderer.invalidateChunkMesh(cx + 1, cz); asyncWorker_.forgetMesh(cx + 1, cz); }
+        if (localZ == 0) { renderer.invalidateChunkMesh(cx, cz - 1); asyncWorker_.forgetMesh(cx, cz - 1); }
+        if (localZ == 15) { renderer.invalidateChunkMesh(cx, cz + 1); asyncWorker_.forgetMesh(cx, cz + 1); }
         diag.recordRemoveAttempt(true);
     }
     
@@ -672,14 +673,12 @@ void Game::handleBlockInteraction() {
                     int cz = (int)floor((float)placePos.z / 16.0f);
                     renderer.invalidateChunkMesh(cx, cz);
                     asyncWorker_.forgetMesh(cx, cz);
-                    if (hitNormal.x != 0 && (placePos.x & 15) == (hitNormal.x > 0 ? 0 : 15)) {
-                        renderer.invalidateChunkMesh(cx - hitNormal.x, cz);
-                        asyncWorker_.forgetMesh(cx - hitNormal.x, cz);
-                    }
-                    if (hitNormal.z != 0 && (placePos.z & 15) == (hitNormal.z > 0 ? 0 : 15)) {
-                        renderer.invalidateChunkMesh(cx, cz - hitNormal.z);
-                        asyncWorker_.forgetMesh(cx, cz - hitNormal.z);
-                    }
+                    int localPX = placePos.x & 15;
+                    int localPZ = placePos.z & 15;
+                    if (localPX == 0) { renderer.invalidateChunkMesh(cx - 1, cz); asyncWorker_.forgetMesh(cx - 1, cz); }
+                    if (localPX == 15) { renderer.invalidateChunkMesh(cx + 1, cz); asyncWorker_.forgetMesh(cx + 1, cz); }
+                    if (localPZ == 0) { renderer.invalidateChunkMesh(cx, cz - 1); asyncWorker_.forgetMesh(cx, cz - 1); }
+                    if (localPZ == 15) { renderer.invalidateChunkMesh(cx, cz + 1); asyncWorker_.forgetMesh(cx, cz + 1); }
                     diag.recordPlaceAttempt(true);
                 } else {
                     diag.recordPlaceAttempt(false);
