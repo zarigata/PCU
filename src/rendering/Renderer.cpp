@@ -1323,4 +1323,96 @@ void Renderer::drawHotbar(int selectedSlot, const std::array<uint32_t, 9>& hotba
     cmd.drawIndexed(idx, 1, 0, 0, 0);
 }
 
+void Renderer::drawPauseMenu(int selection, float sensitivity, bool invertY, bool invertX, bool flyMode) {
+    if (!uiPipelineReady || !uiVertexMapped || !uiIndexMapped) return;
+    auto& cmd = commandBuffers[currentImageIndex];
+    
+    struct UIVert { float x, y, z; uint32_t color; };
+    
+    const int MAX_MENU_VERTS = 512;
+    const int MAX_MENU_INDICES = 768;
+    UIVert verts[MAX_MENU_VERTS];
+    uint32_t indices[MAX_MENU_INDICES];
+    uint32_t v = 0, idx = 0;
+    
+    auto addRect = [&](float x0, float y0, float x1, float y1, uint32_t col) {
+        if (v + 4 > MAX_MENU_VERTS || idx + 6 > MAX_MENU_INDICES) return;
+        uint32_t base = v;
+        verts[v++] = {x0, y0, 0.0f, col};
+        verts[v++] = {x1, y0, 0.0f, col};
+        verts[v++] = {x1, y1, 0.0f, col};
+        verts[v++] = {x0, y1, 0.0f, col};
+        indices[idx++] = base; indices[idx++] = base+1; indices[idx++] = base+2;
+        indices[idx++] = base; indices[idx++] = base+2; indices[idx++] = base+3;
+    };
+    
+    uint32_t bgDim = 0xCC000000;
+    uint32_t panelBg = 0xDD1a1a2e;
+    uint32_t selectedBg = 0xFFe94560;
+    uint32_t normalBg = 0xFF16213e;
+    uint32_t barBg = 0xFF0f3460;
+    uint32_t barFill = 0xFFe94560;
+    uint32_t onColor = 0xFF4ecca3;
+    uint32_t offColor = 0xFF6c757d;
+    
+    addRect(-1.0f, -1.0f, 1.0f, 1.0f, bgDim);
+    
+    float panelW = 0.7f;
+    float panelH = 0.75f;
+    addRect(-panelW, -panelH, panelW, panelH, panelBg);
+    
+    float itemY = 0.55f;
+    float itemH = 0.09f;
+    float itemW = 0.6f;
+    float gap = 0.02f;
+    
+    struct MenuItem {
+        const char* label;
+        int type; // 0=action, 1=slider, 2=toggle
+        float value;
+        bool on;
+    };
+    
+    MenuItem items[] = {
+        {"RESUME", 0, 0, false},
+        {"MOUSE SENSITIVITY", 1, sensitivity, false},
+        {"INVERT MOUSE Y", 2, 0, invertY},
+        {"INVERT MOUSE X", 2, 0, invertX},
+        {"TOGGLE FLY MODE", 0, 0, flyMode},
+    };
+    int itemCount = 5;
+    
+    for (int i = 0; i < itemCount; i++) {
+        float y = itemY - i * (itemH + gap);
+        uint32_t bg = (i == selection) ? selectedBg : normalBg;
+        addRect(-itemW, y - itemH, itemW, y, bg);
+        
+        if (items[i].type == 1) {
+            float barMargin = 0.05f;
+            float barH = itemH * 0.3f;
+            float barY = y - itemH * 0.65f;
+            addRect(-itemW + barMargin, barY - barH, itemW - barMargin, barY, barBg);
+            float fillW = (itemW - barMargin) * 2.0f * items[i].value;
+            addRect(-itemW + barMargin, barY - barH, -itemW + barMargin + fillW, barY, barFill);
+        } else if (items[i].type == 2) {
+            float indSize = itemH * 0.3f;
+            float indX = itemW - 0.08f;
+            float indY = y - itemH * 0.5f;
+            addRect(indX - indSize, indY - indSize, indX + indSize, indY + indSize,
+                    items[i].on ? onColor : offColor);
+        }
+    }
+    
+    memcpy(uiVertexMapped, verts, v * sizeof(UIVert));
+    memcpy(uiIndexMapped, indices, idx * sizeof(uint32_t));
+    
+    cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, uiPipeline);
+    glm::mat4 identity(1.0f);
+    cmd.pushConstants(uiPipelineLayout, vk::ShaderStageFlagBits::eVertex, 0, sizeof(glm::mat4), &identity);
+    vk::DeviceSize off = 0;
+    cmd.bindVertexBuffers(0, 1, &uiVertexBuffer, &off);
+    cmd.bindIndexBuffer(uiIndexBuffer, 0, vk::IndexType::eUint32);
+    cmd.drawIndexed(idx, 1, 0, 0, 0);
+}
+
 } // namespace VoxelForge

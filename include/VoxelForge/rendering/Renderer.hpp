@@ -89,6 +89,7 @@ public:
     void invalidateChunkMesh(int chunkX, int chunkZ);
     void drawCrosshair();
     void drawHotbar(int selectedSlot, const std::array<uint32_t, 9>& hotbarBlocks);
+    void drawPauseMenu(int selection, float sensitivity, bool invertY, bool invertX, bool flyMode);
 
     // UI rendering (host-visible buffers, dedicated UI pipeline)
     void initUIRendering();

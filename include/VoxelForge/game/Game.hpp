@@ -28,13 +28,15 @@ struct GameSettings {
     bool cloudsEnabled = true;
     float fov = 70.0f;
     float mouseSensitivity = 0.1f;
+    bool invertMouseY = false;
+    bool invertMouseX = false;
     bool vsync = true;
     bool fullscreen = false;
     int maxFPS = 120;
     
     // Day/Night cycle
-    float dayNightCycleDuration = 12000.0f;  // 20 minutes (in ticks)
-    float dayStartTime = 0.0f;           // When day started (in ticks since world time)
+    float dayNightCycleDuration = 12000.0f;
+    float dayStartTime = 0.0f;
 };
 
 class Game : public Application {
@@ -125,6 +127,8 @@ private:
     int frameCount = 0;
     float currentFPS = 0.0f;
     float fpsUpdateTimer = 0.0f;
+    
+    int pauseMenuSelection = 0;
 };
 
 // Game instance access

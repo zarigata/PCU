@@ -80,6 +80,8 @@ void Game::onShutdown() {
 }
 
 void Game::onUpdate(float deltaTime) {
+    processInput(deltaTime);
+    
     if (paused) {
         return;
     }
@@ -117,8 +119,6 @@ void Game::onUpdate(float deltaTime) {
         tickAccumulator -= 0.05f;
     }
     
-    processInput(deltaTime);
-    
     if (ecsWorld) {
         ecsWorld->updateSystems(deltaTime);
     }
@@ -147,6 +147,9 @@ void Game::onRender() {
         if (!paused) {
             renderer.drawCrosshair();
             renderer.drawHotbar(selectedSlot, hotbarBlocks);
+        } else {
+            renderer.drawPauseMenu(pauseMenuSelection, settings.mouseSensitivity,
+                                    settings.invertMouseY, settings.invertMouseX, flyMode);
         }
         renderer.endFrame();
     } catch (const std::exception& e) {
@@ -160,10 +163,40 @@ void Game::processInput(float deltaTime) {
     if (input.isKeyJustPressed(Key::Escape)) {
         togglePause();
         if (paused) {
+            pauseMenuSelection = 0;
             getWindow().showCursor();
         } else {
             getWindow().disableCursor();
         }
+    }
+    
+    if (paused) {
+        constexpr int MENU_ITEMS = 5;
+        if (input.isKeyJustPressed(Key::Up)) {
+            pauseMenuSelection = (pauseMenuSelection - 1 + MENU_ITEMS) % MENU_ITEMS;
+        }
+        if (input.isKeyJustPressed(Key::Down)) {
+            pauseMenuSelection = (pauseMenuSelection + 1) % MENU_ITEMS;
+        }
+        if (input.isKeyJustPressed(Key::Left)) {
+            if (pauseMenuSelection == 1) {
+                settings.mouseSensitivity = std::max(0.01f, settings.mouseSensitivity - 0.02f);
+            }
+        }
+        if (input.isKeyJustPressed(Key::Right)) {
+            if (pauseMenuSelection == 1) {
+                settings.mouseSensitivity = std::min(0.5f, settings.mouseSensitivity + 0.02f);
+            }
+        }
+        if (input.isKeyJustPressed(Key::Enter)) {
+            switch (pauseMenuSelection) {
+                case 0: togglePause(); getWindow().disableCursor(); break;
+                case 2: settings.invertMouseY = !settings.invertMouseY; break;
+                case 3: settings.invertMouseX = !settings.invertMouseX; break;
+                case 4: flyMode = !flyMode; playerVelocity = glm::vec3(0.0f); onGround = false; break;
+            }
+        }
+        return;
     }
     
     if (input.isKeyJustPressed(Key::F)) {
@@ -171,8 +204,6 @@ void Game::processInput(float deltaTime) {
         playerVelocity = glm::vec3(0.0f);
         onGround = false;
     }
-    
-    if (paused) return;
     
     static bool loggedFirstInput = false;
     if (flyMode) {
@@ -242,8 +273,10 @@ void Game::processInput(float deltaTime) {
     
     auto mouseDelta = input.getMouseDelta();
     if (glm::length(mouseDelta) > 0.0f) {
-        playerYaw += mouseDelta.x * settings.mouseSensitivity;
-        playerPitch -= mouseDelta.y * settings.mouseSensitivity;
+        float xMul = settings.invertMouseX ? -1.0f : 1.0f;
+        float yMul = settings.invertMouseY ? 1.0f : -1.0f;
+        playerYaw += mouseDelta.x * settings.mouseSensitivity * xMul;
+        playerPitch += mouseDelta.y * settings.mouseSensitivity * yMul;
         playerPitch = std::clamp(playerPitch, -89.0f, 89.0f);
     }
     
