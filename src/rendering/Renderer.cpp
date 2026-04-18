@@ -1168,26 +1168,115 @@ static uint32_t applyFaceLight(uint32_t color, int face) {
            ((uint8_t)(b * brightness) << 16) | (0xFF << 24);
 }
 
-static uint32_t blockColor(uint32_t blockId, int face) {
+static unsigned int posHash(int x, int y, int z) {
+    unsigned int h = (unsigned int)(x * 374761393u + y * 668265263u + z * 1274126177u);
+    h = (h ^ (h >> 13)) * 1274126177u;
+    return h ^ (h >> 16);
+}
+
+static int colorNoise(int x, int y, int z, int range) {
+    return (int)(posHash(x, y, z) % (unsigned int)(range * 2 + 1)) - range;
+}
+
+static uint32_t blockColor(uint32_t blockId, int face, int wx, int wy, int wz) {
+    int n = colorNoise(wx, wy, wz, 10);
     uint32_t base;
     switch (blockId) {
-        case 2: base = face == 4 ? packColor(76,175,80) : packColor(139,119,42); break;
-        case 3: base = packColor(139,90,43); break;
-        case 1: base = packColor(128,128,128); break;
-        case 4: base = packColor(110,110,110); break;
-        case 13: base = packColor(244,225,156); break;
-        case 14: base = packColor(10,10,10); break;
-        case 5: base = packColor(180,140,80); break;
-        case 6: case 7: case 8: case 9: case 10: base = packColor(100,70,40); break;
-        case 11: base = packColor(52,152,219); break;
-        case 12: base = packColor(220,80,20); break;
-        case 15: base = packColor(160,143,129); break;
-        case 16: base = packColor(80,80,80); break;
-        case 17: base = packColor(255,215,0); break;
-        case 18: base = packColor(80,220,230); break;
-        case 64: case 65: case 66: case 67: case 68: case 69: case 70: case 71:
-            base = packColor(50,140,50); break;
-        default: base = packColor(150,150,150); break;
+        case 1: base = packColor(128+n, 128+n, 128+n); break;
+        case 2: base = face == 4
+                        ? packColor(70+n, 168+n/2, 60+n)
+                        : packColor(134+n, 116+n/2, 40+n); break;
+        case 3: base = packColor(134+n, 86+n/2, 40+n); break;
+        case 4: base = packColor(108+n, 108+n, 108+n); break;
+        case 5: base = packColor(178+n, 138+n/2, 78+n); break;
+        case 6: base = packColor(94+n, 66+n/2, 36+n); break;
+        case 7: base = packColor(184+n, 170+n/2, 130+n); break;
+        case 8: base = packColor(70+n, 50+n/2, 30+n); break;
+        case 9: base = packColor(60+n, 42+n/2, 26+n); break;
+        case 10: base = packColor(86+n, 58+n/2, 32+n); break;
+        case 11: base = packColor(42+n/3, 130+n/2, 200); break;
+        case 12: base = packColor(210+n/2, 70+n/3, 15); break;
+        case 13: base = packColor(220+n, 206+n/2, 150+n); break;
+        case 14: base = packColor(8, 8, 8); break;
+        case 15: base = packColor(156+n, 140+n/2, 126+n); break;
+        case 16: base = packColor(70+n, 70+n, 70+n); break;
+        case 17: base = packColor(240+n/3, 200+n/3, 20+n/3); break;
+        case 18: base = packColor(70+n/3, 210+n/3, 220); break;
+        case 19: base = packColor(160+n, 120+n/2, 60+n); break;
+        case 20: base = packColor(140+n, 140+n, 140+n); break;
+        case 21: base = packColor(140+n, 110+n/2, 60+n); break;
+        case 22: base = packColor(220+n, 190+n/2, 50+n); break;
+        case 23: base = packColor(200, 200, 210); break;
+        case 24: base = packColor(148+n, 130+n/2, 116+n); break;
+        case 25: base = packColor(160+n, 142+n/2, 128+n); break;
+        case 26: base = packColor(180+n, 178+n/2, 178+n); break;
+        case 27: base = packColor(190+n, 186+n/2, 182+n); break;
+        case 28: base = packColor(138+n, 128+n/2, 120+n); break;
+        case 29: base = packColor(150+n, 142+n/2, 134+n); break;
+        case 30: base = packColor(80+n/2, 76+n/2, 76+n/2); break;
+        case 31: base = packColor(86+n, 82+n/2, 80+n); break;
+        case 32: base = packColor(100+n, 98+n/2, 94+n); break;
+        case 33: case 34: case 35: case 36:
+            base = packColor(118+n, 114+n/2, 108+n); break;
+        case 37: base = packColor(156+n, 80+n/2, 50+n); break;
+        case 38: base = packColor(156+n, 120+n/2, 80+n); break;
+        case 39: base = packColor(100+n, 80+n/2, 60+n); break;
+        case 40: base = packColor(60+n, 140+n/2, 50+n); break;
+        case 41: base = packColor(80+n, 60+n/2, 50+n); break;
+        case 42: base = packColor(140+n, 30+n/3, 30+n/3); break;
+        case 43: base = packColor(110+n, 30+n/3, 30+n/3); break;
+        case 44: base = packColor(40+n/3, 50+n/2, 130); break;
+        case 45: base = packColor(30+n/3, 40+n/2, 100); break;
+        case 46: base = packColor(30+n/2, 30+n/2, 30+n/2); break;
+        case 47: base = packColor(210+n/3, 210+n/3, 210+n/3); break;
+        case 48: base = packColor(240+n/3, 210+n/3, 40+n/3); break;
+        case 49: base = packColor(80+n/3, 220+n/3, 230+n/3); break;
+        case 50: base = packColor(40+n/3, 180+n/3, 50+n/3); break;
+        case 51: base = packColor(190+n/3, 120+n/3, 60+n/3); break;
+        case 52: base = packColor(30+n/3, 50+n/2, 140); break;
+        case 53: base = packColor(160+n, 20+n/3, 20+n/3); break;
+        case 54: base = packColor(98+n, 70+n/2, 40+n); break;
+        case 55: base = packColor(200+n/3, 190+n/3, 150+n/3); break;
+        case 56: base = packColor(120+n, 90+n/2, 50+n); break;
+        case 57: base = packColor(178+n, 120+n/2, 56+n); break;
+        case 58: base = packColor(60+n, 40+n/2, 24+n); break;
+        case 59: base = packColor(110+n, 80+n/2, 45+n); break;
+        case 60: base = packColor(210+n/3, 170+n/3, 140+n/3); break;
+        case 61: base = packColor(190+n/3, 160+n/3, 110+n/3); break;
+        case 62: base = packColor(70+n/2, 30+n/2, 70+n/2); break;
+        case 63: base = packColor(30+n/2, 120+n/2, 110+n/2); break;
+        case 64: case 65: case 66: case 67: case 68: case 69: case 70: case 71: {
+            int ln = colorNoise(wx, 0, wz, 15);
+            int g = 80 + (blockId - 64) * 8 + ln;
+            if (g > 200) g = 200;
+            base = packColor(30 + ln/3, g, 30 + ln/3);
+            break;
+        }
+        case 72: base = packColor(130+n, 120+n/2, 110+n); break;
+        case 73: base = packColor(120+n, 100+n/2, 70+n); break;
+        case 74: base = packColor(100+n, 130+n/2, 60+n); break;
+        case 75: base = packColor(110+n, 90+n/2, 60+n); break;
+        case 76: base = packColor(80+n, 130+n/2, 70+n); break;
+        case 77: base = packColor(90+n, 85+n/2, 80+n); break;
+        case 78: base = packColor(200+n, 160+n/2, 100+n); break;
+        case 79: base = packColor(210+n, 195+n/2, 150+n); break;
+        case 80: base = packColor(180+n, 110+n/2, 70+n); break;
+        case 81: base = packColor(110+n, 50+n/2, 50+n); break;
+        case 82: base = packColor(110+n, 90+n/2, 70+n); break;
+        case 83: base = packColor(100+n, 80+n/2, 60+n); break;
+        case 84: base = packColor(80+n, 75+n/2, 80+n); break;
+        case 85: base = packColor(50+n, 50+n/2, 50+n); break;
+        case 86: base = packColor(190+n, 170+n/2, 50+n); break;
+        case 87: base = packColor(220+n/3, 220+n/3, 210+n/3); break;
+        case 88: base = packColor(20+n/3, 15+n/3, 25+n/3); break;
+        case 89: base = packColor(50+n/3, 10+n/3, 60+n/3); break;
+        case 128: base = packColor(230+n/3, 235+n/3, 240+n/3); break;
+        case 129: base = packColor(160+n, 200+n/2, 230); break;
+        case 130: base = packColor(170+n, 200+n/2, 220); break;
+        case 131: base = packColor(130+n, 170+n/2, 210); break;
+        case 132: base = packColor(160+n, 155+n/2, 140+n); break;
+        case 133: base = packColor(180+n, 180+n/2, 160+n); break;
+        default: base = packColor(130+n, 130+n, 130+n); break;
     }
     return applyFaceLight(base, face);
 }
@@ -1240,7 +1329,7 @@ void Renderer::generateAndUploadChunks(World* world, const glm::vec3& cameraPos)
                     
                     auto addFace = [&](float x0,float y0,float z0, float x1,float y1,float z1,
                                        float x2,float y2,float z2, float x3,float y3,float z3, int face) {
-                        uint32_t col = blockColor(bid, face);
+                        uint32_t col = blockColor(bid, face, (int)fx, (int)fy, (int)fz);
                         uint32_t base = (uint32_t)(vertices.size() / 4);
                         vertices.insert(vertices.end(), {x0,y0,z0, *(float*)&col, x1,y1,z1, *(float*)&col, x2,y2,z2, *(float*)&col, x3,y3,z3, *(float*)&col});
                         indices.insert(indices.end(), {base, base+1, base+2, base, base+2, base+3});
@@ -1539,7 +1628,7 @@ void Renderer::drawHotbar(int selectedSlot, const std::array<uint32_t, 9>& hotba
         addRect(x, startY, x + slotSize, startY + slotSize, slotBg);
         
         if (hotbarBlocks[i] != 0) {
-            uint32_t blockCol = blockColor(hotbarBlocks[i], 4);
+            uint32_t blockCol = blockColor(hotbarBlocks[i], 4, 0, 0, 0);
             blockCol = (blockCol & 0x00FFFFFF) | 0xDD000000;
             float inset = slotSize * 0.15f;
             addRect(x + inset, startY + inset, x + slotSize - inset, startY + slotSize - inset, blockCol);
