@@ -12,6 +12,7 @@
 #include <glm/glm.hpp>
 #include <memory>
 #include <array>
+#include <string>
 
 namespace VoxelForge {
 
@@ -82,6 +83,8 @@ private:
     void updateWorld(float deltaTime);
     void handleBlockInteraction();
     glm::ivec3 raycastBlocks(const glm::vec3& origin, const glm::vec3& direction, float maxDist, glm::ivec3& hitNormal);
+    void saveWorld();
+    void loadWorld();
     
     std::unique_ptr<World> world;
     std::unique_ptr<ECSWorld> ecsWorld;
@@ -104,6 +107,24 @@ private:
     int selectedSlot = 0;
     bool leftMousePressed = false;
     bool rightMousePressed = false;
+    
+    glm::vec3 playerVelocity = glm::vec3(0.0f);
+    bool onGround = false;
+    bool flyMode = true;
+    
+    static constexpr float PLAYER_WIDTH = 0.6f;
+    static constexpr float PLAYER_HEIGHT = 1.8f;
+    static constexpr float GRAVITY = 28.0f;
+    static constexpr float JUMP_VELOCITY = 8.5f;
+    static constexpr float TERMINAL_VELOCITY = -78.4f;
+    
+    bool checkCollision(const glm::vec3& pos) const;
+    void resolveCollisions(glm::vec3& pos, const glm::vec3& delta);
+    
+    float fpsAccumulator = 0.0f;
+    int frameCount = 0;
+    float currentFPS = 0.0f;
+    float fpsUpdateTimer = 0.0f;
 };
 
 // Game instance access

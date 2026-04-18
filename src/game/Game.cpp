@@ -3,10 +3,13 @@
 #include <VoxelForge/core/Input.hpp>
 #include <VoxelForge/core/Timer.hpp>
 #include <VoxelForge/world/Block.hpp>
-#include <VoxelForge/world/World.hpp>
 #include <VoxelForge/world/BlockRegistry.hpp>
+#include <VoxelForge/world/Chunk.hpp>
+#include <VoxelForge/world/World.hpp>
 #include <cmath>
 #include <algorithm>
+#include <fstream>
+#include <filesystem>
 
 namespace VoxelForge {
 
@@ -26,12 +29,12 @@ void Game::onInit() {
     
     world = std::make_unique<World>(0);
     VF_CORE_INFO("World created with seed 0");
+    loadWorld();
     
     camera.setPerspective(settings.fov,
                           static_cast<float>(getWindow().getWidth()) / static_cast<float>(getWindow().getHeight()),
                           0.1f, 1000.0f);
-    camera.setPosition(playerPos);
-    
+    camera.setPosition(playerPos + glm::vec3(0.0f, PLAYER_HEIGHT * 0.85f, 0.0f));
     try {
         renderer.init(getWindow().getGLFWWindow());
         renderer.initChunkRendering();
@@ -49,6 +52,8 @@ void Game::onInit() {
 
 void Game::onShutdown() {
     VF_CORE_INFO("Shutting down game...");
+    
+    saveWorld();
     
     if (rendererInitialized) {
         renderer.cleanupChunkRendering();
@@ -76,6 +81,18 @@ void Game::onUpdate(float deltaTime) {
     }
     
     gameTime += deltaTime;
+    
+    fpsUpdateTimer += deltaTime;
+    frameCount++;
+    if (fpsUpdateTimer >= 0.5f) {
+        currentFPS = (float)frameCount / fpsUpdateTimer;
+        frameCount = 0;
+        fpsUpdateTimer = 0.0f;
+        getWindow().setTitle("VoxelForge - " + std::to_string((int)currentFPS) + " FPS" +
+            (flyMode ? " [FLY]" : " [WALK]") +
+            " | XYZ: " + std::to_string((int)playerPos.x) + ", " + 
+            std::to_string((int)playerPos.y) + ", " + std::to_string((int)playerPos.z));
+    }
     
     static float tickAccumulator = 0.0f;
     tickAccumulator += deltaTime;
@@ -136,22 +153,68 @@ void Game::processInput(float deltaTime) {
         }
     }
     
+    if (input.isKeyJustPressed(Key::F)) {
+        flyMode = !flyMode;
+        playerVelocity = glm::vec3(0.0f);
+        onGround = false;
+    }
+    
     if (paused) return;
     
-    float speed = 10.0f * deltaTime;
-    if (input.isActionPressed("sprint")) speed *= 2.0f;
-    
-    glm::vec3 forward = camera.getForward();
-    forward.y = 0.0f;
-    forward = glm::normalize(forward);
-    glm::vec3 right = glm::normalize(glm::cross(forward, glm::vec3(0.0f, 1.0f, 0.0f)));
-    
-    if (input.isActionPressed("forward"))  playerPos += forward * speed;
-    if (input.isActionPressed("backward")) playerPos -= forward * speed;
-    if (input.isActionPressed("left"))     playerPos -= right * speed;
-    if (input.isActionPressed("right"))    playerPos += right * speed;
-    if (input.isActionPressed("jump"))     playerPos.y += speed;
-    if (input.isActionPressed("sneak"))    playerPos.y -= speed;
+    if (flyMode) {
+        float speed = 10.0f * deltaTime;
+        if (input.isActionPressed("sprint")) speed *= 2.0f;
+        
+        glm::vec3 forward = camera.getForward();
+        forward.y = 0.0f;
+        forward = glm::normalize(forward);
+        glm::vec3 right = glm::normalize(glm::cross(forward, glm::vec3(0.0f, 1.0f, 0.0f)));
+        
+        if (input.isActionPressed("forward"))  playerPos += forward * speed;
+        if (input.isActionPressed("backward")) playerPos -= forward * speed;
+        if (input.isActionPressed("left"))     playerPos -= right * speed;
+        if (input.isActionPressed("right"))    playerPos += right * speed;
+        if (input.isActionPressed("jump"))     playerPos.y += speed;
+        if (input.isActionPressed("sneak"))    playerPos.y -= speed;
+        
+        camera.setPosition(playerPos + glm::vec3(0.0f, PLAYER_HEIGHT * 0.85f, 0.0f));
+    } else {
+        float moveSpeed = 4.317f * deltaTime;
+        if (input.isActionPressed("sprint")) moveSpeed = 5.612f * deltaTime;
+        
+        glm::vec3 forward = camera.getForward();
+        forward.y = 0.0f;
+        forward = glm::normalize(forward);
+        glm::vec3 right = glm::normalize(glm::cross(forward, glm::vec3(0.0f, 1.0f, 0.0f)));
+        
+        glm::vec3 inputDir(0.0f);
+        if (input.isActionPressed("forward"))  inputDir += forward;
+        if (input.isActionPressed("backward")) inputDir -= forward;
+        if (input.isActionPressed("left"))     inputDir -= right;
+        if (input.isActionPressed("right"))    inputDir += right;
+        
+        if (glm::length(inputDir) > 0.0f) {
+            inputDir = glm::normalize(inputDir);
+        }
+        
+        glm::vec3 delta = inputDir * moveSpeed;
+        
+        if (onGround && input.isActionPressed("jump")) {
+            playerVelocity.y = JUMP_VELOCITY;
+            onGround = false;
+        }
+        
+        playerVelocity.y -= GRAVITY * deltaTime;
+        if (playerVelocity.y < TERMINAL_VELOCITY) playerVelocity.y = TERMINAL_VELOCITY;
+        
+        delta.y += playerVelocity.y * deltaTime;
+        
+        resolveCollisions(playerPos, delta);
+        
+        if (onGround) {
+            playerVelocity.y = 0.0f;
+        }
+    }
     
     auto mouseDelta = input.getMouseDelta();
     if (glm::length(mouseDelta) > 0.0f) {
@@ -160,7 +223,7 @@ void Game::processInput(float deltaTime) {
         playerPitch = std::clamp(playerPitch, -89.0f, 89.0f);
     }
     
-    camera.setPosition(playerPos);
+    camera.setPosition(playerPos + glm::vec3(0.0f, PLAYER_HEIGHT * 0.85f, 0.0f));
     camera.setRotation(playerPitch, playerYaw);
     
     for (int i = 0; i < 9; i++) {
@@ -318,6 +381,130 @@ float Game::getDayTime() const {
 void Game::setDayTime(float time) {
     if (!world) return;
     world->setDayTime(time);
+}
+
+bool Game::checkCollision(const glm::vec3& pos) const {
+    if (!world) return false;
+    
+    float hw = PLAYER_WIDTH * 0.5f;
+    int minX = (int)floor(pos.x - hw);
+    int maxX = (int)floor(pos.x + hw);
+    int minY = (int)floor(pos.y);
+    int maxY = (int)floor(pos.y + PLAYER_HEIGHT);
+    int minZ = (int)floor(pos.z - hw);
+    int maxZ = (int)floor(pos.z + hw);
+    
+    for (int y = minY; y <= maxY; y++) {
+        for (int z = minZ; z <= maxZ; z++) {
+            for (int x = minX; x <= maxX; x++) {
+                auto block = world->getBlock(x, y, z);
+                if (!block.isAir() && block.isSolid()) {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
+void Game::resolveCollisions(glm::vec3& pos, const glm::vec3& delta) {
+    glm::vec3 newPos = pos;
+    
+    newPos.x += delta.x;
+    if (checkCollision(newPos)) {
+        newPos.x = pos.x;
+        playerVelocity.x = 0.0f;
+    }
+    
+    newPos.y += delta.y;
+    if (checkCollision(newPos)) {
+        if (delta.y < 0.0f) {
+            onGround = true;
+            newPos.y = (float)ceil(pos.y + delta.y);
+            if (checkCollision(newPos)) {
+                newPos.y = pos.y;
+            }
+        } else {
+            newPos.y = pos.y;
+            playerVelocity.y = 0.0f;
+        }
+    } else {
+        onGround = false;
+    }
+    
+    newPos.z += delta.z;
+    if (checkCollision(newPos)) {
+        newPos.z = pos.z;
+        playerVelocity.z = 0.0f;
+    }
+    
+    pos = newPos;
+}
+
+void Game::saveWorld() {
+    if (!world) return;
+    
+    std::string worldDir = "saves/world_0";
+    std::filesystem::create_directories(worldDir);
+    
+    world->forEachChunk([&](Chunk& chunk) {
+        ChunkPos pos = chunk.getPosition();
+        std::string filename = worldDir + "/chunk_" + std::to_string(pos.x) + "_" + std::to_string(pos.z) + ".dat";
+        
+        std::ofstream file(filename, std::ios::binary);
+        if (!file.is_open()) return;
+        
+        for (int y = 0; y < CHUNK_HEIGHT; y++) {
+            for (int z = 0; z < CHUNK_WIDTH; z++) {
+                for (int x = 0; x < CHUNK_WIDTH; x++) {
+                    uint64_t encoded = chunk.getBlock(x, y, z).encode();
+                    file.write(reinterpret_cast<const char*>(&encoded), sizeof(encoded));
+                }
+            }
+        }
+    });
+    
+    VF_CORE_INFO("World saved to {}", worldDir);
+}
+
+void Game::loadWorld() {
+    if (!world) return;
+    
+    std::string worldDir = "saves/world_0";
+    if (!std::filesystem::exists(worldDir)) return;
+    
+    int loaded = 0;
+    for (const auto& entry : std::filesystem::directory_iterator(worldDir)) {
+        if (entry.path().extension() != ".dat") continue;
+        
+        std::string filename = entry.path().stem().string();
+        int cx, cz;
+        if (sscanf(filename.c_str(), "chunk_%d_%d", &cx, &cz) != 2) continue;
+        
+        std::ifstream file(entry.path().string(), std::ios::binary);
+        if (!file.is_open()) continue;
+        
+        ChunkPos pos{cx, cz};
+        auto* chunk = world->getOrCreateChunk(pos);
+        if (!chunk) continue;
+        
+        for (int y = 0; y < CHUNK_HEIGHT; y++) {
+            for (int z = 0; z < CHUNK_WIDTH; z++) {
+                for (int x = 0; x < CHUNK_WIDTH; x++) {
+                    uint64_t encoded;
+                    file.read(reinterpret_cast<char*>(&encoded), sizeof(encoded));
+                    if (file.eof()) goto next_chunk;
+                    chunk->setBlock(x, y, z, BlockState::decode(encoded));
+                }
+            }
+        }
+        loaded++;
+        next_chunk:;
+    }
+    
+    if (loaded > 0) {
+        VF_CORE_INFO("Loaded {} chunks from {}", loaded, worldDir);
+    }
 }
 
 Application* createApplication() {

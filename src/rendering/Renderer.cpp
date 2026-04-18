@@ -923,26 +923,44 @@ static uint32_t packColor(uint8_t r, uint8_t g, uint8_t b) {
     return r | (g << 8) | (b << 16) | (0xFF << 24);
 }
 
-static uint32_t blockColor(uint32_t blockId, int face) {
-    switch (blockId) {
-        case 2: return face == 4 ? packColor(76,175,80) : packColor(139,119,42);
-        case 3: return packColor(139,90,43);
-        case 1: return packColor(128,128,128);
-        case 4: return packColor(110,110,110);
-        case 13: return packColor(244,225,156);
-        case 14: return packColor(10,10,10);
-        case 5: return packColor(180,140,80);
-        case 6: case 7: case 8: case 9: case 10: return packColor(100,70,40);
-        case 11: return packColor(52,152,219);
-        case 12: return packColor(220,80,20);
-        case 15: return packColor(160,143,129);
-        case 16: return packColor(80,80,80);
-        case 17: return packColor(255,215,0);
-        case 18: return packColor(80,220,230);
-        case 64: case 65: case 66: case 67: case 68: case 69: case 70: case 71:
-            return packColor(50,140,50);
-        default: return packColor(150,150,150);
+static uint32_t applyFaceLight(uint32_t color, int face) {
+    float brightness;
+    switch (face) {
+        case 4: brightness = 1.0f; break;
+        case 5: brightness = 0.5f; break;
+        case 2: case 3: brightness = 0.8f; break;
+        case 0: case 1: brightness = 0.65f; break;
+        default: brightness = 1.0f; break;
     }
+    uint8_t r = (uint8_t)(color & 0xFF);
+    uint8_t g = (uint8_t)((color >> 8) & 0xFF);
+    uint8_t b = (uint8_t)((color >> 16) & 0xFF);
+    return (uint8_t)(r * brightness) | ((uint8_t)(g * brightness) << 8) |
+           ((uint8_t)(b * brightness) << 16) | (0xFF << 24);
+}
+
+static uint32_t blockColor(uint32_t blockId, int face) {
+    uint32_t base;
+    switch (blockId) {
+        case 2: base = face == 4 ? packColor(76,175,80) : packColor(139,119,42); break;
+        case 3: base = packColor(139,90,43); break;
+        case 1: base = packColor(128,128,128); break;
+        case 4: base = packColor(110,110,110); break;
+        case 13: base = packColor(244,225,156); break;
+        case 14: base = packColor(10,10,10); break;
+        case 5: base = packColor(180,140,80); break;
+        case 6: case 7: case 8: case 9: case 10: base = packColor(100,70,40); break;
+        case 11: base = packColor(52,152,219); break;
+        case 12: base = packColor(220,80,20); break;
+        case 15: base = packColor(160,143,129); break;
+        case 16: base = packColor(80,80,80); break;
+        case 17: base = packColor(255,215,0); break;
+        case 18: base = packColor(80,220,230); break;
+        case 64: case 65: case 66: case 67: case 68: case 69: case 70: case 71:
+            base = packColor(50,140,50); break;
+        default: base = packColor(150,150,150); break;
+    }
+    return applyFaceLight(base, face);
 }
 
 void Renderer::generateAndUploadChunks(World* world, const glm::vec3& cameraPos) {

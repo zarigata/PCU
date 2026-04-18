@@ -364,4 +364,16 @@ bool World::isInsideWorld(int y) const {
     return y >= settings.minBuildHeight && y < settings.maxBuildHeight;
 }
 
+void World::forEachChunk(const std::function<void(Chunk&)>& func) {
+    for (auto& [pos, chunk] : chunks) {
+        if (chunk) func(*chunk);
+    }
+}
+
+void World::forEachChunk(const std::function<void(const Chunk&)>& func) const {
+    for (const auto& [pos, chunk] : chunks) {
+        if (chunk) func(*chunk);
+    }
+}
+
 } // namespace VoxelForge
