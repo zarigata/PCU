@@ -32,7 +32,7 @@ void Game::onInit() {
     loadWorld();
     
     int spawnHeight = world->getHeight(0, 0);
-    playerPos.y = static_cast<float>(spawnHeight + 2);
+    playerPos = glm::vec3(0.0f, static_cast<float>(spawnHeight + 3), 0.0f);
     VF_CORE_INFO("Spawn height: {} (terrain surface), player at y={:.1f}", spawnHeight, playerPos.y);
     
     camera.setPerspective(settings.fov,
@@ -165,21 +165,31 @@ void Game::processInput(float deltaTime) {
     
     if (paused) return;
     
+    static bool loggedFirstInput = false;
     if (flyMode) {
         float speed = 10.0f * deltaTime;
         if (input.isActionPressed("sprint")) speed *= 2.0f;
         
         glm::vec3 forward = camera.getForward();
         forward.y = 0.0f;
-        forward = glm::normalize(forward);
+        if (glm::length(forward) > 0.001f) forward = glm::normalize(forward);
         glm::vec3 right = glm::normalize(glm::cross(forward, glm::vec3(0.0f, 1.0f, 0.0f)));
         
-        if (input.isActionPressed("forward"))  playerPos += forward * speed;
-        if (input.isActionPressed("backward")) playerPos -= forward * speed;
-        if (input.isActionPressed("left"))     playerPos -= right * speed;
-        if (input.isActionPressed("right"))    playerPos += right * speed;
-        if (input.isActionPressed("jump"))     playerPos.y += speed;
-        if (input.isActionPressed("sneak"))    playerPos.y -= speed;
+        glm::vec3 movedir(0.0f);
+        if (input.isActionPressed("forward"))  { movedir += forward; }
+        if (input.isActionPressed("backward")) { movedir -= forward; }
+        if (input.isActionPressed("left"))     { movedir -= right; }
+        if (input.isActionPressed("right"))    { movedir += right; }
+        if (input.isActionPressed("jump"))     { movedir.y += 1.0f; }
+        if (input.isActionPressed("sneak"))    { movedir.y -= 1.0f; }
+        
+        if (glm::length(movedir) > 0.0f) {
+            if (!loggedFirstInput) {
+                VF_CORE_INFO("First movement input detected! flyMode");
+                loggedFirstInput = true;
+            }
+            playerPos += glm::normalize(movedir) * speed;
+        }
         
         camera.setPosition(playerPos + glm::vec3(0.0f, PLAYER_HEIGHT * 0.85f, 0.0f));
     } else {
@@ -223,7 +233,7 @@ void Game::processInput(float deltaTime) {
     auto mouseDelta = input.getMouseDelta();
     if (glm::length(mouseDelta) > 0.0f) {
         playerYaw -= mouseDelta.x * settings.mouseSensitivity;
-        playerPitch -= mouseDelta.y * settings.mouseSensitivity;
+        playerPitch += mouseDelta.y * settings.mouseSensitivity;
         playerPitch = std::clamp(playerPitch, -89.0f, 89.0f);
     }
     
