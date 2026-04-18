@@ -226,7 +226,7 @@ ShaderCompileResult ShaderManager::compileGLSL(const std::string& source,
         case vk::ShaderStageFlagBits::eFragment: language = EShLangFragment; break;
         case vk::ShaderStageFlagBits::eGeometry: language = EShLangGeometry; break;
         case vk::ShaderStageFlagBits::eCompute: language = EShLangCompute; break;
-        case vk::ShaderStageFlagBits::eTessControl: language = EShLangTessControl; break;
+        case vk::ShaderStageFlagBits::eTessellationControl: language = EShLangTessControl; break;
         case vk::ShaderStageFlagBits::eTessellationEvaluation: language = EShLangTessEvaluation; break;
         default:
             result.errorMessage = "Unknown shader stage";

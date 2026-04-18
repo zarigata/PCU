@@ -31,6 +31,7 @@ void Game::onInit() {
     
     try {
         renderer.init(getWindow().getGLFWWindow());
+        renderer.initChunkRendering();
         rendererInitialized = true;
         VF_CORE_INFO("Renderer initialized");
     } catch (const std::exception& e) {
@@ -47,6 +48,7 @@ void Game::onShutdown() {
     VF_CORE_INFO("Shutting down game...");
     
     if (rendererInitialized) {
+        renderer.cleanupChunkRendering();
         renderer.shutdown();
     }
     
@@ -64,6 +66,10 @@ void Game::onUpdate(float deltaTime) {
     if (world) {
         world->setDayTime(world->getDayTime() + deltaTime * 100.0f);
         world->updateChunks(playerPos);
+    }
+    
+    if (rendererInitialized && world) {
+        renderer.generateAndUploadChunks(world.get());
     }
     
     gameTime += deltaTime;
@@ -102,6 +108,9 @@ void Game::onRender() {
     try {
         renderer.setClearColor(skyR, skyG, skyB);
         renderer.beginFrame();
+        if (world) {
+            renderer.renderWorldChunks(world.get(), &camera);
+        }
         renderer.endFrame();
     } catch (const std::exception& e) {
         VF_ERROR("Render error: {}", e.what());

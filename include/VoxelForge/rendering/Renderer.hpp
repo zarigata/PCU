@@ -7,9 +7,12 @@
 
 #include <string>
 #include <array>
+#include <unordered_map>
 
 #include <VoxelForge/rendering/VulkanContext.hpp>
+#include <VoxelForge/rendering/VulkanPipeline.hpp>
 #include <VoxelForge/rendering/Camera.hpp>
+#include <glm/glm.hpp>
 #include <memory>
 #include <vector>
 
@@ -77,6 +80,12 @@ public:
     
     // Clear color (sky)
     void setClearColor(float r, float g, float b, float a = 1.0f);
+    
+    // Chunk rendering
+    void initChunkRendering();
+    void cleanupChunkRendering();
+    void renderWorldChunks(World* world, Camera* camera);
+    void generateAndUploadChunks(World* world);
     
     // Resize
     void onResize(int width, int height);
@@ -158,6 +167,28 @@ private:
     RenderSettings settings;
     
     std::array<float, 4> clearColorValue = {0.0f, 0.0f, 0.2f, 1.0f};
+    
+    struct ChunkGPUMesh {
+        vk::Buffer vertexBuffer = VK_NULL_HANDLE;
+        vk::DeviceMemory vertexMemory = VK_NULL_HANDLE;
+        vk::Buffer indexBuffer = VK_NULL_HANDLE;
+        vk::DeviceMemory indexMemory = VK_NULL_HANDLE;
+        uint32_t indexCount = 0;
+        glm::ivec3 chunkPos{};
+        bool valid = false;
+    };
+    
+    vk::Pipeline chunkPipeline;
+    vk::PipelineLayout chunkPipelineLayout;
+    vk::ShaderModule chunkVertShader = VK_NULL_HANDLE;
+    vk::ShaderModule chunkFragShader = VK_NULL_HANDLE;
+    std::unordered_map<uint64_t, ChunkGPUMesh> chunkMeshes;
+    bool chunkPipelineReady = false;
+    
+    vk::ShaderModule compileShader(const std::string& source, int stage);
+    void createChunkBuffer(vk::DeviceSize size, vk::BufferUsageFlags usage, vk::MemoryPropertyFlags props, vk::Buffer& buf, vk::DeviceMemory& mem);
+    void uploadChunkMesh(const glm::ivec3& pos, const std::vector<float>& verts, const std::vector<uint32_t>& indices);
+    static uint64_t posKey(int x, int y, int z);
     
     // Frame data
     static constexpr int MAX_FRAMES_IN_FLIGHT = 2;

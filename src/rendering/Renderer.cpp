@@ -4,13 +4,21 @@
  */
 
 #include <VoxelForge/rendering/Renderer.hpp>
+#include <VoxelForge/rendering/VulkanPipeline.hpp>
 #include <VoxelForge/world/World.hpp>
+#include <VoxelForge/world/Chunk.hpp>
+#include <VoxelForge/world/Block.hpp>
 #include <VoxelForge/entity/Entity.hpp>
 #include <VoxelForge/core/Logger.hpp>
 #include <VoxelForge/utils/Profiler.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <algorithm>
 #include <array>
 #include <fstream>
+
+#include <glslang/Public/ShaderLang.h>
+#include <glslang/Public/ResourceLimits.h>
+#include <SPIRV/GlslangToSpv.h>
 
 namespace VoxelForge {
 
@@ -692,6 +700,340 @@ vk::Extent2D Renderer::chooseSwapExtent(const vk::SurfaceCapabilitiesKHR& capabi
     );
     
     return actualExtent;
+}
+
+vk::ShaderModule Renderer::compileShader(const std::string& source, int stageInt) {
+    static bool glslangInitialized = false;
+    if (!glslangInitialized) {
+        glslang::InitializeProcess();
+        glslangInitialized = true;
+    }
+    
+    EShLanguage stage = static_cast<EShLanguage>(stageInt);
+    glslang::TShader shader(stage);
+    const char* src = source.c_str();
+    shader.setStrings(&src, 1);
+    
+    EShMessages messages = static_cast<EShMessages>(EShMsgSpvRules | EShMsgVulkanRules);
+    if (!shader.parse(GetDefaultResources(), 450, false, messages)) {
+        VF_ERROR("Shader parse error: {}", shader.getInfoLog());
+        return VK_NULL_HANDLE;
+    }
+    
+    glslang::TProgram program;
+    program.addShader(&shader);
+    if (!program.link(messages)) {
+        VF_ERROR("Shader link error: {}", program.getInfoLog());
+        return VK_NULL_HANDLE;
+    }
+    
+    std::vector<uint32_t> spirv;
+    glslang::GlslangToSpv(*program.getIntermediate(stage), spirv);
+    
+    vk::ShaderModuleCreateInfo createInfo{};
+    createInfo.codeSize = spirv.size() * sizeof(uint32_t);
+    createInfo.pCode = spirv.data();
+    
+    auto module = context->getDevice().createShaderModule(createInfo);
+    VF_INFO("Compiled shader ({} bytes SPIRV)", spirv.size() * 4);
+    return module;
+}
+
+void Renderer::createChunkBuffer(vk::DeviceSize size, vk::BufferUsageFlags usage,
+                                  vk::MemoryPropertyFlags props,
+                                  vk::Buffer& buf, vk::DeviceMemory& mem) {
+    vk::BufferCreateInfo bufInfo{};
+    bufInfo.size = size;
+    bufInfo.usage = usage;
+    bufInfo.sharingMode = vk::SharingMode::eExclusive;
+    buf = context->getDevice().createBuffer(bufInfo);
+    
+    auto memReqs = context->getDevice().getBufferMemoryRequirements(buf);
+    vk::MemoryAllocateInfo allocInfo{};
+    allocInfo.allocationSize = memReqs.size;
+    allocInfo.memoryTypeIndex = context->findMemoryType(memReqs.memoryTypeBits, props);
+    mem = context->getDevice().allocateMemory(allocInfo);
+    context->getDevice().bindBufferMemory(buf, mem, 0);
+}
+
+void Renderer::initChunkRendering() {
+    const char* vertSrc = R"(
+        #version 450
+        layout(location=0) in vec3 inPos;
+        layout(location=1) in uint inColor;
+        layout(push_constant) uniform PC { mat4 mvp; };
+        layout(location=0) out vec4 vColor;
+        void main() {
+            gl_Position = mvp * vec4(inPos, 1.0);
+            float r = float(inColor & 0xFFu) / 255.0;
+            float g = float((inColor >> 8u) & 0xFFu) / 255.0;
+            float b = float((inColor >> 16u) & 0xFFu) / 255.0;
+            vColor = vec4(r, g, b, 1.0);
+        }
+    )";
+    
+    const char* fragSrc = R"(
+        #version 450
+        layout(location=0) in vec4 vColor;
+        layout(location=0) out vec4 outColor;
+        void main() { outColor = vColor; }
+    )";
+    
+    chunkVertShader = compileShader(vertSrc, EShLangVertex);
+    chunkFragShader = compileShader(fragSrc, EShLangFragment);
+    
+    if (!chunkVertShader || !chunkFragShader) {
+        VF_ERROR("Failed to compile chunk shaders");
+        return;
+    }
+    
+    VulkanPipelineBuilder builder(context->getDevice());
+    builder.setShaders(chunkVertShader, chunkFragShader);
+    
+    vk::VertexInputBindingDescription binding{0, 16, vk::VertexInputRate::eVertex};
+    std::vector<vk::VertexInputAttributeDescription> attrs = {
+        {0, 0, vk::Format::eR32G32B32Sfloat, 0},
+        {1, 0, vk::Format::eR32Uint, 12}
+    };
+    builder.setVertexInput(binding, attrs);
+    builder.setInputTopology(vk::PrimitiveTopology::eTriangleList);
+    builder.setViewport(0, 0, (float)swapchainExtent.width, (float)swapchainExtent.height);
+    builder.setScissor(0, 0, swapchainExtent.width, swapchainExtent.height);
+    builder.setRasterizer(vk::PolygonMode::eFill, vk::CullModeFlagBits::eNone, vk::FrontFace::eCounterClockwise);
+    builder.setMultisampling(vk::SampleCountFlagBits::e1);
+    builder.setDepthStencil(false, false, vk::CompareOp::eLess);
+    builder.setColorBlendAttachment(
+        vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG |
+        vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA);
+    builder.addPushConstantRange(vk::ShaderStageFlagBits::eVertex, 0, sizeof(glm::mat4));
+    builder.setRenderPass(renderPass, 0);
+    
+    auto pipeline = builder.build();
+    if (pipeline) {
+        chunkPipeline = pipeline.release();  // Transfer ownership — we manage cleanup ourselves
+        chunkPipelineLayout = builder.getPipelineLayout();
+        chunkPipelineReady = true;
+        VF_INFO("Chunk rendering pipeline created");
+    } else {
+        VF_ERROR("Failed to create chunk rendering pipeline");
+    }
+}
+
+void Renderer::cleanupChunkRendering() {
+    if (!context) return;
+    auto dev = context->getDevice();
+    
+    for (auto& [key, mesh] : chunkMeshes) {
+        if (mesh.vertexBuffer) dev.destroyBuffer(mesh.vertexBuffer);
+        if (mesh.vertexMemory) dev.freeMemory(mesh.vertexMemory);
+        if (mesh.indexBuffer) dev.destroyBuffer(mesh.indexBuffer);
+        if (mesh.indexMemory) dev.freeMemory(mesh.indexMemory);
+    }
+    chunkMeshes.clear();
+    
+    if (chunkPipeline) { dev.destroyPipeline(chunkPipeline); chunkPipeline = VK_NULL_HANDLE; }
+    if (chunkPipelineLayout) { dev.destroyPipelineLayout(chunkPipelineLayout); chunkPipelineLayout = VK_NULL_HANDLE; }
+    if (chunkVertShader) { dev.destroyShaderModule(chunkVertShader); chunkVertShader = VK_NULL_HANDLE; }
+    if (chunkFragShader) { dev.destroyShaderModule(chunkFragShader); chunkFragShader = VK_NULL_HANDLE; }
+    chunkPipelineReady = false;
+}
+
+uint64_t Renderer::posKey(int x, int y, int z) {
+    return (uint64_t)(uint32_t)x | ((uint64_t)(uint32_t)y << 20) | ((uint64_t)(uint32_t)z << 40);
+}
+
+void Renderer::uploadChunkMesh(const glm::ivec3& pos, const std::vector<float>& verts, const std::vector<uint32_t>& indices) {
+    auto dev = context->getDevice();
+    uint64_t key = posKey(pos.x, pos.y, pos.z);
+    
+    auto it = chunkMeshes.find(key);
+    if (it != chunkMeshes.end()) {
+        if (it->second.vertexBuffer) dev.destroyBuffer(it->second.vertexBuffer);
+        if (it->second.vertexMemory) dev.freeMemory(it->second.vertexMemory);
+        if (it->second.indexBuffer) dev.destroyBuffer(it->second.indexBuffer);
+        if (it->second.indexMemory) dev.freeMemory(it->second.indexMemory);
+    }
+    
+    ChunkGPUMesh mesh{};
+    mesh.chunkPos = pos;
+    mesh.indexCount = (uint32_t)indices.size();
+    mesh.valid = true;
+    
+    vk::DeviceSize vsize = verts.size() * sizeof(float);
+    vk::DeviceSize isize = indices.size() * sizeof(uint32_t);
+    
+    vk::Buffer stagingBuf;
+    vk::DeviceMemory stagingMem;
+    createChunkBuffer(vsize + isize,
+        vk::BufferUsageFlagBits::eTransferSrc,
+        vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
+        stagingBuf, stagingMem);
+    
+    void* data = context->getDevice().mapMemory(stagingMem, 0, vsize + isize);
+    memcpy(data, verts.data(), vsize);
+    memcpy((char*)data + vsize, indices.data(), isize);
+    context->getDevice().unmapMemory(stagingMem);
+    
+    createChunkBuffer(vsize,
+        vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst,
+        vk::MemoryPropertyFlagBits::eDeviceLocal,
+        mesh.vertexBuffer, mesh.vertexMemory);
+    
+    createChunkBuffer(isize,
+        vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst,
+        vk::MemoryPropertyFlagBits::eDeviceLocal,
+        mesh.indexBuffer, mesh.indexMemory);
+    
+    vk::CommandBufferAllocateInfo allocInfo{};
+    allocInfo.commandPool = commandPool;
+    allocInfo.level = vk::CommandBufferLevel::ePrimary;
+    allocInfo.commandBufferCount = 1;
+    auto cmdBuf = dev.allocateCommandBuffers(allocInfo)[0];
+    
+    vk::CommandBufferBeginInfo beginInfo{};
+    beginInfo.flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit;
+    cmdBuf.begin(beginInfo);
+    
+    vk::BufferCopy vertCopy{0, 0, vsize};
+    cmdBuf.copyBuffer(stagingBuf, mesh.vertexBuffer, 1, &vertCopy);
+    vk::BufferCopy idxCopy{vsize, 0, isize};
+    cmdBuf.copyBuffer(stagingBuf, mesh.indexBuffer, 1, &idxCopy);
+    
+    cmdBuf.end();
+    
+    vk::SubmitInfo submitInfo{};
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &cmdBuf;
+    context->getGraphicsQueue().submit(1, &submitInfo, VK_NULL_HANDLE);
+    context->getGraphicsQueue().waitIdle();
+    
+    dev.freeCommandBuffers(commandPool, 1, &cmdBuf);
+    dev.destroyBuffer(stagingBuf);
+    dev.freeMemory(stagingMem);
+    
+    chunkMeshes[key] = std::move(mesh);
+}
+
+static uint32_t packColor(uint8_t r, uint8_t g, uint8_t b) {
+    return r | (g << 8) | (b << 16) | (0xFF << 24);
+}
+
+static uint32_t blockColor(uint32_t blockId, int face) {
+    switch (blockId) {
+        case 2: return face == 4 ? packColor(76,175,80) : packColor(139,119,42);
+        case 3: return packColor(139,90,43);
+        case 1: return packColor(128,128,128);
+        case 4: return packColor(110,110,110);
+        case 13: return packColor(244,225,156);
+        case 14: return packColor(10,10,10);
+        case 5: return packColor(180,140,80);
+        case 6: case 7: case 8: case 9: case 10: return packColor(100,70,40);
+        case 11: return packColor(52,152,219);
+        case 12: return packColor(220,80,20);
+        case 15: return packColor(160,143,129);
+        case 16: return packColor(80,80,80);
+        case 17: return packColor(255,215,0);
+        case 18: return packColor(80,220,230);
+        case 64: case 65: case 66: case 67: case 68: case 69: case 70: case 71:
+            return packColor(50,140,50);
+        default: return packColor(150,150,150);
+    }
+}
+
+void Renderer::generateAndUploadChunks(World* world) {
+    if (!world || !chunkPipelineReady) return;
+    
+    auto playerPos = glm::vec3(0, 80, 0);
+    int rd = settings.renderDistance;
+    int cx = (int)floor(playerPos.x / 16.0f);
+    int cz = (int)floor(playerPos.z / 16.0f);
+    
+    int uploaded = 0;
+    
+    for (int dz = -rd; dz <= rd && uploaded < settings.maxChunksPerFrame; dz++) {
+        for (int dx = -rd; dx <= rd && uploaded < settings.maxChunksPerFrame; dx++) {
+            ChunkPos cpos{cx + dx, cz + dz};
+            uint64_t key = posKey(cpos.x, 0, cpos.z);
+            if (chunkMeshes.count(key)) continue;
+            
+            auto* chunk = world->getChunk(cpos);
+            if (!chunk) continue;
+        
+        std::vector<float> vertices;
+        std::vector<uint32_t> indices;
+        
+        for (int y = 0; y < 128; y++) {
+            for (int z = 0; z < 16; z++) {
+                for (int x = 0; x < 16; x++) {
+                    auto block = chunk->getBlock(x, y, z);
+                    if (block.isAir()) continue;
+                    
+                    uint32_t bid = block.getBlockId();
+                    float fx = (float)x, fy = (float)(y - 64), fz = (float)z;
+                    
+                    auto checkNeighbor = [&](int nx, int ny, int nz) -> bool {
+                        if (nx < 0 || nx >= 16 || nz < 0 || nz >= 16 || ny < 0 || ny >= 384) return true;
+                        auto nb = chunk->getBlock(nx, ny, nz);
+                        return nb.isAir();
+                    };
+                    
+                    auto addFace = [&](float x0,float y0,float z0, float x1,float y1,float z1,
+                                       float x2,float y2,float z2, float x3,float y3,float z3, int face) {
+                        uint32_t col = blockColor(bid, face);
+                        uint32_t base = (uint32_t)(vertices.size() / 4);
+                        vertices.insert(vertices.end(), {x0,y0,z0, *(float*)&col, x1,y1,z1, *(float*)&col, x2,y2,z2, *(float*)&col, x3,y3,z3, *(float*)&col});
+                        indices.insert(indices.end(), {base, base+1, base+2, base, base+2, base+3});
+                    };
+                    
+                    if (checkNeighbor(x, y+1, z))
+                        addFace(fx,fy+1,fz, fx+1,fy+1,fz, fx+1,fy+1,fz+1, fx,fy+1,fz+1, 4);
+                    if (checkNeighbor(x, y-1, z))
+                        addFace(fx,fy,fz+1, fx+1,fy,fz+1, fx+1,fy,fz, fx,fy,fz, 5);
+                    if (checkNeighbor(x, y, z-1))
+                        addFace(fx,fy,fz, fx+1,fy,fz, fx+1,fy+1,fz, fx,fy+1,fz, 2);
+                    if (checkNeighbor(x, y, z+1))
+                        addFace(fx+1,fy,fz+1, fx,fy,fz+1, fx,fy+1,fz+1, fx+1,fy+1,fz+1, 3);
+                    if (checkNeighbor(x-1, y, z))
+                        addFace(fx,fy,fz+1, fx,fy,fz, fx,fy+1,fz, fx,fy+1,fz+1, 0);
+                    if (checkNeighbor(x+1, y, z))
+                        addFace(fx+1,fy,fz, fx+1,fy,fz+1, fx+1,fy+1,fz+1, fx+1,fy+1,fz, 1);
+                }
+            }
+        }
+        
+        if (!vertices.empty()) {
+            uploadChunkMesh(glm::ivec3(cpos.x, 0, cpos.z), vertices, indices);
+            uploaded++;
+        }
+        }
+    }
+}
+
+void Renderer::renderWorldChunks(World* world, Camera* camera) {
+    if (!chunkPipelineReady || chunkMeshes.empty()) return;
+    
+    auto& cmd = commandBuffers[currentImageIndex];
+    cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, chunkPipeline);
+    
+    glm::mat4 vp = camera->getViewProjectionMatrix();
+    
+    for (auto& [key, mesh] : chunkMeshes) {
+        if (!mesh.valid || mesh.indexCount == 0) continue;
+        
+        glm::vec3 offset(mesh.chunkPos.x * 16.0f, (mesh.chunkPos.y * 16.0f) - 64.0f, mesh.chunkPos.z * 16.0f);
+        glm::mat4 model = glm::translate(glm::mat4(1.0f), offset);
+        glm::mat4 mvp = vp * model;
+        
+        cmd.pushConstants(chunkPipelineLayout, vk::ShaderStageFlagBits::eVertex, 0, sizeof(glm::mat4), &mvp);
+        
+        vk::DeviceSize offset_v = 0;
+        cmd.bindVertexBuffers(0, 1, &mesh.vertexBuffer, &offset_v);
+        cmd.bindIndexBuffer(mesh.indexBuffer, 0, vk::IndexType::eUint32);
+        cmd.drawIndexed(mesh.indexCount, 1, 0, 0, 0);
+        
+        stats.chunksRendered++;
+        stats.drawCalls++;
+    }
 }
 
 } // namespace VoxelForge

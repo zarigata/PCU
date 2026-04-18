@@ -328,6 +328,9 @@ target_link_libraries(VoxelForge_Engine
         GL
         sol2::sol2
         ${LUA_LIBRARIES}
+        glslang::glslang
+        glslang::SPIRV
+        glslang::glslang-default-resource-limits
 )
 
 target_compile_definitions(VoxelForge_Engine
@@ -336,6 +339,7 @@ target_compile_definitions(VoxelForge_Engine
         VOXELFORGE_VERSION_MAJOR=${PROJECT_VERSION_MAJOR}
         VOXELFORGE_VERSION_MINOR=${PROJECT_VERSION_MINOR}
         VOXELFORGE_VERSION_PATCH=${PROJECT_VERSION_PATCH}
+        USE_GLSLANG
 )
 
 # ============================================
