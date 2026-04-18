@@ -20,6 +20,10 @@
 #include <glslang/Public/ResourceLimits.h>
 #include <SPIRV/GlslangToSpv.h>
 
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include <stb_image_write.h>
+#include <stb_easy_font.h>
+
 namespace VoxelForge {
 
 // Global renderer instance
@@ -693,15 +697,162 @@ void Renderer::recreateSwapChain() {
 void Renderer::takeScreenshot(const std::string& path) {
     VF_PROFILE_FUNCTION();
     
-    VF_INFO("Taking screenshot: {}", path);
+    auto dev = context->getDevice();
     
-    // TODO: Implement screenshot functionality
-    // 1. Create a buffer image
-    // 2. Copy swapchain image to buffer image
-    // 3. Map and read the image data
-    // 4. Save to file (PNG or BMP)
+    // Wait for rendering to finish
+    dev.waitIdle();
     
-    VF_WARN("Screenshot not yet implemented");
+    // Get the swapchain image
+    vk::Image srcImage = swapchainImages[currentImageIndex];
+    
+    // Create a host-visible destination image
+    vk::ImageCreateInfo dstImageInfo{};
+    dstImageInfo.sType = vk::StructureType::eImageCreateInfo;
+    dstImageInfo.imageType = vk::ImageType::e2D;
+    dstImageInfo.format = vk::Format::eR8G8B8A8Unorm;
+    dstImageInfo.extent = vk::Extent3D{swapchainExtent.width, swapchainExtent.height, 1};
+    dstImageInfo.mipLevels = 1;
+    dstImageInfo.arrayLayers = 1;
+    dstImageInfo.samples = vk::SampleCountFlagBits::e1;
+    dstImageInfo.tiling = vk::ImageTiling::eLinear;
+    dstImageInfo.usage = vk::ImageUsageFlagBits::eTransferDst;
+    dstImageInfo.sharingMode = vk::SharingMode::eExclusive;
+    dstImageInfo.initialLayout = vk::ImageLayout::eUndefined;
+    
+    vk::Image dstImage;
+    vk::DeviceMemory dstMemory;
+    try {
+        dstImage = dev.createImage(dstImageInfo);
+        auto memReqs = dev.getImageMemoryRequirements(dstImage);
+        vk::MemoryAllocateInfo allocInfo{};
+        allocInfo.sType = vk::StructureType::eMemoryAllocateInfo;
+        allocInfo.allocationSize = memReqs.size;
+        allocInfo.memoryTypeIndex = context->findMemoryType(
+            memReqs.memoryTypeBits,
+            vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent);
+        dstMemory = dev.allocateMemory(allocInfo);
+        dev.bindImageMemory(dstImage, dstMemory, 0);
+    } catch (const vk::SystemError& e) {
+        VF_ERROR("Screenshot: failed to create dest image: {}", e.what());
+        return;
+    }
+    
+    // Create a one-shot command buffer for the copy
+    vk::CommandBufferAllocateInfo cmdAlloc{};
+    cmdAlloc.sType = vk::StructureType::eCommandBufferAllocateInfo;
+    cmdAlloc.commandPool = commandPool;
+    cmdAlloc.level = vk::CommandBufferLevel::ePrimary;
+    cmdAlloc.commandBufferCount = 1;
+    auto cmdBuf = dev.allocateCommandBuffers(cmdAlloc)[0];
+    
+    vk::CommandBufferBeginInfo beginInfo{};
+    beginInfo.sType = vk::StructureType::eCommandBufferBeginInfo;
+    beginInfo.flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit;
+    cmdBuf.begin(beginInfo);
+    
+    // Transition source (swapchain) image for transfer
+    vk::ImageMemoryBarrier srcBarrier{};
+    srcBarrier.sType = vk::StructureType::eImageMemoryBarrier;
+    srcBarrier.srcAccessMask = vk::AccessFlagBits::eMemoryRead;
+    srcBarrier.dstAccessMask = vk::AccessFlagBits::eTransferRead;
+    srcBarrier.oldLayout = vk::ImageLayout::ePresentSrcKHR;
+    srcBarrier.newLayout = vk::ImageLayout::eTransferSrcOptimal;
+    srcBarrier.image = srcImage;
+    srcBarrier.subresourceRange = {vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1};
+    cmdBuf.pipelineBarrier(
+        vk::PipelineStageFlagBits::eTransfer,
+        vk::PipelineStageFlagBits::eTransfer,
+        vk::DependencyFlags{}, 0, nullptr, 0, nullptr, 1, &srcBarrier);
+    
+    // Transition dest image for transfer write
+    vk::ImageMemoryBarrier dstBarrier{};
+    dstBarrier.sType = vk::StructureType::eImageMemoryBarrier;
+    dstBarrier.srcAccessMask = vk::AccessFlags{};
+    dstBarrier.dstAccessMask = vk::AccessFlagBits::eTransferWrite;
+    dstBarrier.oldLayout = vk::ImageLayout::eUndefined;
+    dstBarrier.newLayout = vk::ImageLayout::eTransferDstOptimal;
+    dstBarrier.image = dstImage;
+    dstBarrier.subresourceRange = {vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1};
+    cmdBuf.pipelineBarrier(
+        vk::PipelineStageFlagBits::eTransfer,
+        vk::PipelineStageFlagBits::eTransfer,
+        vk::DependencyFlags{}, 0, nullptr, 0, nullptr, 1, &dstBarrier);
+    
+    // Copy image (may need format conversion — B8G8R8A8 → R8G8B8A8)
+    vk::ImageCopy copyRegion{};
+    copyRegion.srcSubresource = {vk::ImageAspectFlagBits::eColor, 0, 0, 1};
+    copyRegion.srcOffset = vk::Offset3D{0, 0, 0};
+    copyRegion.dstSubresource = {vk::ImageAspectFlagBits::eColor, 0, 0, 1};
+    copyRegion.dstOffset = vk::Offset3D{0, 0, 0};
+    copyRegion.extent = vk::Extent3D{swapchainExtent.width, swapchainExtent.height, 1};
+    cmdBuf.copyImage(srcImage, vk::ImageLayout::eTransferSrcOptimal,
+                     dstImage, vk::ImageLayout::eTransferDstOptimal, 1, &copyRegion);
+    
+    // Transition dest to general for reading
+    vk::ImageMemoryBarrier readBarrier{};
+    readBarrier.sType = vk::StructureType::eImageMemoryBarrier;
+    readBarrier.srcAccessMask = vk::AccessFlagBits::eTransferWrite;
+    readBarrier.dstAccessMask = vk::AccessFlagBits::eMemoryRead;
+    readBarrier.oldLayout = vk::ImageLayout::eTransferDstOptimal;
+    readBarrier.newLayout = vk::ImageLayout::eGeneral;
+    readBarrier.image = dstImage;
+    readBarrier.subresourceRange = {vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1};
+    cmdBuf.pipelineBarrier(
+        vk::PipelineStageFlagBits::eTransfer,
+        vk::PipelineStageFlagBits::eHost,
+        vk::DependencyFlags{}, 0, nullptr, 0, nullptr, 1, &readBarrier);
+    
+    // Transition source back to present
+    srcBarrier.srcAccessMask = vk::AccessFlagBits::eTransferRead;
+    srcBarrier.dstAccessMask = vk::AccessFlagBits::eMemoryRead;
+    srcBarrier.oldLayout = vk::ImageLayout::eTransferSrcOptimal;
+    srcBarrier.newLayout = vk::ImageLayout::ePresentSrcKHR;
+    cmdBuf.pipelineBarrier(
+        vk::PipelineStageFlagBits::eTransfer,
+        vk::PipelineStageFlagBits::eTransfer,
+        vk::DependencyFlags{}, 0, nullptr, 0, nullptr, 1, &srcBarrier);
+    
+    cmdBuf.end();
+    
+    vk::SubmitInfo submitInfo{};
+    submitInfo.sType = vk::StructureType::eSubmitInfo;
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &cmdBuf;
+    context->getGraphicsQueue().submit(1, &submitInfo, vk::Fence{});
+    context->getGraphicsQueue().waitIdle();
+    
+    // Read back pixel data
+    auto imgReqs = dev.getImageMemoryRequirements(dstImage);
+    void* mapped = dev.mapMemory(dstMemory, 0, imgReqs.size);
+    
+    auto subRes = dev.getImageSubresourceLayout(dstImage, {vk::ImageAspectFlagBits::eColor, 0, 0});
+    auto* pixels = static_cast<unsigned char*>(mapped) + subRes.offset;
+    
+    // Convert BGR to RGB and strip alpha, write PNG
+    int w = (int)swapchainExtent.width;
+    int h = (int)swapchainExtent.height;
+    std::vector<unsigned char> rgb(w * h * 3);
+    
+    for (int row = 0; row < h; row++) {
+        auto* srcRow = pixels + row * subRes.rowPitch;
+        auto* dstRow = rgb.data() + row * w * 3;
+        for (int col = 0; col < w; col++) {
+            dstRow[col * 3 + 0] = srcRow[col * 4 + 2]; // R from B
+            dstRow[col * 3 + 1] = srcRow[col * 4 + 1]; // G
+            dstRow[col * 3 + 2] = srcRow[col * 4 + 0]; // B from R
+        }
+    }
+    
+    dev.unmapMemory(dstMemory);
+    
+    stbi_write_png(path.c_str(), w, h, 3, rgb.data(), w * 3);
+    
+    // Cleanup
+    dev.freeCommandBuffers(commandPool, 1, &cmdBuf);
+    dev.destroyImage(dstImage);
+    dev.freeMemory(dstMemory);
+    
+    VF_INFO("Screenshot saved: {} ({}x{})", path, w, h);
 }
 
 void Renderer::reloadShaders() {
@@ -737,14 +888,21 @@ vk::SurfaceFormatKHR Renderer::chooseSwapSurfaceFormat(
 vk::PresentModeKHR Renderer::chooseSwapPresentMode(
     const std::vector<vk::PresentModeKHR>& availablePresentModes) {
     
-    // Prefer mailbox (triple buffering)
+    if (settings.enableVsync) {
+        bool hasRelaxed = false;
+        for (const auto& mode : availablePresentModes) {
+            if (mode == vk::PresentModeKHR::eFifoRelaxed) return mode;
+            if (mode == vk::PresentModeKHR::eFifo) hasRelaxed = true;
+        }
+        if (hasRelaxed) return vk::PresentModeKHR::eFifo;
+    }
+    
     for (const auto& availablePresentMode : availablePresentModes) {
         if (availablePresentMode == vk::PresentModeKHR::eMailbox) {
             return availablePresentMode;
         }
     }
     
-    // Fallback to FIFO (vsync)
     return vk::PresentModeKHR::eFifo;
 }
 
@@ -870,7 +1028,7 @@ void Renderer::initChunkRendering() {
     builder.setInputTopology(vk::PrimitiveTopology::eTriangleList);
     builder.setViewport(0, 0, (float)swapchainExtent.width, (float)swapchainExtent.height);
     builder.setScissor(0, 0, swapchainExtent.width, swapchainExtent.height);
-    builder.setRasterizer(vk::PolygonMode::eFill, vk::CullModeFlagBits::eBack, vk::FrontFace::eCounterClockwise);
+    builder.setRasterizer(vk::PolygonMode::eFill, vk::CullModeFlagBits::eBack, vk::FrontFace::eClockwise);
     builder.setMultisampling(vk::SampleCountFlagBits::e1);
     builder.setDepthStencil(true, true, vk::CompareOp::eLess);
     builder.setColorBlendAttachment(
@@ -1414,13 +1572,17 @@ void Renderer::drawPauseMenu(int selection, float sensitivity, bool invertY, boo
     };
     
     uint32_t bgDim = 0xCC000000;
-    uint32_t panelBg = 0xDD1a1a2e;
+    uint32_t panelBg = 0xDD202030;
     uint32_t selectedBg = 0xFFe94560;
     uint32_t normalBg = 0xFF16213e;
     uint32_t barBg = 0xFF0f3460;
     uint32_t barFill = 0xFFe94560;
     uint32_t onColor = 0xFF4ecca3;
     uint32_t offColor = 0xFF6c757d;
+    uint32_t textColor = 0xFFFFFFFF;
+    
+    float pxW = (float)swapchainExtent.width;
+    float pxH = (float)swapchainExtent.height;
     
     addRect(-1.0f, -1.0f, 1.0f, 1.0f, bgDim);
     
@@ -1480,6 +1642,89 @@ void Renderer::drawPauseMenu(int selection, float sensitivity, bool invertY, boo
     cmd.bindVertexBuffers(0, 1, &uiVertexBuffer, &off);
     cmd.bindIndexBuffer(uiIndexBuffer, 0, vk::IndexType::eUint32);
     cmd.drawIndexed(idx, 1, 0, 0, 0);
+    
+    drawText("PAUSED", pxW * 0.5f - 54.0f, pxH * 0.18f, 0xFFFFFFFF, 3.0f);
+    for (int i = 0; i < itemCount; i++) {
+        float y = itemY - i * (itemH + gap);
+        float pxY = (1.0f - y + itemH * 0.3f) * pxH * 0.5f;
+        float pxX = (-itemW + 0.03f) * pxW * 0.5f + pxW * 0.5f;
+        uint32_t col = (i == selection) ? 0xFFFFFFFF : 0xFFCCCCCC;
+        drawText(items[i].label, pxX, pxY, col, 1.5f);
+        
+        char valBuf[32];
+        if (items[i].type == 1) {
+            snprintf(valBuf, sizeof(valBuf), "%.2f", items[i].value);
+            float valX = (itemW - 0.15f) * pxW * 0.5f + pxW * 0.5f;
+            drawText(valBuf, valX, pxY, 0xFFCCCCCC, 1.3f);
+        } else if (items[i].type == 2) {
+            drawText(items[i].on ? "ON" : "OFF",
+                     (itemW - 0.08f) * pxW * 0.5f + pxW * 0.5f - 12.0f, pxY,
+                     items[i].on ? onColor : offColor, 1.3f);
+        } else if (i == 4) {
+            drawText(flyMode ? "FLY" : "WALK",
+                     (itemW - 0.08f) * pxW * 0.5f + pxW * 0.5f - 16.0f, pxY,
+                     flyMode ? onColor : offColor, 1.3f);
+        }
+    }
+}
+
+void Renderer::drawText(const char* text, float x, float y, uint32_t color, float scale) {
+    if (!uiPipelineReady || !uiVertexMapped || !uiIndexMapped) return;
+    if (!text || !text[0]) return;
+    
+    char qbuffer[4096];
+    int num_quads = stb_easy_font_print(x, y, const_cast<char*>(text), nullptr, qbuffer, sizeof(qbuffer));
+    if (num_quads <= 0) return;
+    
+    struct EasyVert { float x, y, z; uint32_t col; };
+    
+    auto* src = reinterpret_cast<EasyVert*>(qbuffer);
+    auto& cmd = commandBuffers[currentImageIndex];
+    
+    uint32_t v = 0, idx = 0;
+    int totalVerts = num_quads * 4;
+    int totalIndices = num_quads * 6;
+    
+    auto* verts = static_cast<EasyVert*>(uiVertexMapped);
+    auto* indices = static_cast<uint32_t*>(uiIndexMapped);
+    
+    float scaleX = scale * 2.0f / (float)swapchainExtent.width;
+    float scaleY = scale * 2.0f / (float)swapchainExtent.height;
+    
+    for (int q = 0; q < num_quads; q++) {
+        uint32_t base = v;
+        for (int i = 0; i < 4; i++) {
+            auto& sv = src[q * 4 + i];
+            verts[v].x = sv.x * scaleX - 1.0f;
+            verts[v].y = -(sv.y * scaleY - 1.0f);
+            verts[v].z = 0.0f;
+            verts[v].col = color;
+            v++;
+        }
+        indices[idx++] = base;
+        indices[idx++] = base + 1;
+        indices[idx++] = base + 2;
+        indices[idx++] = base;
+        indices[idx++] = base + 2;
+        indices[idx++] = base + 3;
+    }
+    
+    cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, uiPipeline);
+    glm::mat4 identity(1.0f);
+    cmd.pushConstants(uiPipelineLayout, vk::ShaderStageFlagBits::eVertex, 0, sizeof(glm::mat4), &identity);
+    vk::DeviceSize off = 0;
+    cmd.bindVertexBuffers(0, 1, &uiVertexBuffer, &off);
+    cmd.bindIndexBuffer(uiIndexBuffer, 0, vk::IndexType::eUint32);
+    cmd.drawIndexed(idx, 1, 0, 0, 0);
+}
+
+void Renderer::drawDebugOverlay(float fps, float frameTime, int chunks, int drawCalls, float pitch, float yaw) {
+    if (!uiPipelineReady || !uiVertexMapped || !uiIndexMapped) return;
+    
+    char buf[256];
+    snprintf(buf, sizeof(buf), "FPS: %.0f  FT: %.1fms  Chunks: %d  Draws: %d  Pitch: %.1f  Yaw: %.1f",
+             fps, frameTime * 1000.0f, chunks, drawCalls, pitch, yaw);
+    drawText(buf, 4.0f, 4.0f, 0xFFFFFFFF, 1.5f);
 }
 
 } // namespace VoxelForge

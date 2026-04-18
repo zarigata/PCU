@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <fstream>
 #include <filesystem>
+#include <ctime>
 
 namespace VoxelForge {
 
@@ -161,6 +162,9 @@ void Game::onRender() {
             renderer.drawPauseMenu(pauseMenuSelection, settings.mouseSensitivity,
                                     settings.invertMouseY, settings.invertMouseX, flyMode);
         }
+        auto& rstats = renderer.getStats();
+        renderer.drawDebugOverlay(currentFPS, (currentFPS > 0.0f) ? 1.0f/currentFPS : 0.0f,
+                                  (int)rstats.chunksRendered, (int)rstats.drawCalls, playerPitch, playerYaw);
         renderer.endFrame();
     } catch (const std::exception& e) {
         VF_ERROR("Render error: {}", e.what());
@@ -213,6 +217,17 @@ void Game::processInput(float deltaTime) {
         flyMode = !flyMode;
         playerVelocity = glm::vec3(0.0f);
         onGround = false;
+    }
+    
+    if (input.isKeyJustPressed(301)) {
+        auto now = std::time(nullptr);
+        auto tm = std::localtime(&now);
+        char buf[64];
+        std::strftime(buf, sizeof(buf), "%Y%m%d_%H%M%S", tm);
+        std::string dir = "screenshots";
+        std::filesystem::create_directories(dir);
+        std::string path = dir + "/" + std::string(buf) + ".png";
+        renderer.takeScreenshot(path);
     }
     
     static bool loggedFirstInput = false;
@@ -284,7 +299,7 @@ void Game::processInput(float deltaTime) {
     auto mouseDelta = input.getMouseDelta();
     if (glm::length(mouseDelta) > 0.0f) {
     float xMul = settings.invertMouseX ? -1.0f : 1.0f;
-    float yMul = settings.invertMouseY ? -1.0f : 1.0f;
+    float yMul = settings.invertMouseY ? 1.0f : -1.0f;
         playerYaw += mouseDelta.x * settings.mouseSensitivity * xMul;
         playerPitch += mouseDelta.y * settings.mouseSensitivity * yMul;
         playerPitch = std::clamp(playerPitch, -89.0f, 89.0f);

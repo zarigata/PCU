@@ -41,7 +41,7 @@ TEST_F(RendererTest, RenderStats_DefaultValues) {
 TEST_F(RendererTest, RenderSettings_DefaultValues) {
     RenderSettings settings;
     
-    EXPECT_EQ(settings.renderDistance, 8);
+    EXPECT_EQ(settings.renderDistance, 6);
     EXPECT_EQ(settings.simulationDistance, 6);
     EXPECT_TRUE(settings.enableAO);
     EXPECT_TRUE(settings.enableShadows);
@@ -53,7 +53,8 @@ TEST_F(RendererTest, RenderSettings_DefaultValues) {
     EXPECT_TRUE(settings.enableTAA);
     EXPECT_TRUE(settings.enableFXAA);
     EXPECT_FLOAT_EQ(settings.bloomIntensity, 0.5f);
-    EXPECT_EQ(settings.maxFps, 120);
+    EXPECT_EQ(settings.maxFps, 60);
+    EXPECT_TRUE(settings.enableVsync);
     EXPECT_TRUE(settings.enableFrustumCulling);
     EXPECT_TRUE(settings.enableOcclusionCulling);
     EXPECT_TRUE(settings.enableChunkMeshing);

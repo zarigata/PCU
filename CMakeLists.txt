@@ -340,6 +340,7 @@ target_compile_definitions(VoxelForge_Engine
         VOXELFORGE_VERSION_MINOR=${PROJECT_VERSION_MINOR}
         VOXELFORGE_VERSION_PATCH=${PROJECT_VERSION_PATCH}
         USE_GLSLANG
+        GLM_FORCE_DEPTH_ZERO_TO_ONE
 )
 
 # ============================================

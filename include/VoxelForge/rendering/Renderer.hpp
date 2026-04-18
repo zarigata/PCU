@@ -38,7 +38,7 @@ struct RenderStats {
 // Render settings
 struct RenderSettings {
     // Quality
-    int renderDistance = 8;
+    int renderDistance = 6;
     int simulationDistance = 6;
     bool enableAO = true;
     bool enableShadows = true;
@@ -54,7 +54,8 @@ struct RenderSettings {
     float bloomIntensity = 0.5f;
     
     // Performance
-    int maxFps = 120;
+    int maxFps = 60;
+    bool enableVsync = true;
     bool enableFrustumCulling = true;
     bool enableOcclusionCulling = true;
     bool enableChunkMeshing = true;
@@ -90,6 +91,8 @@ public:
     void drawCrosshair();
     void drawHotbar(int selectedSlot, const std::array<uint32_t, 9>& hotbarBlocks);
     void drawPauseMenu(int selection, float sensitivity, bool invertY, bool invertX, bool flyMode);
+    void drawText(const char* text, float x, float y, uint32_t color, float scale = 1.0f);
+    void drawDebugOverlay(float fps, float frameTime, int chunks, int drawCalls, float pitch, float yaw);
 
     // UI rendering (host-visible buffers, dedicated UI pipeline)
     void initUIRendering();
