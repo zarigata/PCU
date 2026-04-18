@@ -322,6 +322,7 @@ void CommandManager::registerVanillaCommands() {
     registerCommand(Commands::createWorldBorderCommand());
     registerCommand(Commands::createSummonCommand());
     registerCommand(Commands::createSetBlockCommand());
+    registerCommand(Commands::createFillCommand());
     
     VF_INFO("Registered {} commands", commands.size());
 }
@@ -398,7 +399,7 @@ std::unique_ptr<Command> createHelpCommand() {
     cmd->usage = "help [command]";
     cmd->aliases = {"?"};
     cmd->execute = [](CommandContext& ctx, const std::vector<std::string>& args) -> CommandResult {
-        ctx.sendSuccess("Available commands: /help, /gamemode, /tp, /give, /time, /weather, /kill, /heal, /clear, /list, /stop, /summon, /setblock");
+        ctx.sendSuccess("Available commands: /help, /gamemode, /tp, /give, /time, /weather, /kill, /heal, /clear, /list, /stop, /summon, /setblock, /fill, /say, /difficulty, /seed, /worldborder");
         return {true, "", 0};
     };
     return cmd;
@@ -893,7 +894,160 @@ std::unique_ptr<Command> createSetBlockCommand() {
 
     return cmd;
 }
-std::unique_ptr<Command> createFillCommand() { return std::make_unique<Command>(); }
+std::unique_ptr<Command> createFillCommand() {
+    auto cmd = std::make_unique<Command>();
+    cmd->name = "fill";
+    cmd->description = "Fills a region with a block";
+    cmd->usage = "fill <x1> <y1> <z1> <x2> <y2> <z2> <block> [destroy|keep|outline|replace|hollow]";
+    cmd->requiredPermission = 2;
+    cmd->arguments = {
+        {"x1", ArgumentType::Integer, false, {}, "~"},
+        {"y1", ArgumentType::Integer, false, {}, "~"},
+        {"z1", ArgumentType::Integer, false, {}, "~"},
+        {"x2", ArgumentType::Integer, false, {}, "~"},
+        {"y2", ArgumentType::Integer, false, {}, "~"},
+        {"z2", ArgumentType::Integer, false, {}, "~"},
+        {"block", ArgumentType::String, false, {}, ""},
+        {"mode", ArgumentType::String, true, {"destroy", "keep", "outline", "replace", "hollow"}, "replace"}
+    };
+
+    cmd->execute = [](CommandContext& ctx, const std::vector<std::string>& args) -> CommandResult {
+        if (args.size() < 7) {
+            return {false, "Usage: fill <x1> <y1> <z1> <x2> <y2> <z2> <block> [destroy|keep|outline|replace|hollow]", 0};
+        }
+
+        if (!ctx.world) {
+            return {false, "No world context available", 0};
+        }
+
+        // Parse coordinates with ~ relative support
+        auto parseCoord = [](const std::string& s, int base) -> std::optional<int> {
+            if (s.empty()) return std::nullopt;
+            if (s[0] == '~') {
+                if (s.size() == 1) return base;
+                try { return base + std::stoi(s.substr(1)); } catch (...) { return std::nullopt; }
+            }
+            try { return std::stoi(s); } catch (...) { return std::nullopt; }
+        };
+
+        auto ox1 = parseCoord(args[0], static_cast<int>(ctx.position.x));
+        auto oy1 = parseCoord(args[1], static_cast<int>(ctx.position.y));
+        auto oz1 = parseCoord(args[2], static_cast<int>(ctx.position.z));
+        auto ox2 = parseCoord(args[3], static_cast<int>(ctx.position.x));
+        auto oy2 = parseCoord(args[4], static_cast<int>(ctx.position.y));
+        auto oz2 = parseCoord(args[5], static_cast<int>(ctx.position.z));
+
+        if (!ox1 || !oy1 || !oz1 || !ox2 || !oy2 || !oz2) {
+            return {false, "Invalid position coordinates", 0};
+        }
+
+        // Normalize corners (order doesn't matter)
+        int minX = std::min(*ox1, *ox2), maxX = std::max(*ox1, *ox2);
+        int minY = std::min(*oy1, *oy2), maxY = std::max(*oy1, *oy2);
+        int minZ = std::min(*oz1, *oz2), maxZ = std::max(*oz1, *oz2);
+
+        // Volume limit (32768 blocks, matching vanilla Minecraft)
+        int64_t volume = static_cast<int64_t>(maxX - minX + 1) *
+                         static_cast<int64_t>(maxY - minY + 1) *
+                         static_cast<int64_t>(maxZ - minZ + 1);
+        if (volume > 32768) {
+            return {false, "Too many blocks in the specified area (max 32768, got " +
+                std::to_string(volume) + ")", 0};
+        }
+
+        // Resolve block name
+        std::string blockName = args[6];
+        if (blockName.find(':') == std::string::npos) {
+            blockName = "minecraft:" + blockName;
+        }
+
+        BlockID blockId = BlockRegistry::get().getBlockId(blockName);
+        if (blockId == AIR_BLOCK && blockName != "minecraft:air") {
+            return {false, "Unknown block: " + args[6], 0};
+        }
+
+        BlockState fillState(blockId);
+
+        // Parse mode
+        std::string mode = "replace";
+        if (args.size() >= 8) {
+            mode = args[7];
+            std::transform(mode.begin(), mode.end(), mode.begin(), ::tolower);
+        }
+
+        int placed = 0;
+
+        auto isOnShell = [&](int x, int y, int z) -> bool {
+            return x == minX || x == maxX ||
+                   y == minY || y == maxY ||
+                   z == minZ || z == maxZ;
+        };
+
+        for (int y = minY; y <= maxY; ++y) {
+            for (int z = minZ; z <= maxZ; ++z) {
+                for (int x = minX; x <= maxX; ++x) {
+                    BlockState existing = ctx.world->getBlock(x, y, z);
+
+                    if (mode == "destroy") {
+                        // Replace all blocks (drop loot handled by setBlock in full impl)
+                        ctx.world->setBlock(x, y, z, fillState);
+                        placed++;
+                    } else if (mode == "keep") {
+                        // Only replace air
+                        if (existing.isAir()) {
+                            ctx.world->setBlock(x, y, z, fillState);
+                            placed++;
+                        }
+                    } else if (mode == "outline") {
+                        // Only place on the outer shell
+                        if (isOnShell(x, y, z)) {
+                            ctx.world->setBlock(x, y, z, fillState);
+                            placed++;
+                        }
+                    } else if (mode == "hollow") {
+                        // Shell is filled, interior is cleared to air
+                        if (isOnShell(x, y, z)) {
+                            ctx.world->setBlock(x, y, z, fillState);
+                            placed++;
+                        } else {
+                            if (!existing.isAir()) {
+                                ctx.world->setBlock(x, y, z, BlockState(AIR_BLOCK));
+                                placed++;
+                            }
+                        }
+                    } else {
+                        // replace (default): replace all non-air blocks
+                        if (!existing.isAir()) {
+                            ctx.world->setBlock(x, y, z, fillState);
+                            placed++;
+                        } else {
+                            // Also fill air
+                            ctx.world->setBlock(x, y, z, fillState);
+                            placed++;
+                        }
+                    }
+                }
+            }
+        }
+
+        ctx.sendSuccess("Filled " + std::to_string(placed) + " blocks with " + args[6]);
+        return {true, "", placed};
+    };
+
+    // Tab completion for modes
+    cmd->tabComplete = [](const std::string& partial) -> std::vector<std::string> {
+        static const std::vector<std::string> modes = {"destroy", "keep", "outline", "replace", "hollow"};
+        std::vector<std::string> results;
+        std::string lower = partial;
+        std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+        for (const auto& m : modes) {
+            if (m.find(lower) == 0) results.push_back(m);
+        }
+        return results;
+    };
+
+    return cmd;
+}
 std::unique_ptr<Command> createCloneCommand() { return std::make_unique<Command>(); }
 std::unique_ptr<Command> createOpCommand() { return std::make_unique<Command>(); }
 std::unique_ptr<Command> createDeopCommand() { return std::make_unique<Command>(); }
