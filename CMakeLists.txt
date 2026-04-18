@@ -198,6 +198,7 @@ add_library(VoxelForge_Engine STATIC
     src/core/Logger.cpp
     src/core/Memory.cpp
     src/core/Timer.cpp
+    src/core/Diagnostics.cpp
     
     # Engine Systems
     src/engine/EventSystem.cpp
@@ -220,6 +221,7 @@ add_library(VoxelForge_Engine STATIC
     src/world/FluidSystem.cpp
     src/world/ChunkMesher.cpp
     src/world/ChunkManager.cpp
+    src/world/AsyncChunkWorker.cpp
     src/world/LightEngine.cpp
     src/world/AnvilLoader.cpp
     

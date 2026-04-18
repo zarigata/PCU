@@ -159,6 +159,39 @@ void World::updateChunks(const glm::vec3& playerPos) {
     // TODO: Unload distant chunks
 }
 
+void World::unloadDistantChunks(const glm::vec3& playerPos, int renderDistance,
+                                const std::function<bool(int, int)>& shouldProtect) {
+    ChunkPos playerChunk(
+        static_cast<int>(std::floor(playerPos.x / (float)CHUNK_WIDTH)),
+        static_cast<int>(std::floor(playerPos.z / (float)CHUNK_WIDTH))
+    );
+
+    int unloadRadius = renderDistance + 4;
+    int unloadRadiusSq = unloadRadius * unloadRadius;
+
+    std::vector<ChunkPos> toUnload;
+
+    {
+        std::shared_lock lock(chunkMutex);
+        for (const auto& [pos, chunk] : chunks) {
+            int dx = pos.x - playerChunk.x;
+            int dz = pos.z - playerChunk.z;
+            if (dx * dx + dz * dz > unloadRadiusSq) {
+                if (!shouldProtect(pos.x, pos.z)) {
+                    toUnload.push_back(pos);
+                }
+            }
+        }
+    }
+
+    if (!toUnload.empty()) {
+        std::unique_lock lock(chunkMutex);
+        for (const auto& pos : toUnload) {
+            chunks.erase(pos);
+        }
+    }
+}
+
 // ============================================
 // World Generation
 // ============================================

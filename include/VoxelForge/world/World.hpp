@@ -51,6 +51,8 @@ public:
     
     // Chunk management
     void updateChunks(const glm::vec3& playerPos);
+    void unloadDistantChunks(const glm::vec3& playerPos, int renderDistance,
+                             const std::function<bool(int, int)>& shouldProtect);
     size_t getLoadedChunkCount() const { return chunks.size(); }
     
     // World generation

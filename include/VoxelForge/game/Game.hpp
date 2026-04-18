@@ -9,6 +9,7 @@
 #include <VoxelForge/core/ECS.hpp>
 #include <VoxelForge/rendering/Renderer.hpp>
 #include <VoxelForge/rendering/Camera.hpp>
+#include <VoxelForge/world/AsyncChunkWorker.hpp>
 #include <glm/glm.hpp>
 #include <memory>
 #include <array>
@@ -115,7 +116,10 @@ private:
     bool onGround = false;
     bool flyMode = true;
     float flySpeedMult = 1.0f;
-    
+
+    AsyncChunkWorker asyncWorker_;
+    std::vector<AsyncMeshResult> pendingUploads_;
+
     static constexpr float PLAYER_WIDTH = 0.6f;
     static constexpr float PLAYER_HEIGHT = 1.8f;
     static constexpr float GRAVITY = 28.0f;

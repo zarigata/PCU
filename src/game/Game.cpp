@@ -2,10 +2,12 @@
 #include <VoxelForge/core/Logger.hpp>
 #include <VoxelForge/core/Input.hpp>
 #include <VoxelForge/core/Timer.hpp>
+#include <VoxelForge/core/Diagnostics.hpp>
 #include <VoxelForge/world/Block.hpp>
 #include <VoxelForge/world/BlockRegistry.hpp>
 #include <VoxelForge/world/Chunk.hpp>
 #include <VoxelForge/world/World.hpp>
+#include <VoxelForge/engine/JobSystem.hpp>
 #include <GLFW/glfw3.h>
 #include <cmath>
 #include <algorithm>
@@ -73,6 +75,9 @@ void Game::onShutdown() {
     
     saveWorld();
     
+    asyncWorker_.shutdown();
+    ShutdownJobSystem();
+    
     if (rendererInitialized) {
         renderer.cleanupChunkRendering();
         renderer.shutdown();
@@ -85,6 +90,10 @@ void Game::onShutdown() {
 }
 
 void Game::onUpdate(float deltaTime) {
+    if (rendererInitialized) {
+        renderer.waitForPendingUpload();
+    }
+
     processInput(deltaTime);
     
     if (paused) {
@@ -108,7 +117,52 @@ void Game::onUpdate(float deltaTime) {
     camera.setPerspective(settings.fov, aspect, 0.1f, farPlane);
     
     if (rendererInitialized && world) {
-        renderer.generateAndUploadChunks(world.get(), playerPos);
+        auto& diag = Diagnostics::get();
+
+        diag.beginSection("chunkUpdate");
+
+        if (pendingUploads_.size() < 8) {
+            asyncWorker_.update(world.get(), playerPos, settings.renderDistance, {});
+        }
+
+        {
+            auto completed = asyncWorker_.pollCompleted(64);
+            pendingUploads_.insert(pendingUploads_.end(),
+                std::make_move_iterator(completed.begin()),
+                std::make_move_iterator(completed.end()));
+        }
+
+        int uploadBytes = 0;
+        int uploadedCount = 0;
+        if (!pendingUploads_.empty()) {
+            diag.beginSection("upload");
+            renderer.submitUploadBatch({pendingUploads_.begin(), pendingUploads_.begin() + 1});
+            uploadBytes = (int)(pendingUploads_[0].vertices.size() * sizeof(float) +
+                                pendingUploads_[0].indices.size() * sizeof(uint32_t));
+            uploadedCount = 1;
+            pendingUploads_.erase(pendingUploads_.begin());
+            diag.endSection("upload");
+        }
+
+        static int cleanupCounter = 0;
+        if (++cleanupCounter >= 8) {
+            cleanupCounter = 0;
+            renderer.evictDistantMeshes(playerPos);
+            auto pending = asyncWorker_.getPendingSnapshot();
+            world->unloadDistantChunks(playerPos, settings.renderDistance,
+                [&pending](int cx, int cz) {
+                    uint64_t key = (uint64_t)(uint32_t)cx | ((uint64_t)(uint32_t)cz << 40);
+                    return pending.count(key) > 0;
+                });
+        }
+        diag.endSection("chunkUpdate");
+
+        if (diag.config().enabled) {
+            diag.currentFrame().chunksVisible = (int)renderer.getChunkMeshKeys().size();
+            diag.currentFrame().chunksLoaded = (int)world->getLoadedChunkCount();
+            diag.currentFrame().chunksUploadedThisFrame = uploadedCount;
+            diag.currentFrame().uploadBytesThisFrame = uploadBytes;
+        }
     }
     
     gameTime += deltaTime;
@@ -432,13 +486,19 @@ void Game::processInput(float deltaTime) {
     
     auto& input = getInput();
     auto mouseDelta = input.getMouseDelta();
+    float appliedDX = 0.0f, appliedDY = 0.0f;
     if (glm::length(mouseDelta) > 0.0f) {
         float xMul = settings.invertMouseX ? -1.0f : 1.0f;
         float yMul = settings.invertMouseY ? 1.0f : -1.0f;
-        playerYaw += mouseDelta.x * settings.mouseSensitivity * xMul;
-        playerPitch += mouseDelta.y * settings.mouseSensitivity * yMul;
+        appliedDX = mouseDelta.x * settings.mouseSensitivity * xMul;
+        appliedDY = mouseDelta.y * settings.mouseSensitivity * yMul;
+        playerYaw += appliedDX;
+        playerPitch += appliedDY;
         playerPitch = std::clamp(playerPitch, -89.0f, 89.0f);
     }
+    
+    auto& diag = Diagnostics::get();
+    diag.recordMouseDelta(mouseDelta.x, mouseDelta.y, appliedDX, appliedDY, cursorCaptured);
     
     camera.setPosition(playerPos + glm::vec3(0.0f, PLAYER_HEIGHT * 0.85f, 0.0f));
     camera.setRotation(playerPitch, playerYaw);
@@ -563,6 +623,7 @@ void Game::handleBlockInteraction() {
     if (!world || paused) return;
     
     auto& input = getInput();
+    auto& diag = Diagnostics::get();
     
     bool leftDown = input.isMouseButtonPressed(0);
     bool rightDown = input.isMouseButtonPressed(1);
@@ -570,19 +631,31 @@ void Game::handleBlockInteraction() {
     glm::ivec3 hitNormal;
     glm::ivec3 hitBlock = raycastBlocks(camera.getPosition(), camera.getForward(), 6.0f, hitNormal);
     
-    if (hitBlock.x == INT_MAX) return;
+    bool hit = (hitBlock.x != INT_MAX);
+    float rayDist = hit ? glm::length(glm::vec3(hitBlock) - camera.getPosition()) : 0.0f;
+    diag.recordInteraction(hit, rayDist, hitBlock.x, hitBlock.y, hitBlock.z, selectedSlot);
+    
+    if (!hit) {
+        leftMousePressed = leftDown;
+        rightMousePressed = rightDown;
+        return;
+    }
     
     if (leftDown && !leftMousePressed) {
         world->setBlock(hitBlock.x, hitBlock.y, hitBlock.z, BlockState());
         int cx = (int)floor((float)hitBlock.x / 16.0f);
         int cz = (int)floor((float)hitBlock.z / 16.0f);
         renderer.invalidateChunkMesh(cx, cz);
+        asyncWorker_.forgetMesh(cx, cz);
         if (hitNormal.x != 0 && (hitBlock.x & 15) == (hitNormal.x > 0 ? 0 : 15)) {
             renderer.invalidateChunkMesh(cx - hitNormal.x, cz);
+            asyncWorker_.forgetMesh(cx - hitNormal.x, cz);
         }
         if (hitNormal.z != 0 && (hitBlock.z & 15) == (hitNormal.z > 0 ? 0 : 15)) {
             renderer.invalidateChunkMesh(cx, cz - hitNormal.z);
+            asyncWorker_.forgetMesh(cx, cz - hitNormal.z);
         }
+        diag.recordRemoveAttempt(true);
     }
     
     if (rightDown && !rightMousePressed) {
@@ -601,12 +674,18 @@ void Game::handleBlockInteraction() {
                     int cx = (int)floor((float)placePos.x / 16.0f);
                     int cz = (int)floor((float)placePos.z / 16.0f);
                     renderer.invalidateChunkMesh(cx, cz);
+                    asyncWorker_.forgetMesh(cx, cz);
                     if (hitNormal.x != 0 && (placePos.x & 15) == (hitNormal.x > 0 ? 0 : 15)) {
                         renderer.invalidateChunkMesh(cx - hitNormal.x, cz);
+                        asyncWorker_.forgetMesh(cx - hitNormal.x, cz);
                     }
                     if (hitNormal.z != 0 && (placePos.z & 15) == (hitNormal.z > 0 ? 0 : 15)) {
                         renderer.invalidateChunkMesh(cx, cz - hitNormal.z);
+                        asyncWorker_.forgetMesh(cx, cz - hitNormal.z);
                     }
+                    diag.recordPlaceAttempt(true);
+                } else {
+                    diag.recordPlaceAttempt(false);
                 }
             }
         }

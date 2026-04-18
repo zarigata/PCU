@@ -5,9 +5,11 @@
 
 #include <VoxelForge/rendering/Renderer.hpp>
 #include <VoxelForge/rendering/VulkanPipeline.hpp>
+#include <VoxelForge/rendering/BlockColor.hpp>
 #include <VoxelForge/world/World.hpp>
 #include <VoxelForge/world/Chunk.hpp>
 #include <VoxelForge/world/Block.hpp>
+#include <VoxelForge/world/AsyncChunkWorker.hpp>
 #include <VoxelForge/entity/Entity.hpp>
 #include <VoxelForge/core/Logger.hpp>
 #include <VoxelForge/utils/Profiler.hpp>
@@ -23,6 +25,8 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image_write.h>
 #include <stb_easy_font.h>
+
+using namespace VoxelForge::BlockColor;
 
 namespace VoxelForge {
 
@@ -1067,10 +1071,11 @@ void Renderer::initChunkRendering() {
 }
 
 void Renderer::cleanupChunkRendering() {
-    // Cleanup UI resources first to ensure no GPU usage during chunk teardown
     cleanupUIRendering();
     if (!context) return;
     auto dev = context->getDevice();
+    
+    waitForPendingUpload();
     
     for (auto& [key, mesh] : chunkMeshes) {
         if (mesh.vertexBuffer) dev.destroyBuffer(mesh.vertexBuffer);
@@ -1079,6 +1084,14 @@ void Renderer::cleanupChunkRendering() {
         if (mesh.indexMemory) dev.freeMemory(mesh.indexMemory);
     }
     chunkMeshes.clear();
+
+    for (auto& p : bufferPool_) {
+        if (p.vertexBuffer) dev.destroyBuffer(p.vertexBuffer);
+        if (p.vertexMemory) dev.freeMemory(p.vertexMemory);
+        if (p.indexBuffer) dev.destroyBuffer(p.indexBuffer);
+        if (p.indexMemory) dev.freeMemory(p.indexMemory);
+    }
+    bufferPool_.clear();
     
     if (chunkPipeline) { dev.destroyPipeline(chunkPipeline); chunkPipeline = VK_NULL_HANDLE; }
     if (chunkPipelineLayout) { dev.destroyPipelineLayout(chunkPipelineLayout); chunkPipelineLayout = VK_NULL_HANDLE; }
@@ -1153,8 +1166,11 @@ void Renderer::uploadChunkMesh(const glm::ivec3& pos, const std::vector<float>& 
     vk::SubmitInfo submitInfo{};
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = &cmdBuf;
-    context->getGraphicsQueue().submit(1, &submitInfo, VK_NULL_HANDLE);
-    context->getGraphicsQueue().waitIdle();
+
+    vk::Fence uploadFence = dev.createFence(vk::FenceCreateInfo{});
+    context->getGraphicsQueue().submit(1, &submitInfo, uploadFence);
+    dev.waitForFences(1, &uploadFence, VK_TRUE, UINT64_MAX);
+    dev.destroyFence(uploadFence);
     
     dev.freeCommandBuffers(commandPool, 1, &cmdBuf);
     dev.destroyBuffer(stagingBuf);
@@ -1163,228 +1179,196 @@ void Renderer::uploadChunkMesh(const glm::ivec3& pos, const std::vector<float>& 
     chunkMeshes[key] = std::move(mesh);
 }
 
-static uint32_t packColor(uint8_t r, uint8_t g, uint8_t b) {
-    return r | (g << 8) | (b << 16) | (0xFF << 24);
-}
-
-static uint32_t applyFaceLight(uint32_t color, int face) {
-    float brightness;
-    switch (face) {
-        case 4: brightness = 1.0f; break;
-        case 5: brightness = 0.5f; break;
-        case 2: case 3: brightness = 0.8f; break;
-        case 0: case 1: brightness = 0.65f; break;
-        default: brightness = 1.0f; break;
-    }
-    uint8_t r = (uint8_t)(color & 0xFF);
-    uint8_t g = (uint8_t)((color >> 8) & 0xFF);
-    uint8_t b = (uint8_t)((color >> 16) & 0xFF);
-    return (uint8_t)(r * brightness) | ((uint8_t)(g * brightness) << 8) |
-           ((uint8_t)(b * brightness) << 16) | (0xFF << 24);
-}
-
-static unsigned int posHash(int x, int y, int z) {
-    unsigned int h = (unsigned int)(x * 374761393u + y * 668265263u + z * 1274126177u);
-    h = (h ^ (h >> 13)) * 1274126177u;
-    return h ^ (h >> 16);
-}
-
-static int colorNoise(int x, int y, int z, int range) {
-    return (int)(posHash(x, y, z) % (unsigned int)(range * 2 + 1)) - range;
-}
-
-static uint32_t blockColor(uint32_t blockId, int face, int wx, int wy, int wz) {
-    int n = colorNoise(wx, wy, wz, 10);
-    uint32_t base;
-    switch (blockId) {
-        case 1: base = packColor(128+n, 128+n, 128+n); break;
-        case 2: base = face == 4
-                        ? packColor(70+n, 168+n/2, 60+n)
-                        : packColor(134+n, 116+n/2, 40+n); break;
-        case 3: base = packColor(134+n, 86+n/2, 40+n); break;
-        case 4: base = packColor(108+n, 108+n, 108+n); break;
-        case 5: base = packColor(178+n, 138+n/2, 78+n); break;
-        case 6: base = packColor(94+n, 66+n/2, 36+n); break;
-        case 7: base = packColor(184+n, 170+n/2, 130+n); break;
-        case 8: base = packColor(70+n, 50+n/2, 30+n); break;
-        case 9: base = packColor(60+n, 42+n/2, 26+n); break;
-        case 10: base = packColor(86+n, 58+n/2, 32+n); break;
-        case 11: base = packColor(42+n/3, 130+n/2, 200); break;
-        case 12: base = packColor(210+n/2, 70+n/3, 15); break;
-        case 13: base = packColor(220+n, 206+n/2, 150+n); break;
-        case 14: base = packColor(8, 8, 8); break;
-        case 15: base = packColor(156+n, 140+n/2, 126+n); break;
-        case 16: base = packColor(70+n, 70+n, 70+n); break;
-        case 17: base = packColor(240+n/3, 200+n/3, 20+n/3); break;
-        case 18: base = packColor(70+n/3, 210+n/3, 220); break;
-        case 19: base = packColor(160+n, 120+n/2, 60+n); break;
-        case 20: base = packColor(140+n, 140+n, 140+n); break;
-        case 21: base = packColor(140+n, 110+n/2, 60+n); break;
-        case 22: base = packColor(220+n, 190+n/2, 50+n); break;
-        case 23: base = packColor(200, 200, 210); break;
-        case 24: base = packColor(148+n, 130+n/2, 116+n); break;
-        case 25: base = packColor(160+n, 142+n/2, 128+n); break;
-        case 26: base = packColor(180+n, 178+n/2, 178+n); break;
-        case 27: base = packColor(190+n, 186+n/2, 182+n); break;
-        case 28: base = packColor(138+n, 128+n/2, 120+n); break;
-        case 29: base = packColor(150+n, 142+n/2, 134+n); break;
-        case 30: base = packColor(80+n/2, 76+n/2, 76+n/2); break;
-        case 31: base = packColor(86+n, 82+n/2, 80+n); break;
-        case 32: base = packColor(100+n, 98+n/2, 94+n); break;
-        case 33: case 34: case 35: case 36:
-            base = packColor(118+n, 114+n/2, 108+n); break;
-        case 37: base = packColor(156+n, 80+n/2, 50+n); break;
-        case 38: base = packColor(156+n, 120+n/2, 80+n); break;
-        case 39: base = packColor(100+n, 80+n/2, 60+n); break;
-        case 40: base = packColor(60+n, 140+n/2, 50+n); break;
-        case 41: base = packColor(80+n, 60+n/2, 50+n); break;
-        case 42: base = packColor(140+n, 30+n/3, 30+n/3); break;
-        case 43: base = packColor(110+n, 30+n/3, 30+n/3); break;
-        case 44: base = packColor(40+n/3, 50+n/2, 130); break;
-        case 45: base = packColor(30+n/3, 40+n/2, 100); break;
-        case 46: base = packColor(30+n/2, 30+n/2, 30+n/2); break;
-        case 47: base = packColor(210+n/3, 210+n/3, 210+n/3); break;
-        case 48: base = packColor(240+n/3, 210+n/3, 40+n/3); break;
-        case 49: base = packColor(80+n/3, 220+n/3, 230+n/3); break;
-        case 50: base = packColor(40+n/3, 180+n/3, 50+n/3); break;
-        case 51: base = packColor(190+n/3, 120+n/3, 60+n/3); break;
-        case 52: base = packColor(30+n/3, 50+n/2, 140); break;
-        case 53: base = packColor(160+n, 20+n/3, 20+n/3); break;
-        case 54: base = packColor(98+n, 70+n/2, 40+n); break;
-        case 55: base = packColor(200+n/3, 190+n/3, 150+n/3); break;
-        case 56: base = packColor(120+n, 90+n/2, 50+n); break;
-        case 57: base = packColor(178+n, 120+n/2, 56+n); break;
-        case 58: base = packColor(60+n, 40+n/2, 24+n); break;
-        case 59: base = packColor(110+n, 80+n/2, 45+n); break;
-        case 60: base = packColor(210+n/3, 170+n/3, 140+n/3); break;
-        case 61: base = packColor(190+n/3, 160+n/3, 110+n/3); break;
-        case 62: base = packColor(70+n/2, 30+n/2, 70+n/2); break;
-        case 63: base = packColor(30+n/2, 120+n/2, 110+n/2); break;
-        case 64: case 65: case 66: case 67: case 68: case 69: case 70: case 71: {
-            int ln = colorNoise(wx, 0, wz, 15);
-            int g = 80 + (blockId - 64) * 8 + ln;
-            if (g > 200) g = 200;
-            base = packColor(30 + ln/3, g, 30 + ln/3);
-            break;
+void Renderer::recycleBuffers(ChunkGPUMesh& mesh) {
+    if (!mesh.vertexBuffer || bufferPool_.size() >= MAX_POOL_SIZE) {
+        if (context) {
+            auto dev = context->getDevice();
+            if (mesh.vertexBuffer) dev.destroyBuffer(mesh.vertexBuffer);
+            if (mesh.vertexMemory) dev.freeMemory(mesh.vertexMemory);
+            if (mesh.indexBuffer) dev.destroyBuffer(mesh.indexBuffer);
+            if (mesh.indexMemory) dev.freeMemory(mesh.indexMemory);
         }
-        case 72: base = packColor(130+n, 120+n/2, 110+n); break;
-        case 73: base = packColor(120+n, 100+n/2, 70+n); break;
-        case 74: base = packColor(100+n, 130+n/2, 60+n); break;
-        case 75: base = packColor(110+n, 90+n/2, 60+n); break;
-        case 76: base = packColor(80+n, 130+n/2, 70+n); break;
-        case 77: base = packColor(90+n, 85+n/2, 80+n); break;
-        case 78: base = packColor(200+n, 160+n/2, 100+n); break;
-        case 79: base = packColor(210+n, 195+n/2, 150+n); break;
-        case 80: base = packColor(180+n, 110+n/2, 70+n); break;
-        case 81: base = packColor(110+n, 50+n/2, 50+n); break;
-        case 82: base = packColor(110+n, 90+n/2, 70+n); break;
-        case 83: base = packColor(100+n, 80+n/2, 60+n); break;
-        case 84: base = packColor(80+n, 75+n/2, 80+n); break;
-        case 85: base = packColor(50+n, 50+n/2, 50+n); break;
-        case 86: base = packColor(190+n, 170+n/2, 50+n); break;
-        case 87: base = packColor(220+n/3, 220+n/3, 210+n/3); break;
-        case 88: base = packColor(20+n/3, 15+n/3, 25+n/3); break;
-        case 89: base = packColor(50+n/3, 10+n/3, 60+n/3); break;
-        case 128: base = packColor(230+n/3, 235+n/3, 240+n/3); break;
-        case 129: base = packColor(160+n, 200+n/2, 230); break;
-        case 130: base = packColor(170+n, 200+n/2, 220); break;
-        case 131: base = packColor(130+n, 170+n/2, 210); break;
-        case 132: base = packColor(160+n, 155+n/2, 140+n); break;
-        case 133: base = packColor(180+n, 180+n/2, 160+n); break;
-        default: base = packColor(130+n, 130+n, 130+n); break;
+    } else {
+        bufferPool_.push_back({
+            mesh.vertexBuffer, mesh.vertexMemory, mesh.vertexCapacity,
+            mesh.indexBuffer, mesh.indexMemory, mesh.indexCapacity
+        });
     }
-    return applyFaceLight(base, face);
+    mesh.vertexBuffer = VK_NULL_HANDLE;
+    mesh.vertexMemory = VK_NULL_HANDLE;
+    mesh.vertexCapacity = 0;
+    mesh.indexBuffer = VK_NULL_HANDLE;
+    mesh.indexMemory = VK_NULL_HANDLE;
+    mesh.indexCapacity = 0;
+}
+
+bool Renderer::acquireFromPool(vk::DeviceSize vsize, vk::DeviceSize isize, ChunkGPUMesh& out) {
+    for (auto it = bufferPool_.begin(); it != bufferPool_.end(); ++it) {
+        if (it->vertexCapacity >= vsize && it->indexCapacity >= isize) {
+            out.vertexBuffer = it->vertexBuffer;
+            out.vertexMemory = it->vertexMemory;
+            out.indexBuffer = it->indexBuffer;
+            out.indexMemory = it->indexMemory;
+            bufferPool_.erase(it);
+            return true;
+        }
+    }
+    return false;
+}
+
+void Renderer::waitForPendingUpload() {
+    if (!pendingUpload_.active || !context) return;
+    auto dev = context->getDevice();
+
+    dev.waitForFences(1, &pendingUpload_.fence, VK_TRUE, UINT64_MAX);
+    dev.destroyFence(pendingUpload_.fence);
+    dev.freeCommandBuffers(commandPool, 1, &pendingUpload_.cmdBuf);
+    dev.destroyBuffer(pendingUpload_.stagingBuf);
+    dev.freeMemory(pendingUpload_.stagingMem);
+
+    for (auto& [key, mesh] : pendingUpload_.pendingMeshes) {
+        chunkMeshes[key] = std::move(mesh);
+    }
+
+    pendingUpload_.active = false;
+    pendingUpload_.pendingMeshes.clear();
+}
+
+void Renderer::submitUploadBatch(const std::vector<AsyncMeshResult>& meshes) {
+    if (meshes.empty() || !context) return;
+    
+    waitForPendingUpload();
+    
+    auto dev = context->getDevice();
+
+    struct UploadEntry {
+        uint64_t key;
+        ChunkGPUMesh mesh;
+        vk::DeviceSize vertStagingOffset;
+        vk::DeviceSize idxStagingOffset;
+        vk::DeviceSize vsize;
+        vk::DeviceSize isize;
+    };
+    std::vector<UploadEntry> entries;
+    entries.reserve(meshes.size());
+
+    vk::DeviceSize totalSize = 0;
+    for (const auto& m : meshes) {
+        if (m.vertices.empty()) continue;
+        uint64_t key = posKey(m.chunkX, 0, m.chunkZ);
+
+        auto it = chunkMeshes.find(key);
+        if (it != chunkMeshes.end()) {
+            recycleBuffers(it->second);
+        }
+
+        vk::DeviceSize vsize = m.vertices.size() * sizeof(float);
+        vk::DeviceSize isize = m.indices.size() * sizeof(uint32_t);
+
+        UploadEntry e{};
+        e.key = key;
+        e.mesh.chunkPos = glm::ivec3(m.chunkX, 0, m.chunkZ);
+        e.mesh.indexCount = (uint32_t)m.indices.size();
+        e.mesh.valid = true;
+        e.vertStagingOffset = totalSize;
+        e.idxStagingOffset = totalSize + vsize;
+        e.vsize = vsize;
+        e.isize = isize;
+        totalSize += vsize + isize;
+
+        if (!acquireFromPool(vsize, isize, e.mesh)) {
+            createChunkBuffer(vsize,
+                vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst,
+                vk::MemoryPropertyFlagBits::eDeviceLocal,
+                e.mesh.vertexBuffer, e.mesh.vertexMemory);
+            createChunkBuffer(isize,
+                vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst,
+                vk::MemoryPropertyFlagBits::eDeviceLocal,
+                e.mesh.indexBuffer, e.mesh.indexMemory);
+        }
+        e.mesh.vertexCapacity = vsize;
+        e.mesh.indexCapacity = isize;
+
+        entries.push_back(std::move(e));
+    }
+    if (entries.empty()) return;
+
+    vk::Buffer stagingBuf;
+    vk::DeviceMemory stagingMem;
+    createChunkBuffer(totalSize,
+        vk::BufferUsageFlagBits::eTransferSrc,
+        vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
+        stagingBuf, stagingMem);
+
+    void* data = dev.mapMemory(stagingMem, 0, totalSize);
+    char* dst = static_cast<char*>(data);
+    for (size_t i = 0; i < entries.size(); i++) {
+        const auto& m = meshes[i];
+        memcpy(dst + entries[i].vertStagingOffset, m.vertices.data(), entries[i].vsize);
+        memcpy(dst + entries[i].idxStagingOffset, m.indices.data(), entries[i].isize);
+    }
+    dev.unmapMemory(stagingMem);
+
+    vk::CommandBufferAllocateInfo allocInfo{};
+    allocInfo.commandPool = commandPool;
+    allocInfo.level = vk::CommandBufferLevel::ePrimary;
+    allocInfo.commandBufferCount = 1;
+    auto cmdBuf = dev.allocateCommandBuffers(allocInfo)[0];
+
+    vk::CommandBufferBeginInfo beginInfo{};
+    beginInfo.flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit;
+    cmdBuf.begin(beginInfo);
+
+    for (const auto& e : entries) {
+        vk::BufferCopy vertCopy{e.vertStagingOffset, 0, e.vsize};
+        cmdBuf.copyBuffer(stagingBuf, e.mesh.vertexBuffer, 1, &vertCopy);
+        vk::BufferCopy idxCopy{e.idxStagingOffset, 0, e.isize};
+        cmdBuf.copyBuffer(stagingBuf, e.mesh.indexBuffer, 1, &idxCopy);
+    }
+
+    cmdBuf.end();
+
+    vk::SubmitInfo submitInfo{};
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &cmdBuf;
+
+    vk::Fence uploadFence = dev.createFence(vk::FenceCreateInfo{});
+    context->getGraphicsQueue().submit(1, &submitInfo, uploadFence);
+
+    // Store deferred state — no wait here
+    pendingUpload_.fence = uploadFence;
+    pendingUpload_.cmdBuf = cmdBuf;
+    pendingUpload_.stagingBuf = stagingBuf;
+    pendingUpload_.stagingMem = stagingMem;
+    pendingUpload_.active = true;
+    pendingUpload_.pendingMeshes.clear();
+    for (auto& e : entries) {
+        pendingUpload_.pendingMeshes.emplace_back(e.key, std::move(e.mesh));
+    }
+}
+
+void Renderer::uploadMeshDataBatch(const std::vector<AsyncMeshResult>& meshes) {
+    waitForPendingUpload();
+    submitUploadBatch(meshes);
+    waitForPendingUpload();
 }
 
 void Renderer::generateAndUploadChunks(World* world, const glm::vec3& cameraPos) {
     if (!world || !chunkPipelineReady) return;
-    
-    int rd = settings.renderDistance;
-    int cx = (int)floor(cameraPos.x / 16.0f);
-    int cz = (int)floor(cameraPos.z / 16.0f);
-    
-    static bool firstLog = true;
-    if (firstLog) {
-        VF_INFO("Chunk mesh gen: cameraPos=({:.1f},{:.1f},{:.1f}) cx={} cz={} rd={}",
-                cameraPos.x, cameraPos.y, cameraPos.z, cx, cz, rd);
-        firstLog = false;
-    }
-    
-    int uploaded = 0;
-    int skipped = 0;
-    int emptyMesh = 0;
-    
-    for (int dz = -rd; dz <= rd && uploaded < settings.maxChunksPerFrame; dz++) {
-        for (int dx = -rd; dx <= rd && uploaded < settings.maxChunksPerFrame; dx++) {
-            ChunkPos cpos{cx + dx, cz + dz};
-            uint64_t key = posKey(cpos.x, 0, cpos.z);
-            if (chunkMeshes.count(key)) continue;
-            
-            auto* chunk = world->getChunk(cpos);
-            if (!chunk) { skipped++; continue; }
-        
-        std::vector<float> vertices;
-        std::vector<uint32_t> indices;
-        
-        for (int y = CHUNK_MIN_Y; y < CHUNK_MIN_Y + CHUNK_HEIGHT; y++) {
-            for (int z = 0; z < 16; z++) {
-                for (int x = 0; x < 16; x++) {
-                    auto block = chunk->getBlock(x, y, z);
-                    if (block.isAir()) continue;
-                    
-                    uint32_t bid = block.getBlockId();
-                    float fx = (float)x, fy = (float)y, fz = (float)z;
-                    
-                    auto checkNeighbor = [&](int nx, int ny, int nz) -> bool {
-                        if (nx < 0 || nx >= 16 || nz < 0 || nz >= 16) return true;
-                        if (ny < CHUNK_MIN_Y || ny >= CHUNK_MIN_Y + CHUNK_HEIGHT) return true;
-                        auto nb = chunk->getBlock(nx, ny, nz);
-                        return nb.isAir();
-                    };
-                    
-                    auto addFace = [&](float x0,float y0,float z0, float x1,float y1,float z1,
-                                       float x2,float y2,float z2, float x3,float y3,float z3, int face) {
-                        uint32_t col = blockColor(bid, face, (int)fx, (int)fy, (int)fz);
-                        uint32_t base = (uint32_t)(vertices.size() / 4);
-                        vertices.insert(vertices.end(), {x0,y0,z0, *(float*)&col, x1,y1,z1, *(float*)&col, x2,y2,z2, *(float*)&col, x3,y3,z3, *(float*)&col});
-                        indices.insert(indices.end(), {base, base+1, base+2, base, base+2, base+3});
-                    };
-                    
-                    if (checkNeighbor(x, y+1, z))
-                        addFace(fx,fy+1,fz, fx+1,fy+1,fz, fx+1,fy+1,fz+1, fx,fy+1,fz+1, 4);
-                    if (checkNeighbor(x, y-1, z))
-                        addFace(fx,fy,fz+1, fx+1,fy,fz+1, fx+1,fy,fz, fx,fy,fz, 5);
-                    if (checkNeighbor(x, y, z-1))
-                        addFace(fx,fy,fz, fx+1,fy,fz, fx+1,fy+1,fz, fx,fy+1,fz, 2);
-                    if (checkNeighbor(x, y, z+1))
-                        addFace(fx+1,fy,fz+1, fx,fy,fz+1, fx,fy+1,fz+1, fx+1,fy+1,fz+1, 3);
-                    if (checkNeighbor(x-1, y, z))
-                        addFace(fx,fy,fz+1, fx,fy,fz, fx,fy+1,fz, fx,fy+1,fz+1, 0);
-                    if (checkNeighbor(x+1, y, z))
-                        addFace(fx+1,fy,fz, fx+1,fy,fz+1, fx+1,fy+1,fz+1, fx+1,fy+1,fz, 1);
-                }
-            }
-        }
-        
-        if (!vertices.empty()) {
-            uploadChunkMesh(glm::ivec3(cpos.x, 0, cpos.z), vertices, indices);
-            uploaded++;
-            if (uploaded <= 4) {
-                VF_INFO("Uploaded chunk ({},{}) : {} verts, {} indices",
-                        cpos.x, cpos.z, vertices.size()/4, indices.size());
-            }
-        } else {
-            emptyMesh++;
-        }
-        }
-    }
-    
-    if (uploaded > 0 || (skipped > 0 && skipped <= 5)) {
-        VF_INFO("Chunk mesh pass: uploaded={} skipped={} empty={} total={}",
-                uploaded, skipped, emptyMesh, (int)chunkMeshes.size());
-    }
-
     evictDistantMeshes(cameraPos);
+}
+
+void Renderer::uploadMeshData(int chunkX, int chunkZ, const std::vector<float>& verts, const std::vector<uint32_t>& indices) {
+    if (verts.empty()) return;
+    uploadChunkMesh(glm::ivec3(chunkX, 0, chunkZ), verts, indices);
+}
+
+std::unordered_set<uint64_t> Renderer::getChunkMeshKeys() const {
+    std::unordered_set<uint64_t> keys;
+    for (const auto& [key, mesh] : chunkMeshes) {
+        keys.insert(key);
+    }
+    return keys;
 }
 
 void Renderer::renderWorldChunks(World* world, Camera* camera, float fogR, float fogG, float fogB) {
@@ -1451,10 +1435,7 @@ void Renderer::evictDistantMeshes(const glm::vec3& cameraPos) {
     for (auto key : toEvict) {
         auto it = chunkMeshes.find(key);
         if (it == chunkMeshes.end()) continue;
-        if (it->second.vertexBuffer) dev.destroyBuffer(it->second.vertexBuffer);
-        if (it->second.vertexMemory) dev.freeMemory(it->second.vertexMemory);
-        if (it->second.indexBuffer) dev.destroyBuffer(it->second.indexBuffer);
-        if (it->second.indexMemory) dev.freeMemory(it->second.indexMemory);
+        recycleBuffers(it->second);
         chunkMeshes.erase(it);
     }
 }
@@ -1464,11 +1445,7 @@ void Renderer::invalidateChunkMesh(int chunkX, int chunkZ) {
     auto it = chunkMeshes.find(key);
     if (it == chunkMeshes.end()) return;
     
-    auto dev = context->getDevice();
-    if (it->second.vertexBuffer) dev.destroyBuffer(it->second.vertexBuffer);
-    if (it->second.vertexMemory) dev.freeMemory(it->second.vertexMemory);
-    if (it->second.indexBuffer) dev.destroyBuffer(it->second.indexBuffer);
-    if (it->second.indexMemory) dev.freeMemory(it->second.indexMemory);
+    recycleBuffers(it->second);
     chunkMeshes.erase(it);
 }
 
@@ -1682,7 +1659,7 @@ void Renderer::drawHotbar(int selectedSlot, const std::array<uint32_t, 9>& hotba
         addRect(x, startY, x + slotSize, startY + slotSize, slotBg);
         
         if (hotbarBlocks[i] != 0) {
-            uint32_t blockCol = blockColor(hotbarBlocks[i], 4, 0, 0, 0);
+            uint32_t blockCol = compute(hotbarBlocks[i], 4, 0, 0, 0);
             blockCol = (blockCol & 0x00FFFFFF) | 0xDD000000;
             float inset = slotSize * 0.15f;
             addRect(x + inset, startY + inset, x + slotSize - inset, startY + slotSize - inset, blockCol);

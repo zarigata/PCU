@@ -7,6 +7,7 @@
 #include <VoxelForge/core/Application.hpp>
 #include <VoxelForge/core/Logger.hpp>
 #include <VoxelForge/core/Memory.hpp>
+#include <VoxelForge/core/Diagnostics.hpp>
 #include <VoxelForge/engine/EventSystem.hpp>
 #include <GLFW/glfw3.h>
 #include <iostream>
@@ -68,6 +69,9 @@ void Application::run() {
     lastFrameTime = (float)glfwGetTime();
     
     while (running) {
+        auto& diag = Diagnostics::get();
+        diag.beginFrame();
+
         float currentTime = (float)glfwGetTime();
         deltaTime = currentTime - lastFrameTime;
         lastFrameTime = currentTime;
@@ -77,21 +81,34 @@ void Application::run() {
         fpsCounter.frame();
         
         if (input) {
+            diag.beginSection("input");
             input->update();
+            diag.endSection("input");
         }
         
         if (window && window->shouldClose()) {
             running = false;
             break;
         }
+
+        if (diag.shouldQuit()) {
+            running = false;
+            break;
+        }
         
+        diag.beginSection("update");
         onUpdate(deltaTime);
+        diag.endSection("update");
         
         if (window) {
+            diag.beginSection("render");
             onRender();
+            diag.endSection("render");
         }
         
         Memory::resetTempArena();
+
+        diag.endFrame();
     }
     
     VF_CORE_INFO("Main loop ended");

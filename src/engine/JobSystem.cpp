@@ -65,6 +65,18 @@ JobHandle JobSystem::submit(std::function<void()>&& task, Priority priority) {
     job.id = nextJobId++;
     
     std::unique_lock lock(queueMutex);
+
+    {
+        auto it = jobs.begin();
+        while (it != jobs.end()) {
+            if (it->second.state == JobState::Completed) {
+                it = jobs.erase(it);
+            } else {
+                ++it;
+            }
+        }
+    }
+    
     jobs[job.id] = std::move(job);
     jobs[job.id].state = JobState::Queued;
     
@@ -77,12 +89,14 @@ JobHandle JobSystem::submit(std::function<void()>&& task, Priority priority) {
 
 void JobSystem::waitFor(JobHandle handle) {
     while (true) {
-        std::shared_lock lock(queueMutex);
-        auto it = jobs.find(handle.id);
-        if (it == jobs.end() || it->second.state == JobState::Completed) {
-            return;
+        {
+            std::unique_lock lock(queueMutex);
+            auto it = jobs.find(handle.id);
+            if (it == jobs.end() || it->second.state == JobState::Completed) {
+                if (it != jobs.end()) jobs.erase(it);
+                return;
+            }
         }
-        lock.unlock();
         std::this_thread::yield();
     }
 }

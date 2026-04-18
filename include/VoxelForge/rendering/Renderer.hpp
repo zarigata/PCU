@@ -8,6 +8,7 @@
 #include <string>
 #include <array>
 #include <unordered_map>
+#include <unordered_set>
 
 #include <VoxelForge/rendering/VulkanContext.hpp>
 #include <VoxelForge/rendering/VulkanPipeline.hpp>
@@ -20,6 +21,7 @@ namespace VoxelForge {
 
 class World;
 class Entity;
+struct AsyncMeshResult;
 
 // Render statistics
 struct RenderStats {
@@ -100,8 +102,13 @@ public:
     void cleanupChunkRendering();
     void renderWorldChunks(World* world, Camera* camera, float fogR, float fogG, float fogB);
     void generateAndUploadChunks(World* world, const glm::vec3& cameraPos);
+    void uploadMeshData(int chunkX, int chunkZ, const std::vector<float>& verts, const std::vector<uint32_t>& indices);
+    void uploadMeshDataBatch(const std::vector<AsyncMeshResult>& meshes);
+    void submitUploadBatch(const std::vector<AsyncMeshResult>& meshes);
+    void waitForPendingUpload();
     void evictDistantMeshes(const glm::vec3& cameraPos);
     void invalidateChunkMesh(int chunkX, int chunkZ);
+    std::unordered_set<uint64_t> getChunkMeshKeys() const;
     void drawCrosshair();
     void drawHotbar(int selectedSlot, const std::array<uint32_t, 9>& hotbarBlocks);
     void drawPauseMenu(const UIMenuState& menu);
@@ -200,8 +207,10 @@ private:
     struct ChunkGPUMesh {
         vk::Buffer vertexBuffer = VK_NULL_HANDLE;
         vk::DeviceMemory vertexMemory = VK_NULL_HANDLE;
+        vk::DeviceSize vertexCapacity = 0;
         vk::Buffer indexBuffer = VK_NULL_HANDLE;
         vk::DeviceMemory indexMemory = VK_NULL_HANDLE;
+        vk::DeviceSize indexCapacity = 0;
         uint32_t indexCount = 0;
         glm::ivec3 chunkPos{};
         bool valid = false;
@@ -213,6 +222,29 @@ private:
     vk::ShaderModule chunkFragShader = VK_NULL_HANDLE;
     std::unordered_map<uint64_t, ChunkGPUMesh> chunkMeshes;
     bool chunkPipelineReady = false;
+
+    struct PendingUpload {
+        vk::Fence fence;
+        vk::CommandBuffer cmdBuf;
+        vk::Buffer stagingBuf;
+        vk::DeviceMemory stagingMem;
+        std::vector<std::pair<uint64_t, ChunkGPUMesh>> pendingMeshes;
+        bool active = false;
+    } pendingUpload_;
+
+    struct PooledBuffer {
+        vk::Buffer vertexBuffer;
+        vk::DeviceMemory vertexMemory;
+        vk::DeviceSize vertexCapacity;
+        vk::Buffer indexBuffer;
+        vk::DeviceMemory indexMemory;
+        vk::DeviceSize indexCapacity;
+    };
+    std::vector<PooledBuffer> bufferPool_;
+    static constexpr size_t MAX_POOL_SIZE = 64;
+
+    void recycleBuffers(ChunkGPUMesh& mesh);
+    bool acquireFromPool(vk::DeviceSize vsize, vk::DeviceSize isize, ChunkGPUMesh& out);
     
     vk::ShaderModule compileShader(const std::string& source, int stage);
     void createChunkBuffer(vk::DeviceSize size, vk::BufferUsageFlags usage, vk::MemoryPropertyFlags props, vk::Buffer& buf, vk::DeviceMemory& mem);
