@@ -13,17 +13,22 @@ namespace VoxelForge {
 void Input::init(GLFWwindow* win) {
     window = win;
     
-    // Set user pointer for callbacks
     glfwSetWindowUserPointer(window, this);
     
-    // Set callbacks
+    if (glfwRawMouseMotionSupported()) {
+        rawMotionSupported_ = true;
+        VF_CORE_INFO("Raw mouse motion supported");
+    } else {
+        rawMotionSupported_ = false;
+        VF_CORE_WARN("Raw mouse motion NOT supported — falling back to cursor delta");
+    }
+    
     glfwSetKeyCallback(window, keyCallback);
     glfwSetCharCallback(window, charCallback);
     glfwSetMouseButtonCallback(window, mouseButtonCallback);
     glfwSetCursorPosCallback(window, cursorPosCallback);
     glfwSetScrollCallback(window, scrollCallback);
     
-    // Set up default key bindings
     bindKey("forward", Key::W);
     bindKey("backward", Key::S);
     bindKey("left", Key::A);
@@ -85,6 +90,25 @@ bool Input::isMouseButtonJustPressed(int button) const {
 bool Input::isMouseButtonJustReleased(int button) const {
     return !isMouseButtonPressed(button) && 
            (previous.mouseButtons.count(button) && previous.mouseButtons.at(button));
+}
+
+void Input::setCursorCaptured(bool captured) {
+    cursorCaptured_ = captured;
+    if (captured) {
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        if (rawMotionSupported_) {
+            glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+        }
+        double mx, my;
+        glfwGetCursorPos(window, &mx, &my);
+        current.mousePosition = glm::vec2(static_cast<float>(mx), static_cast<float>(my));
+        current.mouseDelta = glm::vec2(0.0f);
+    } else {
+        if (rawMotionSupported_) {
+            glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_FALSE);
+        }
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    }
 }
 
 void Input::setCursorMode(int mode) {
@@ -151,7 +175,10 @@ void Input::cursorPosCallback(GLFWwindow* win, double xpos, double ypos) {
     if (!input) return;
     
     glm::vec2 newPos(static_cast<float>(xpos), static_cast<float>(ypos));
-    input->current.mouseDelta = newPos - input->current.mousePosition;
+    
+    if (input->cursorCaptured_) {
+        input->current.mouseDelta += newPos - input->current.mousePosition;
+    }
     input->current.mousePosition = newPos;
 }
 

@@ -93,49 +93,14 @@ void Window::shutdown() {
 }
 
 void Window::setupCallbacks() {
-    // Window resize
     glfwSetWindowSizeCallback(window, [](GLFWwindow* win, int width, int height) {
         auto* data = static_cast<WindowData*>(glfwGetWindowUserPointer(win));
         data->width = static_cast<uint32_t>(width);
         data->height = static_cast<uint32_t>(height);
-        
-        // TODO: Dispatch WindowResizeEvent
     });
     
-    // Window close
     glfwSetWindowCloseCallback(window, [](GLFWwindow* win) {
         auto* data = static_cast<WindowData*>(glfwGetWindowUserPointer(win));
-        // TODO: Dispatch WindowCloseEvent
-    });
-    
-    // Key callback
-    glfwSetKeyCallback(window, [](GLFWwindow* win, int key, int scancode, int action, int mods) {
-        auto* data = static_cast<WindowData*>(glfwGetWindowUserPointer(win));
-        // TODO: Dispatch KeyEvent
-    });
-    
-    // Mouse button callback
-    glfwSetMouseButtonCallback(window, [](GLFWwindow* win, int button, int action, int mods) {
-        auto* data = static_cast<WindowData*>(glfwGetWindowUserPointer(win));
-        // TODO: Dispatch MouseButtonEvent
-    });
-    
-    // Mouse scroll callback
-    glfwSetScrollCallback(window, [](GLFWwindow* win, double xoffset, double yoffset) {
-        auto* data = static_cast<WindowData*>(glfwGetWindowUserPointer(win));
-        // TODO: Dispatch MouseScrollEvent
-    });
-    
-    // Cursor position callback
-    glfwSetCursorPosCallback(window, [](GLFWwindow* win, double xpos, double ypos) {
-        auto* data = static_cast<WindowData*>(glfwGetWindowUserPointer(win));
-        // TODO: Dispatch MouseMovedEvent
-    });
-    
-    // Character input callback
-    glfwSetCharCallback(window, [](GLFWwindow* win, unsigned int codepoint) {
-        auto* data = static_cast<WindowData*>(glfwGetWindowUserPointer(win));
-        // TODO: Dispatch KeyTypedEvent
     });
 }
 

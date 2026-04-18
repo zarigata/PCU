@@ -155,7 +155,9 @@ public:
     // Scroll
     glm::vec2 getScrollDelta() const { return current.scrollDelta; }
     
-    void clearMouseDelta() { current.mouseDelta = glm::vec2(0.0f); }
+    // Cursor capture state — call when entering/exiting gameplay mode
+    void setCursorCaptured(bool captured);
+    bool isCursorCaptured() const { return cursorCaptured_; }
     
     // Typed characters
     const std::vector<uint32_t>& getTypedCharacters() const { return current.typedCharacters; }
@@ -174,6 +176,9 @@ private:
     InputState current;
     InputState previous;
     std::unordered_map<std::string, int> keyBindings;
+    
+    bool cursorCaptured_ = false;
+    bool rawMotionSupported_ = false;
     
     // GLFW callbacks
     static void keyCallback(GLFWwindow* win, int key, int scancode, int action, int mods);

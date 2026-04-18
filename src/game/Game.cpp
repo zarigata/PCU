@@ -255,10 +255,7 @@ void Game::processInput(float deltaTime) {
     if (!cursorCaptured) {
         if (glfwGetMouseButton(win, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
             cursorCaptured = true;
-            glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-            int ww, wh;
-            glfwGetWindowSize(win, &ww, &wh);
-            glfwSetCursorPos(win, ww / 2.0, wh / 2.0);
+            getInput().setCursorCaptured(true);
         }
         return;
     }
@@ -271,12 +268,11 @@ void Game::processInput(float deltaTime) {
             pauseMenuSelection = 0;
             hoveredMenuItem = -1;
             menuDragging = false;
-            glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            cursorCaptured = false;
+            getInput().setCursorCaptured(false);
         } else {
-            glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-            int ww, wh;
-            glfwGetWindowSize(win, &ww, &wh);
-            glfwSetCursorPos(win, ww / 2.0, wh / 2.0);
+            cursorCaptured = true;
+            getInput().setCursorCaptured(true);
         }
     }
     escWasPressed = escPressed;
@@ -313,8 +309,9 @@ void Game::processInput(float deltaTime) {
         if (leftJust && hoveredMenuItem >= 0) {
             pauseMenuSelection = hoveredMenuItem;
             switch (hoveredMenuItem) {
-                case 0: togglePause(); glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-                    { int ww, wh; glfwGetWindowSize(win, &ww, &wh); glfwSetCursorPos(win, ww / 2.0, wh / 2.0); }
+                case 0: togglePause();
+                    cursorCaptured = true;
+                    getInput().setCursorCaptured(true);
                     break;
                 case 5: settings.invertMouseY = !settings.invertMouseY; break;
                 case 6: settings.invertMouseX = !settings.invertMouseX; break;
@@ -372,8 +369,8 @@ void Game::processInput(float deltaTime) {
         if (enterNow && !enterWas) {
             if (pauseMenuSelection == 0) {
                 togglePause();
-                glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-                int ww, wh; glfwGetWindowSize(win, &ww, &wh); glfwSetCursorPos(win, ww / 2.0, wh / 2.0);
+                cursorCaptured = true;
+                getInput().setCursorCaptured(true);
             }
             else toggleSetting(pauseMenuSelection);
         }
@@ -486,6 +483,11 @@ void Game::processInput(float deltaTime) {
     
     auto& input = getInput();
     auto mouseDelta = input.getMouseDelta();
+    
+    constexpr float MAX_MOUSE_DELTA = 50.0f;
+    mouseDelta.x = std::clamp(mouseDelta.x, -MAX_MOUSE_DELTA, MAX_MOUSE_DELTA);
+    mouseDelta.y = std::clamp(mouseDelta.y, -MAX_MOUSE_DELTA, MAX_MOUSE_DELTA);
+    
     float appliedDX = 0.0f, appliedDY = 0.0f;
     if (glm::length(mouseDelta) > 0.0f) {
         float xMul = settings.invertMouseX ? -1.0f : 1.0f;
@@ -518,11 +520,6 @@ void Game::processInput(float deltaTime) {
     }
     
     handleBlockInteraction();
-    
-    int ww, wh;
-    glfwGetWindowSize(win, &ww, &wh);
-    glfwSetCursorPos(win, ww / 2.0, wh / 2.0);
-    input.clearMouseDelta();
 }
 
 void Game::updateEntities(float deltaTime) {
