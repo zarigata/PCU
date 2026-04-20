@@ -138,13 +138,14 @@ void World::unloadChunks(int maxToUnload) {
 }
 
 void World::updateChunks(const glm::vec3& playerPos) {
-    // Calculate player chunk position
     ChunkPos playerChunk(
         static_cast<int>(std::floor(playerPos.x / CHUNK_WIDTH)),
         static_cast<int>(std::floor(playerPos.z / CHUNK_WIDTH))
     );
     
-    // Load chunks in radius
+    if (playerChunk.x == lastPlayerChunk_.x && playerChunk.z == lastPlayerChunk_.z) return;
+    lastPlayerChunk_ = playerChunk;
+    
     int radius = settings.chunkLoadRadius;
     
     for (int dx = -radius; dx <= radius; dx++) {
@@ -155,8 +156,6 @@ void World::updateChunks(const glm::vec3& playerPos) {
             }
         }
     }
-    
-    // TODO: Unload distant chunks
 }
 
 void World::unloadDistantChunks(const glm::vec3& playerPos, int renderDistance,

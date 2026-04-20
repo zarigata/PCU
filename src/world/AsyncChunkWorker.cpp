@@ -58,6 +58,11 @@ void AsyncChunkWorker::update(World* world, const glm::vec3& cameraPos, int rend
 
     int submitted = 0;
     int budget = MAX_PENDING - (int)pendingSnapshot.size();
+    {
+        std::lock_guard<std::mutex> lock(completedMutex_);
+        budget = std::min(budget, MAX_COMPLETED - (int)completedMeshes_.size());
+    }
+    if (budget <= 0) return;
     for (auto& cand : candidates) {
         if (submitted >= budget) break;
 

@@ -121,15 +121,18 @@ void Game::onUpdate(float deltaTime) {
 
         diag.beginSection("chunkUpdate");
 
-        if (pendingUploads_.size() < 8) {
+        if (pendingUploads_.size() < 16) {
             asyncWorker_.update(world.get(), playerPos, settings.renderDistance, {});
         }
 
         {
-            auto completed = asyncWorker_.pollCompleted(64);
+            auto completed = asyncWorker_.pollCompleted(8);
             pendingUploads_.insert(pendingUploads_.end(),
                 std::make_move_iterator(completed.begin()),
                 std::make_move_iterator(completed.end()));
+            if (pendingUploads_.size() > 32) {
+                pendingUploads_.resize(32);
+            }
         }
 
         int uploadBytes = 0;

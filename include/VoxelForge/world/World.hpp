@@ -123,6 +123,8 @@ private:
     std::vector<ChunkPos> loadQueue;
     std::vector<ChunkPos> unloadQueue;
     
+    ChunkPos lastPlayerChunk_{0x7FFFFFFF, 0x7FFFFFFF};
+    
     // Helper methods
     ChunkPos getChunkPos(const BlockPos& pos) const;
     BlockPos getLocalPos(const BlockPos& pos) const;

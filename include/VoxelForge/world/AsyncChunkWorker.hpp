@@ -56,6 +56,7 @@ private:
     std::atomic<bool> shuttingDown_{false};
 
     static constexpr int MAX_PENDING = 16;
+    static constexpr int MAX_COMPLETED = 32;
 };
 
 } // namespace VoxelForge
